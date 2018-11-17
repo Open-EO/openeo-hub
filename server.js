@@ -33,6 +33,55 @@ server.get('/crawl', function(req, res, next) {
                     content: JSON.parse(data)
                 });
             });
+
+            request(backend+'/collections', function(err, response, data) {
+                const infos = JSON.parse(data);
+                collection.insertOne({
+                    backend: backend,
+                    path: "/collections",
+                    retrieved: new Date().toJSON(),
+                    content: infos
+                });
+                
+                infos.collections.forEach((c) => {
+                    request(backend+'/collections/'+c.name, function(err, response, data) {
+                        collection.insertOne({
+                            backend: backend,
+                            path: "/collections/"+c.name,
+                            retrieved: new Date().toJSON(),
+                            content: JSON.parse(data)
+                        });                        
+                    });
+                });
+            });
+
+            request(backend+'/processes', function(err, response, data) {
+                collection.insertOne({
+                    backend: backend,
+                    path: "/processes",
+                    retrieved: new Date().toJSON(),
+                    content: JSON.parse(data)
+                });
+            });
+
+            request(backend+'/output_formats', function(err, response, data) {
+                collection.insertOne({
+                    backend: backend,
+                    path: "/output_formats",
+                    retrieved: new Date().toJSON(),
+                    content: JSON.parse(data)
+                });
+            });
+
+            request(backend+'/service_types', function(err, response, data) {
+                collection.insertOne({
+                    backend: backend,
+                    path: "/service_types",
+                    retrieved: new Date().toJSON(),
+                    content: JSON.parse(data)
+                });
+            });
+
         });
 
         res.send('done');
