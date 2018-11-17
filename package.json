@@ -1,0 +1,32 @@
+{
+  "name": "@openeo/hub",
+  "version": "0.1.0",
+  "author": "openEO Consortium",
+  "contributors": [
+    {
+      "name": "Christoph Friedrich"
+    }
+  ],
+  "description": "Platform for discovering openEO back-ends and exchanging process graphs with the openEO community.",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Open-EO/openeo-hub/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Open-EO/openeo-hub.git"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "restify": "^7.2.3",
+    "vue": "^2.5.16"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "^3.0.0",
+    "vue-template-compiler": "^2.5.17"
+  }
+}
