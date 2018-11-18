@@ -8,7 +8,8 @@ const dbName = 'openeohub';
 
 var request = require('request');
 
-var backends = ['http://giv-openeo.uni-muenster.de:8080/v0.3', 'http://localhost:8000'];
+const backends = ['http://giv-openeo.uni-muenster.de:8080/v0.3', 'http://localhost:8000'];
+const endpoints = ['/', '/collections', '/processes', '/output_formats', '/service_types'];
 
 server.get('/test', function(req, res, next) {
     res.send('test');
@@ -27,42 +28,28 @@ function saveToDb(collection, backend, path, data) {
 server.get('/crawl', function(req, res, next) {
     MongoClient.connect(dbUrl, function(err, client) {
         assert.equal(null, err);
-        console.log("Connected successfully to server");
+        console.log('Connected successfully to server');
       
         const db = client.db(dbName);
         const collection = db.collection('backends');
 
         backends.forEach(backend => {
-        
-            request(backend+'/', function(err, response, data) {
-                saveToDb(collection, backend, '/', JSON.parse(data));
-            });
-
-            request(backend+'/collections', function(err, response, data) {
-                const infos = JSON.parse(data);
-                saveToDb(collection, backend, '/collections', infos);
-                
-                infos.collections.forEach((c) => {
-                    request(backend+'/collections/'+c.name, function(err, response, data) {
-                        saveToDb(collection, backend, '/collections'+c.name, JSON.parse(data));     
-                    });
+            endpoints.forEach(endpoint => {
+                request(backend+endpoint, function(err, response, json) {
+                    const data = JSON.parse(json);
+                    saveToDb(collection, backend, endpoint, data);
+                    
+                    // fetch the collection details
+                    if(endpoint == '/collections') {
+                        data.collections.forEach((coll) => {
+                            request(backend+'/collections/'+coll.name, function(err, response, json) {
+                                saveToDb(collection, backend, '/collections'+coll.name, JSON.parse(json));     
+                            });
+                        });    
+                    }
                 });
             });
-
-            request(backend+'/processes', function(err, response, data) {
-                saveToDb(collection, backend, '/processes', JSON.parse(data));
-            });
-
-            request(backend+'/output_formats', function(err, response, data) {
-                saveToDb(collection, backend, '/output_formats', JSON.parse(data));
-            });
-
-            request(backend+'/service_types', function(err, response, data) {
-                saveToDb(collection, backend, '/service_types', JSON.parse(data));
-            });
-
         });
-
         res.send('done');
     });
     
