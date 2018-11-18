@@ -15,6 +15,15 @@ server.get('/test', function(req, res, next) {
     return next();
 });
 
+function saveToDb(collection, backend, path, data) {
+    collection.insertOne({
+        backend: backend,
+        path: path,
+        retrieved: new Date().toJSON(),
+        content: data
+    });
+}
+
 server.get('/crawl', function(req, res, next) {
     MongoClient.connect(dbUrl, function(err, client) {
         assert.equal(null, err);
@@ -26,60 +35,30 @@ server.get('/crawl', function(req, res, next) {
         backends.forEach(backend => {
         
             request(backend+'/', function(err, response, data) {
-                collection.insertOne({
-                    backend: backend,
-                    path: "/",
-                    retrieved: new Date().toJSON(),
-                    content: JSON.parse(data)
-                });
+                saveToDb(collection, backend, '/', JSON.parse(data));
             });
 
             request(backend+'/collections', function(err, response, data) {
                 const infos = JSON.parse(data);
-                collection.insertOne({
-                    backend: backend,
-                    path: "/collections",
-                    retrieved: new Date().toJSON(),
-                    content: infos
-                });
+                saveToDb(collection, backend, '/collections', infos);
                 
                 infos.collections.forEach((c) => {
                     request(backend+'/collections/'+c.name, function(err, response, data) {
-                        collection.insertOne({
-                            backend: backend,
-                            path: "/collections/"+c.name,
-                            retrieved: new Date().toJSON(),
-                            content: JSON.parse(data)
-                        });                        
+                        saveToDb(collection, backend, '/collections'+c.name, JSON.parse(data));     
                     });
                 });
             });
 
             request(backend+'/processes', function(err, response, data) {
-                collection.insertOne({
-                    backend: backend,
-                    path: "/processes",
-                    retrieved: new Date().toJSON(),
-                    content: JSON.parse(data)
-                });
+                saveToDb(collection, backend, '/processes', JSON.parse(data));
             });
 
             request(backend+'/output_formats', function(err, response, data) {
-                collection.insertOne({
-                    backend: backend,
-                    path: "/output_formats",
-                    retrieved: new Date().toJSON(),
-                    content: JSON.parse(data)
-                });
+                saveToDb(collection, backend, '/output_formats', JSON.parse(data));
             });
 
             request(backend+'/service_types', function(err, response, data) {
-                collection.insertOne({
-                    backend: backend,
-                    path: "/service_types",
-                    retrieved: new Date().toJSON(),
-                    content: JSON.parse(data)
-                });
+                saveToDb(collection, backend, '/service_types', JSON.parse(data));
             });
 
         });
