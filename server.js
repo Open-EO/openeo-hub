@@ -11,11 +11,6 @@ var request = require('request');
 const backends = ['http://giv-openeo.uni-muenster.de:8080/v0.3', 'http://localhost:8000'];
 const endpoints = ['/', '/collections', '/processes', '/output_formats', '/service_types'];
 
-server.get('/test', function(req, res, next) {
-    res.send('test');
-    return next();
-});
-
 function saveToDb(collection, backend, path, data) {
     collection.insertOne({
         backend: backend,
@@ -25,6 +20,13 @@ function saveToDb(collection, backend, path, data) {
     });
 }
 
+function getFromDb(findCriteria) {
+    return MongoClient.connect(dbUrl).then(client => {
+        return client.db(dbName).collection('backends').findOne(findCriteria);
+    });
+}
+
+// trigger crawling
 server.get('/crawl', function(req, res, next) {
     MongoClient.connect(dbUrl, function(err, client) {
         assert.equal(null, err);
@@ -43,7 +45,7 @@ server.get('/crawl', function(req, res, next) {
                     if(endpoint == '/collections') {
                         data.collections.forEach((coll) => {
                             request(backend+'/collections/'+coll.name, function(err, response, json) {
-                                saveToDb(collection, backend, '/collections'+coll.name, JSON.parse(json));     
+                                saveToDb(collection, backend, '/collections/'+coll.name, JSON.parse(json));     
                             });
                         });    
                     }
@@ -56,6 +58,19 @@ server.get('/crawl', function(req, res, next) {
     return next();
 });
 
+// list backends
+server.get('/backends', function(req, res, next) {
+    res.send(backends);
+    return next();
+});
+
+// proxy backends
+server.get('/backends/:backend/*', function(req, res, next) {
+    getFromDb({backend: req.params.backend, path: '/'+req.params['*']}).then(r => res.send(r));
+    return next();
+});
+
+// serve website (UI)
 server.get('/*', restify.plugins.serveStatic({
     directory: './public',
     default: 'index.html'
