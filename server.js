@@ -72,7 +72,7 @@ server.get('/backends/:backend/*', function(req, res, next) {
 
 // serve website (UI)
 server.get('/*', restify.plugins.serveStatic({
-    directory: './public',
+    directory: './dist',
     default: 'index.html'
 }));
 

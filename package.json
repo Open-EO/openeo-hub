@@ -17,9 +17,9 @@
     "url": "https://github.com/Open-EO/openeo-hub.git"
   },
   "scripts": {
-    "start": "node server.js",
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "start:backend": "node server.js",
+    "start:frontend": "vue-cli-service serve",
+    "start": "vue-cli-service build && node server.js"
   },
   "dependencies": {
     "mongodb": "^3.1.10",
