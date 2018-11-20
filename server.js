@@ -20,10 +20,18 @@ function saveToDb(collection, backend, path, data) {
     });
 }
 
-function getFromDb(findCriteria) {
-    return MongoClient.connect(dbUrl).then(client => {
-        return client.db(dbName).collection('backends').findOne(findCriteria);
+function getCollection() {
+    return MongoClient.connect(dbUrl, { useNewUrlParser: true }).then(client => {
+        return client.db(dbName).collection('backends');
     });
+}
+
+function getOneFromDb(findCriteria) {
+    return getCollection().then(collection => collection.findOne(findCriteria));
+}
+
+function getFromDb(findCriteria, projection = undefined) {
+    return getCollection().then(collection => collection.find(findCriteria));
 }
 
 // trigger crawling
@@ -66,7 +74,7 @@ server.get('/backends', function(req, res, next) {
 
 // proxy backends
 server.get('/backends/:backend/*', function(req, res, next) {
-    getFromDb({backend: req.params.backend, path: '/'+req.params['*']}).then(r => res.send(r));
+    getOneFromDb({backend: req.params.backend, path: '/'+req.params['*']}).then(r => res.send(r));
     return next();
 });
 
