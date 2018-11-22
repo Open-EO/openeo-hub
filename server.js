@@ -1,6 +1,9 @@
 var restify = require('restify');
 var server = restify.createServer();
 
+server.use(restify.plugins.queryParser({ mapParams: false }));
+server.use(restify.plugins.bodyParser({ mapParams: false }));
+
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const dbUrl = 'mongodb://localhost:27017';
@@ -70,6 +73,62 @@ server.get('/crawl', function(req, res, next) {
 server.get('/backends', function(req, res, next) {
     res.send(backends);
     return next();
+});
+
+// search backends via parameters in URL query string
+// only supports `version` parameter
+server.get('/backends/search', function(req, res, next) {
+    getFromDb({"content.version": req.query.version}).then(cursor => {
+       try {
+           var backendList = [];
+           cursor
+               .map(b => b.backend)
+               .forEach(b => backendList.push(b))
+               .then(() => res.send(backendList))
+               .catch(error => res.send(error));
+       }
+       catch(error) {
+           res.send(error);
+       }
+   })
+   .catch(error => res.send(error));
+});
+
+// search backends via JSON document in POST body
+// supports all parameters, which are currently: version, endpoints
+server.post('/backends/search', function(req, res, next) {
+    var criteria = {};
+
+    if(req.body.version) {
+        criteria["content.version"] = req.body.version;
+    }
+
+    if(req.body.endpoints) {
+        criteria["$and"] = req.body.endpoints.map(e => ({
+            "content.endpoints": {
+                $elemMatch: {
+                    path: e.split(' ')[1],
+                    methods: e.split(' ')[0]
+                }
+            }
+        }));
+    }
+
+    getFromDb(criteria)
+        .then(cursor => {
+            try {
+                var backendList = [];
+                cursor
+                    .map(b => b.backend)
+                    .forEach(b => backendList.push(b))
+                    .then(() => res.send(backendList))
+                    .catch(error => res.send(error));
+            }
+            catch(error) {
+                console.log(error);
+            }
+        })
+        .catch(error => res.send(error));
 });
 
 // proxy backends
