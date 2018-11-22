@@ -29,12 +29,16 @@ function getCollection() {
     });
 }
 
-function getOneFromDb(findCriteria) {
+function findOne(findCriteria) {
     return getCollection().then(collection => collection.findOne(findCriteria));
 }
 
-function getFromDb(findCriteria, projection = undefined) {
+function find(findCriteria, projection = undefined) {
     return getCollection().then(collection => collection.find(findCriteria));
+}
+
+function aggregate(pipeline) {
+    return getCollection().then(collection => collection.aggregate(pipeline));
 }
 
 // trigger crawling
@@ -78,7 +82,7 @@ server.get('/backends', function(req, res, next) {
 // search backends via parameters in URL query string
 // only supports `version` parameter
 server.get('/backends/search', function(req, res, next) {
-    getFromDb({"content.version": req.query.version}).then(cursor => {
+    find({"content.version": req.query.version}).then(cursor => {
        try {
            var backendList = [];
            cursor
@@ -114,7 +118,7 @@ server.post('/backends/search', function(req, res, next) {
         }));
     }
 
-    getFromDb(criteria)
+    find(criteria)
         .then(cursor => {
             try {
                 var backendList = [];
@@ -133,7 +137,7 @@ server.post('/backends/search', function(req, res, next) {
 
 // proxy backends
 server.get('/backends/:backend/*', function(req, res, next) {
-    getOneFromDb({backend: req.params.backend, path: '/'+req.params['*']}).then(r => res.send(r));
+    findOne({backend: req.params.backend, path: '/'+req.params['*']}).then(r => res.send(r));
     return next();
 });
 
