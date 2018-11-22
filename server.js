@@ -118,7 +118,33 @@ server.post('/backends/search', function(req, res, next) {
         }));
     }
 
-    find(criteria)
+    if(req.body.processes) {
+        // make sure we operate on the root documents only
+        if(Object.getOwnPropertyNames(criteria).length == 0) {
+            criteria.path = '/';
+        }
+        // construct pipeline for aggregate
+        var pipeline = [
+            // get items of previous filtering
+            {'$match': criteria},
+            // add the `processes` document
+            {'$lookup': {from:'backends', as:'processes', let:{'backend':'$backend'}, pipeline:[{'$match':{'path':'/processes','$expr':{'$eq':['$$backend','$backend']}}}]}},
+            // delete all un-needed content in `processes`
+            {'$addFields': {'processes': {'$arrayElemAt': [{'$map':{input:'$processes',in:'$$this.content.processes'}}, 0]}}},
+            // get one item for each process
+            {'$unwind': '$processes'},
+            // filter for process names
+            {'$match': {'processes.name': {'$in': req.body.processes}}},
+            // group by backend
+            {'$group': { _id: '$backend', count: {$sum: 1}, processes: { $push: "$processes"} }},
+            // only keep those that have them all
+            {'$match': {count: req.body.processes.length}}
+            // possibly project down
+            //{'$project': {'_id':1,'backend':1,'processes':1}}
+        ];
+    }
+
+    (pipeline ? aggregate(pipeline) : find(criteria))
         .then(cursor => {
             try {
                 var backendList = [];
