@@ -99,7 +99,7 @@ server.get('/backends/search', function(req, res, next) {
 });
 
 // search backends via JSON document in POST body
-// supports all parameters, which are currently: version, endpoints, processes
+// supports all parameters, which are currently: version, endpoints, collections, processes
 server.post('/backends/search', async function(req, res, next) {
     var criteria = {path: '/'};
 
@@ -121,6 +121,17 @@ server.post('/backends/search', async function(req, res, next) {
     // get all backends that match the criteria that are validated against the '/' document
     var backendsWithCriteria = await (await find(criteria)).toArray();
 
+    if(req.body.collections) {
+        var collectionCriteria = {
+            "path":"/collections",
+            "$and": req.body.collections.map(c => ({"content.collections.name": c}))
+        };
+        // get all backends that match the criteria that are validated against the '/collections' document
+        var backendsWithCollections = await (await find(collectionCriteria)).toArray();
+        // only keep those that match both the previous and the '/collections' criteria
+        backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithCollections.some(b2 => b1.backend == b2.backend));
+    }
+
     if(req.body.processes) {
         var processCriteria = {
             "path":"/processes",
@@ -128,7 +139,7 @@ server.post('/backends/search', async function(req, res, next) {
         };
         // get all backends that match the criteria that are validated against the '/processes' document
         var backendsWithProcesses = await (await find(processCriteria)).toArray();
-        // only keep those that match both the '/' and the '/processes' criteria
+        // only keep those that match both the previous and the '/processes' criteria
         backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithProcesses.some(b2 => b1.backend == b2.backend));
     }
 
