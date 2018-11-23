@@ -99,14 +99,17 @@ server.get('/backends/search', function(req, res, next) {
 });
 
 // search backends via JSON document in POST body
-// supports all parameters, which are currently: version, endpoints, collections, processes
+// supports all parameters, which are currently: version, endpoints, collections, processes, processGraph
 server.post('/backends/search', async function(req, res, next) {
+    // INIT
     var criteria = {path: '/'};
 
+    // VERSION
     if(req.body.version) {
         criteria["content.version"] = req.body.version;
     }
 
+    // ENDPOINTS
     if(req.body.endpoints) {
         criteria["$and"] = req.body.endpoints.map(e => ({
             "content.endpoints": {
@@ -121,6 +124,53 @@ server.post('/backends/search', async function(req, res, next) {
     // get all backends that match the criteria that are validated against the '/' document
     var backendsWithCriteria = await (await find(criteria)).toArray();
 
+    // PROCESSGRAPH
+    // check process graph = check if backend provides all of its processes and collections
+    // -> add process graph's collections and processes to the checks that will be carried out later anyway
+    if(req.body.processGraph) {
+        // work with Sets so the list won't have duplicates
+        var pgCollections = new Set(req.body.collections);
+        var pgProcesses = new Set(req.body.processes);
+
+        var recursivelyAddPgCollectionsAndProcesses = pgPart => {
+            if(pgPart.process_id) {
+                pgProcesses.add(pgPart.process_id);
+            }
+            // this works for the earthengine-driver, but I'm not sure whether this `get_collection` process is standardized
+            if(pgPart.process_id == 'get_collection' && pgPart.name) {
+                pgCollections.add(pgPart.name);
+            }
+            for(var pgSubPart in pgPart) {
+                if(typeof pgPart[pgSubPart] == 'object') {
+                    recursivelyAddPgCollectionsAndProcesses(pgPart[pgSubPart]);
+                }
+            }
+        };
+        recursivelyAddPgCollectionsAndProcesses(req.body.processGraph);
+
+        // only touch req.body if we have to
+        if(pgCollections.size > 0) {
+            // if there were no collections yet we can straightforwardly assign the ones we've got now
+            if(!req.body.collections) {
+                req.body.collections = [...pgCollections];  // spread Set as Array
+            // otherwise we have to combine the old and the new
+            } else {
+                req.body.collections.forEach(c => pgCollections.add(c));  // add to Set for deduplication
+                req.body.collections = [...pgCollections];  // spread Set as Array
+            }
+        }
+
+        if(pgProcesses.size > 0) {
+            if(!req.body.processes) {
+                req.body.processes = [...pgProcesses];
+            } else {
+                req.body.processes.forEach(p => pgProcesses.add(p));
+                req.body.processes = [...pgProcesses];
+            }
+        }
+    }
+    
+    // COLLECTIONS
     if(req.body.collections) {
         var collectionCriteria = {
             "path":"/collections",
@@ -132,6 +182,7 @@ server.post('/backends/search', async function(req, res, next) {
         backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithCollections.some(b2 => b1.backend == b2.backend));
     }
 
+    // PROCESSES
     if(req.body.processes) {
         var processCriteria = {
             "path":"/processes",
@@ -143,6 +194,7 @@ server.post('/backends/search', async function(req, res, next) {
         backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithProcesses.some(b2 => b1.backend == b2.backend));
     }
 
+    // send end result
     res.send(backendsWithCriteria);
 });
 
