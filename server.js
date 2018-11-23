@@ -99,9 +99,9 @@ server.get('/backends/search', function(req, res, next) {
 });
 
 // search backends via JSON document in POST body
-// supports all parameters, which are currently: version, endpoints
-server.post('/backends/search', function(req, res, next) {
-    var criteria = {};
+// supports all parameters, which are currently: version, endpoints, processes
+server.post('/backends/search', async function(req, res, next) {
+    var criteria = {path: '/'};
 
     if(req.body.version) {
         criteria["content.version"] = req.body.version;
@@ -118,47 +118,21 @@ server.post('/backends/search', function(req, res, next) {
         }));
     }
 
+    // get all backends that match the criteria that are validated against the '/' document
+    var backendsWithCriteria = await (await find(criteria)).toArray();
+
     if(req.body.processes) {
-        // make sure we operate on the root documents only
-        if(Object.getOwnPropertyNames(criteria).length == 0) {
-            criteria.path = '/';
-        }
-        // construct pipeline for aggregate
-        var pipeline = [
-            // get items of previous filtering
-            {'$match': criteria},
-            // add the `processes` document
-            {'$lookup': {from:'backends', as:'processes', let:{'backend':'$backend'}, pipeline:[{'$match':{'path':'/processes','$expr':{'$eq':['$$backend','$backend']}}}]}},
-            // delete all un-needed content in `processes`
-            {'$addFields': {'processes': {'$arrayElemAt': [{'$map':{input:'$processes',in:'$$this.content.processes'}}, 0]}}},
-            // get one item for each process
-            {'$unwind': '$processes'},
-            // filter for process names
-            {'$match': {'processes.name': {'$in': req.body.processes}}},
-            // group by backend
-            {'$group': { _id: '$backend', count: {$sum: 1}, processes: { $push: "$processes"} }},
-            // only keep those that have them all
-            {'$match': {count: req.body.processes.length}}
-            // possibly project down
-            //{'$project': {'_id':1,'backend':1,'processes':1}}
-        ];
+        var processCriteria = {
+            "path":"/processes",
+            "$and": req.body.processes.map(p => ({"content.processes.name": p}))
+        };
+        // get all backends that match the criteria that are validated against the '/processes' document
+        var backendsWithProcesses = await (await find(processCriteria)).toArray();
+        // only keep those that match both the '/' and the '/processes' criteria
+        backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithProcesses.some(b2 => b1.backend == b2.backend));
     }
 
-    (pipeline ? aggregate(pipeline) : find(criteria))
-        .then(cursor => {
-            try {
-                var backendList = [];
-                cursor
-                    .map(b => b.backend)
-                    .forEach(b => backendList.push(b))
-                    .then(() => res.send(backendList))
-                    .catch(error => res.send(error));
-            }
-            catch(error) {
-                console.log(error);
-            }
-        })
-        .catch(error => res.send(error));
+    res.send(backendsWithCriteria);
 });
 
 // proxy backends
