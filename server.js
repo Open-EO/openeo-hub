@@ -111,14 +111,23 @@ server.post('/backends/search', async function(req, res, next) {
 
     // ENDPOINTS
     if(req.body.endpoints) {
-        criteria["$and"] = req.body.endpoints.map(e => ({
-            "content.endpoints": {
-                $elemMatch: {
-                    path: e.split(' ')[1],
-                    methods: e.split(' ')[0]
+        // the backend must support every requested endpoint -> join with $and
+        criteria["$and"] = req.body.endpoints.map(e => {
+            // given as string in the format: "METHOD /endpoint"
+            const parts = e.split(' ');
+            const method = parts[0];
+            const path = parts[1];
+            return {
+                "content.endpoints": {
+                    // matches when the "element in the array field matches all specified conditions"
+                    $elemMatch: {
+                        methods: method,
+                        // if path contains parameters: use regex and allow arbitrary parameter names
+                        path: (path.indexOf('{') == -1 ? path : { $regex: path.replace(/{[^}]+}/g, '{[^}]+}') })
+                    }
                 }
             }
-        }));
+        });
     }
 
     // get all backends that match the criteria that are validated against the '/' document
