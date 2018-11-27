@@ -133,6 +133,18 @@ server.post('/backends/search', async function(req, res, next) {
     // get all backends that match the criteria that are validated against the '/' document
     var backendsWithCriteria = await (await find(criteria)).toArray();
 
+    // cleanup response object (add version and endpoints to root scope, remove all other unnecessary properties)
+    backendsWithCriteria = backendsWithCriteria.map(b => {
+        b.version = b.content.version;
+        // endpoints in `"METHOD /path"` format like in the request
+        b.endpoints = req.body.endpoints;
+        // endpoints in `{path:'/path', methods:['METHOD']}` format like in the openEO API spec
+        //b.endpoints = b.content.endpoints.filter(e => req.body.endpoints.some(x => e.path == x.split(' ')[1] && e.methods.indexOf(x.split(' ')[0]) != -1));
+        delete b.content;
+        delete b.path;
+        return b;
+    });
+
     // PROCESSGRAPH
     // check process graph = check if backend provides all of its processes and collections
     // -> add process graph's collections and processes to the checks that will be carried out later anyway
@@ -189,6 +201,15 @@ server.post('/backends/search', async function(req, res, next) {
         var backendsWithCollections = await (await find(collectionCriteria)).toArray();
         // only keep those that match both the previous and the '/collections' criteria
         backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithCollections.some(b2 => b1.backend == b2.backend));
+        // add metadata of queried collections to response object
+        backendsWithCriteria = backendsWithCriteria.map(b => 
+            Object.assign(b, { collections: backendsWithCollections
+                .find(el => el.backend == b.backend)
+                .content
+                .collections
+                .filter(c => req.body.collections.indexOf(c.name) != -1)
+            })
+        );
     }
 
     // PROCESSES
@@ -201,6 +222,15 @@ server.post('/backends/search', async function(req, res, next) {
         var backendsWithProcesses = await (await find(processCriteria)).toArray();
         // only keep those that match both the previous and the '/processes' criteria
         backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithProcesses.some(b2 => b1.backend == b2.backend));
+        // add metadata of queried processes to response object
+        backendsWithCriteria = backendsWithCriteria.map(b => 
+            Object.assign(b, { processes: backendsWithProcesses
+                .find(el => el.backend == b.backend)
+                .content
+                .processes
+                .filter(p => req.body.processes.indexOf(p.name) != -1)
+            })
+        );
     }
 
     // send end result
