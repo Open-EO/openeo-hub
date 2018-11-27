@@ -22,6 +22,7 @@
     "start": "vue-cli-service build && node server.js"
   },
   "dependencies": {
+    "@openeo/processes-docgen": "^0.2.2",
     "axios": "^0.18.0",
     "mongodb": "^3.1.10",
     "restify": "^7.2.3",

@@ -30,7 +30,35 @@
 		<em v-if="matchedBackends.length == 0">empty</em>
 		<output>
 			<ul>
-				<li v-for="backend in matchedBackends" :key="backend">{{backend}}</li>
+				<li v-for="backend in matchedBackends" :key="backend">
+					<h3>{{backend.backend}}</h3>
+					<dl>
+						<dt><h4>Version</h4></dt>
+						<dd>{{backend.version}}</dd>
+
+						<dt v-if="backend.endpoints"><h4>Endpoints</h4></dt>
+						<dd v-if="backend.endpoints">
+							<ul>
+								<li v-for="endpoint in backend.endpoints" :key="endpoint">{{endpoint}}</li>
+							</ul>
+						</dd>
+
+						<dt v-if="backend.collections"><h4>Collections</h4></dt>
+						<dd v-if="backend.collections">
+							<ul>
+								<li v-for="collection in backend.collections" :key="collection.name">
+									<h5>{{collection.name}}</h5>
+									{{collection}}
+								</li>
+							</ul>
+						</dd>
+						
+						<dt v-if="backend.processes"><h4>Processes</h4></dt>
+						<dd v-if="backend.processes">
+							<DocGenProcesses :processes="backend.processes"></DocGenProcesses>
+						</dd>
+					</dl>
+				</li>
 			</ul>
 		</output>
 	</div>
@@ -39,13 +67,15 @@
 <script>
 import Vue from 'vue';
 import axios from 'axios';
+import { DocGenProcesses } from '@openeo/processes-docgen';
 import { OPENEO_V0_3_1_ENDPOINTS } from './const.js'
 import EndpointChooser from './components/EndpointChooser.vue';
 
 export default {
 	name: 'openeo-hub',
 	components: {
-		EndpointChooser
+		EndpointChooser,
+		DocGenProcesses
 	},
 	data() {
 		return {
