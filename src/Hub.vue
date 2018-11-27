@@ -119,8 +119,8 @@ export default {
 				.then(response => {
 					this.matchedBackends = response.data;
 				})
-				.error(error => {
-					alert(error);
+				.catch(error => {
+					console.log(error);
 				});
 		}
 	}
@@ -185,12 +185,14 @@ label {
 	padding-left: 3px;
 	margin-right: 10px;
 }
-input[type='radio'], input[type='checkbox'] {
+input[type='radio'],
+input[type='checkbox'] {
 	vertical-align: bottom;
 }
 
 /* search section */
-#search h2, #search h3 {
+#search h2,
+#search h3 {
 	margin-top: 10px;
 }
 #endpointchooser {
@@ -208,13 +210,17 @@ input[type='radio'], input[type='checkbox'] {
 }
 
 /* results section */
-#results h2, #results h3 {
+#results h2,
+#results h3 {
 	margin-bottom: 10px;
 }
-#results h3, #results h4, #results h5 {
+#results h3,
+#results h4,
+#results h5 {
 	font-size: 100%;
 }
-#results h4, #results h5 {
+#results h4,
+#results h5 {
 	font-weight: normal;
 }
 #results em {
