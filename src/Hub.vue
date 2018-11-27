@@ -52,17 +52,12 @@
 
 								<dt v-if="backend.collections"><h4>Collections</h4></dt>
 								<dd v-if="backend.collections">
-									<ul>
-										<li v-for="collection in backend.collections" :key="collection.name">
-											<h5>{{collection.name}}</h5>
-											{{collection}}
-										</li>
-									</ul>
+									<CollectionPanel v-for="collection in backend.collections" :key="collection.name" :collection="collection"></CollectionPanel>
 								</dd>
 								
 								<dt v-if="backend.processes"><h4>Processes</h4></dt>
 								<dd v-if="backend.processes">
-									<DocGenProcesses :processes="backend.processes"></DocGenProcesses>
+									<ProcessPanel v-for="process in backend.processes" :key="process.name" :process="process"></ProcessPanel>
 								</dd>
 							</dl>
 						</li>
@@ -81,15 +76,17 @@
 <script>
 import Vue from 'vue';
 import axios from 'axios';
-import { DocGenProcesses } from '@openeo/processes-docgen';
+import { ProcessPanel } from '@openeo/processes-docgen';
 import { OPENEO_V0_3_1_ENDPOINTS } from './const.js'
 import EndpointChooser from './components/EndpointChooser.vue';
+import CollectionPanel from './components/CollectionPanel.vue';
 
 export default {
 	name: 'openeo-hub',
 	components: {
 		EndpointChooser,
-		DocGenProcesses
+		CollectionPanel,
+		ProcessPanel
 	},
 	data() {
 		return {
@@ -234,5 +231,16 @@ input[type='checkbox'] {
 }
 #results dd > ul {
 	padding-left: 15px;
+}
+#results .processPanel {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+#results .processPanel h2,
+#results .processPanel h3,
+#results .collectionPanel h2,
+#results .collectionPanel h3 {
+	font-size: 100%;
+	margin-top: 10px;
 }
 </style>

@@ -19,7 +19,8 @@
   "scripts": {
     "start:backend": "node server.js",
     "start:frontend": "vue-cli-service serve",
-    "start": "vue-cli-service build && node server.js"
+    "start": "vue-cli-service build && node server.js",
+    "start:dev": "vue-cli-service build --mode development && node server.js"
   },
   "dependencies": {
     "@openeo/processes-docgen": "^0.2.2",
