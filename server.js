@@ -88,7 +88,8 @@ server.get('/backends', function(req, res, next) {
 // search backends via parameters in URL query string
 // only supports `version` parameter
 server.get('/backends/search', function(req, res, next) {
-    find({"content.version": req.query.version}).then(cursor => {
+    const criteria = (req.query.version ? {'content.version': req.query.version} : {path: '/'});
+    find(criteria).then(async cursor => {
         res.send(await getAllDocsFromCursor(cursor, b => b.backend));
     })
    .catch(error => res.send(error));
