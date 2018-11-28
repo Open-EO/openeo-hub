@@ -41,6 +41,12 @@ function aggregate(pipeline) {
     return getCollection().then(collection => collection.aggregate(pipeline));
 }
 
+async function getAllDocsFromCursor(cursor, mappingCallback = undefined) {
+    var list = [];
+    await cursor.map(mappingCallback || (x => x)).forEach(x => list.push(x));
+    return list;
+}
+
 // trigger crawling
 server.get('/crawl', function(req, res, next) {
     MongoClient.connect(dbUrl, function(err, client) {
@@ -83,18 +89,8 @@ server.get('/backends', function(req, res, next) {
 // only supports `version` parameter
 server.get('/backends/search', function(req, res, next) {
     find({"content.version": req.query.version}).then(cursor => {
-       try {
-           var backendList = [];
-           cursor
-               .map(b => b.backend)
-               .forEach(b => backendList.push(b))
-               .then(() => res.send(backendList))
-               .catch(error => res.send(error));
-       }
-       catch(error) {
-           res.send(error);
-       }
-   })
+        res.send(await getAllDocsFromCursor(cursor, b => b.backend));
+    })
    .catch(error => res.send(error));
 });
 
@@ -250,17 +246,8 @@ server.get('/collections', function(req, res, next) {
         { $addFields: { 'content.collections.backend': '$backend', 'content.collections.retrieved': '$retrieved' } },
         { $project: { 'collection': '$content.collections' } },
         { $unwind: '$collection' }
-    ]).then(cursor => {
-        try {
-            var collections = [];
-            cursor
-                .forEach(c => collections.push(c))
-                .then(() => res.send(collections))
-                .catch(error => res.send(error));
-        }
-        catch(error) {
-            res.send(error);
-        }
+    ]).then(async cursor => {
+        res.send(await getAllDocsFromCursor(cursor));
     })
     .catch(error => res.send(error));
 });
