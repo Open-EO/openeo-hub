@@ -243,6 +243,28 @@ server.get('/backends/:backend/*', function(req, res, next) {
     return next();
 });
 
+// list collections
+server.get('/collections', function(req, res, next) {
+    aggregate([
+        { $match: { path: '/collections' } },
+        { $addFields: { 'content.collections.backend': '$backend', 'content.collections.retrieved': '$retrieved' } },
+        { $project: { 'collection': '$content.collections' } },
+        { $unwind: '$collection' }
+    ]).then(cursor => {
+        try {
+            var collections = [];
+            cursor
+                .forEach(c => collections.push(c))
+                .then(() => res.send(collections))
+                .catch(error => res.send(error));
+        }
+        catch(error) {
+            res.send(error);
+        }
+    })
+    .catch(error => res.send(error));
+});
+
 // serve website (UI)
 server.get('/*', restify.plugins.serveStatic({
     directory: './dist',
