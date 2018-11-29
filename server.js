@@ -96,7 +96,7 @@ server.get('/backends/search', function(req, res, next) {
 });
 
 // search backends via JSON document in POST body
-// supports all parameters, which are currently: version, endpoints, collections, processes, processGraph
+// supports all parameters, which are currently: version, endpoints, collections, processes, processGraph, outputFormats, processTypes, excludePaidOnly
 server.post('/backends/search', async function(req, res, next) {
     // INIT
     var criteria = {path: '/'};
@@ -125,6 +125,11 @@ server.post('/backends/search', async function(req, res, next) {
                 }
             }
         });
+    }
+
+    // EXCLUDE PAID ONLY
+    if(req.body.excludePaidOnly) {
+        criteria['content.billing.plans.name'] = 'free';
     }
 
     // get all backends that match the criteria that are validated against the '/' document
@@ -228,6 +233,48 @@ server.post('/backends/search', async function(req, res, next) {
                 .filter(p => req.body.processes.indexOf(p.name) != -1)
             })
         );
+    }
+
+    // OUTPUT FORMATS
+    if(req.body.outputFormats) {
+        var outputFormatCriteria = {
+            "path":"/output_formats"
+        };
+        // output format identifiers aren't array items but object keys, so check for $exists
+        req.body.outputFormats.forEach(of => outputFormatCriteria['content.formats.'+of] = {$exists: true});
+        // get all backends that match the criteria that are validated against the '/output_formats' document
+        var backendsWithOutputFormats = await (await find(outputFormatCriteria)).toArray();
+        // only keep those that match both the previous and the '/output_formats' criteria
+        backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithOutputFormats.some(b2 => b1.backend == b2.backend));
+        // add metadata of queried output formats to response object
+        backendsWithCriteria = backendsWithCriteria.map(b => {
+            var result = Object.assign(b, { outputFormats: {} });
+            req.body.outputFormats.forEach(of => 
+                result.outputFormats[of] = backendsWithOutputFormats.find(el => el.backend == b.backend).content.formats[of]
+            );
+            return b;
+        });
+    }
+
+    // SERVICE TYPES
+    if(req.body.serviceTypes) {
+        var serviceTypeCriteria = {
+            "path":"/service_types"
+        };
+        // output format identifiers aren't array items but object keys, so check for $exists
+        req.body.serviceTypes.forEach(st => serviceTypeCriteria['content.'+st] = {$exists: true});
+        // get all backends that match the criteria that are validated against the '/service_types' document
+        var backendsWithServiceTypes = await (await find(serviceTypeCriteria)).toArray();
+        // only keep those that match both the previous and the '/output_formats' criteria
+        backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithServiceTypes.some(b2 => b1.backend == b2.backend));
+        // add metadata of queried service types to response object
+        backendsWithCriteria = backendsWithCriteria.map(b => {
+            var result = Object.assign(b, { serviceTypes: {} });
+            req.body.serviceTypes.forEach(st => 
+                result.serviceTypes[st] = backendsWithServiceTypes.find(el => el.backend == b.backend).content[st]
+            );
+            return b;
+        });
     }
 
     // send end result

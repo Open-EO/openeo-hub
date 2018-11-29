@@ -50,6 +50,15 @@
 				<h3>Process Graph</h3>
 				<textarea v-model="backendSearch.processGraph" placeholder="Paste an openEO process graph"></textarea>
 
+				<h3>Output formats</h3>
+				<textarea v-model="backendSearch.outputFormats" placeholder="Specify output formats, each on a new line"></textarea>
+
+				<h3>Service Types</h3>
+				<textarea v-model="backendSearch.serviceTypes" placeholder="Specify service types, each on a new line"></textarea>
+
+				<h3>Billing</h3>
+				<input type="checkbox" v-model="backendSearch.excludePaidOnly" id="vany"><label for="vany">Exclude backends without a free plan</label>
+
 				<h3>Actions</h3>
 				<button @click="queryBackends()">Submit</button>
 			</section>
@@ -128,7 +137,10 @@ export default {
 				endpoints: [],
 				collections: '',
 				processes: '',
-				processGraph: ''
+				processGraph: '',
+				outputFormats: '',
+				serviceTypes: '',
+				excludePaidOnly: false
 			},
 			matchedBackends: [],
 			collectionSearch: {
@@ -155,11 +167,14 @@ export default {
 
 		queryBackends() {
 			const params = {
-				version:            (this.backendSearch.version == 'any' ? undefined : this.backendSearch.version),
-				endpoints:     (this.backendSearch.endpoints.length == 0 ? undefined : this.backendSearch.endpoints),
-				collections: (this.backendSearch.collections.length == 0 ? undefined : this.backendSearch.collections.split("\n")),
-				processes:     (this.backendSearch.processes.length == 0 ? undefined : this.backendSearch.processes.split("\n")),
-				processGraph:     (this.backendSearch.processGraph == '' ? undefined : JSON.parse(this.backendSearch.processGraph))
+				version:          (this.backendSearch.version == 'any' ? undefined : this.backendSearch.version),
+				endpoints:  (this.backendSearch.endpoints.length == 0  ? undefined : this.backendSearch.endpoints),
+				collections:     (this.backendSearch.collections == '' ? undefined : this.backendSearch.collections.split("\n")),
+				processes:         (this.backendSearch.processes == '' ? undefined : this.backendSearch.processes.split("\n")),
+				processGraph:   (this.backendSearch.processGraph == '' ? undefined : JSON.parse(this.backendSearch.processGraph)),
+				outputFormats: (this.backendSearch.outputFormats == '' ? undefined : this.backendSearch.outputFormats.split("\n")),
+				serviceTypes:   (this.backendSearch.serviceTypes == '' ? undefined : this.backendSearch.serviceTypes.split("\n")),
+				excludePaidOnly:  (!this.backendSearch.excludePaidOnly ? undefined : true)
 			}
 			axios.post('/backends/search', params)
 				.then(response => {
