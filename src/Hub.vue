@@ -20,12 +20,7 @@
 
 				<h3>Extent</h3>
 				<h4>Spatial</h4>
-				<div class="bboxchooser">
-					<input v-model="collectionSearch.extent.spatial[3]" />
-					<input v-model="collectionSearch.extent.spatial[0]" />
-					<input v-model="collectionSearch.extent.spatial[2]" />
-					<input v-model="collectionSearch.extent.spatial[1]" />
-				</div>
+				<BboxChooser :calledOnChange="setSpatialExtent"></BboxChooser>
 				<h4>Temporal</h4>
 				<input v-model="collectionSearch.extent.temporal[0]" />
 				<input v-model="collectionSearch.extent.temporal[1]" />
@@ -113,12 +108,14 @@ import axios from 'axios';
 import { ProcessPanel } from '@openeo/processes-docgen';
 import { OPENEO_V0_3_1_ENDPOINTS } from './const.js'
 import EndpointChooser from './components/EndpointChooser.vue';
+import BboxChooser from './components/BboxChooser.vue';
 import CollectionPanel from './components/CollectionPanel.vue';
 
 export default {
 	name: 'openeo-hub',
 	components: {
 		EndpointChooser,
+		BboxChooser,
 		CollectionPanel,
 		ProcessPanel
 	},
@@ -147,6 +144,11 @@ export default {
 	methods: {
 		setSelectedEndpoints(input) {
 			this.selectedEndpoints = input;
+		},
+
+		setSpatialExtent(input) {
+			console.log('called');
+			this.collectionSearch.extent.spatial = input;
 		},
 
 		queryBackends() {
@@ -280,16 +282,6 @@ input[type='checkbox'] {
 	width: 100%;
 	height: 100px;
 	padding: 5px;
-}
-#search .bboxchooser input {
-	width: 30%;
-	margin-left: 30%;
-}
-#search .bboxchooser input:nth-child(1) {
-	display: block;
-}
-#search .bboxchooser input:nth-child(2) {
-	margin-left: 0;
 }
 
 /* results section */
