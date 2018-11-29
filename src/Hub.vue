@@ -181,7 +181,7 @@ export default {
 				params.extent = {};
 				params.extent.spatial = [];
 				for(var i=0; i<=3; i++) {
-					params.extent.spatial.push(parseInt(this.collectionSearch.extent.spatial[i]));
+					params.extent.spatial.push(parseFloat(this.collectionSearch.extent.spatial[i]));
 				}
 			}
 			if(this.collectionSearch.extent.temporal[0] != '') {
