@@ -240,17 +240,82 @@ server.get('/backends/:backend/*', function(req, res, next) {
     return next();
 });
 
+const GET_ALL_COLLECTIONS_PIPELINE = [
+    { $match: { path: '/collections' } },
+    { $addFields: { 'content.collections.backend': '$backend', 'content.collections.retrieved': '$retrieved' } },
+    { $project: { 'collection': '$content.collections' } },
+    { $unwind: '$collection' }
+];
+
 // list collections
 server.get('/collections', function(req, res, next) {
-    aggregate([
-        { $match: { path: '/collections' } },
-        { $addFields: { 'content.collections.backend': '$backend', 'content.collections.retrieved': '$retrieved' } },
-        { $project: { 'collection': '$content.collections' } },
-        { $unwind: '$collection' }
-    ]).then(async cursor => {
+    aggregate(GET_ALL_COLLECTIONS_PIPELINE).then(async cursor => {
         res.send(await getAllDocsFromCursor(cursor));
     })
     .catch(error => res.send(error));
+});
+
+// search collections via JSON document in POST body
+// supports all parameters, which are currently: name, title, description, extent (spatial and temporal)
+server.post('/collections/search', async function(req, res, next) {
+    // INIT
+    var pipeline = Array.from(GET_ALL_COLLECTIONS_PIPELINE);  // copy the array so we don't overwrite the constant
+    var criteria = {};
+    
+    // NAME
+    if(req.body.name) {
+        criteria['collection.name'] = {$regex: req.body.name, $options: 'i'};
+    }
+
+    // TITLE
+    if(req.body.title) {
+        criteria['collection.title'] = {$regex: req.body.title, $options: 'i'};
+    }
+
+    // DESCRIPTION
+    if(req.body.description) {
+        criteria['collection.description'] = {$regex: req.body.description, $options: 'i'};
+    }
+
+    // EXTENT
+    if(req.body.extent) {
+        // SPATIAL
+        if(req.body.extent.spatial) {
+            // inspired by https://github.com/morganherlocker/bbox-intersect
+            /*criteria['$not'] = {
+                '$or': {
+                    'collection.extent.spatial.0': {$gt: req.body.extent.spatial[2]},
+                    'collection.extent.spatial.2': {$lt: req.body.extent.spatial[0]},
+                    'collection.extent.spatial.1': {$gt: req.body.extent.spatial[3]},
+                    'collection.extent.spatial.3': {$lt: req.body.extent.spatial[1]},
+                }
+            }*/
+            // $not can't be used like that, so rewrite as:
+            criteria['$and'] = [
+                {'collection.extent.spatial.0': {$lte: req.body.extent.spatial[2]}},
+                {'collection.extent.spatial.2': {$gte: req.body.extent.spatial[0]}},
+                {'collection.extent.spatial.1': {$lte: req.body.extent.spatial[3]}},
+                {'collection.extent.spatial.3': {$gte: req.body.extent.spatial[1]}},
+            ]
+        }
+
+        // TEMPORAL
+        if(req.body.extent.temporal) {
+            if(req.body.extent.temporal[0] != null) {
+                criteria['collection.extent.temporal.0'] = {$lte: req.body.extent.temporal[0]};
+            }
+            if(req.body.extent.temporal[1] != null) {
+                criteria['collection.extent.temporal.1'] = {$gte: req.body.extent.temporal[1]};
+            }
+        }
+    }
+
+    // add the match stage to the collection pipeline
+    pipeline.push({$match: criteria});
+    // execute pipeline
+    var collectionsWithCriteria = await (await aggregate(pipeline)).toArray();
+    // send end result
+    res.send(collectionsWithCriteria);
 });
 
 // serve website (UI)
