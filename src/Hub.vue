@@ -7,7 +7,34 @@
 		<main>
 			
 			<section id="search">
-				<h2>Search</h2>
+				<h2>Search for collections</h2>
+
+				<h3>Name</h3>
+				<input v-model="collectionSearch.name" />
+
+				<h3>Title</h3>
+				<input v-model="collectionSearch.title" />
+
+				<h3>Description</h3>
+				<input v-model="collectionSearch.description" />
+
+				<h3>Extent</h3>
+				<h4>Spatial</h4>
+				<div class="bboxchooser">
+					<input v-model="collectionSearch.extent.spatial[3]" />
+					<input v-model="collectionSearch.extent.spatial[0]" />
+					<input v-model="collectionSearch.extent.spatial[2]" />
+					<input v-model="collectionSearch.extent.spatial[1]" />
+				</div>
+				<h4>Temporal</h4>
+				<input v-model="collectionSearch.extent.temporal[0]" />
+				<input v-model="collectionSearch.extent.temporal[1]" />
+
+				<h3>Actions</h3>
+				<button @click="queryCollections()">Submit</button>
+
+				
+				<h2>Search for backends</h2>
 
 				<h3>Version</h3>
 				<div>
@@ -34,6 +61,13 @@
 
 			<section id="results">
 				<h2>Results</h2>
+
+				<ol>
+					<li v-for="collection in matchedCollections" :key="collection.backend+'/'+collection.collection.name">
+						{{collection.collection.name}}
+					</li>
+				</ol>
+
 				<em v-if="matchedBackends.length == 0">empty</em>
 				<output>
 					<ol>
@@ -97,13 +131,24 @@ export default {
 			specifiedCollections: '',
 			specifiedProcesses: '',
 			specifiedProcessGraph: '',
-			matchedBackends: []
+			matchedBackends: [],
+			collectionSearch: {
+				name: '',
+				title: '',
+				description: '',
+				extent: {
+					spatial: ['', '', '', ''],
+					temporal: ['', '']
+				}
+			},
+			matchedCollections: []
 		};
 	},
 	methods: {
 		setSelectedEndpoints(input) {
 			this.selectedEndpoints = input;
 		},
+
 		queryBackends() {
 			const params = {
 				version:             (this.selectedVersion == 'any' ? undefined : this.selectedVersion),
@@ -115,6 +160,37 @@ export default {
 			axios.post('/backends/search', params)
 				.then(response => {
 					this.matchedBackends = response.data;
+				})
+				.catch(error => {
+					console.log(error);
+				});
+		},
+
+		queryCollections() {
+			var params = {};
+			
+			// Build `params` object (can't use it directly because empty fields must be removed)
+			Object.keys(this.collectionSearch).forEach(key => {
+				if(this.collectionSearch[key] != '' && typeof this.collectionSearch[key] != 'object') {
+					params[key] = this.collectionSearch[key];
+				}
+			});
+			if(this.collectionSearch.extent.spatial[0] != '') {
+				params.extent = {};
+				params.extent.spatial = [];
+				for(var i=0; i<=3; i++) {
+					params.extent.spatial.push(parseInt(this.collectionSearch.extent.spatial[i]));
+				}
+			}
+			if(this.collectionSearch.extent.temporal[0] != '') {
+				params.extent = params.extent || {};
+				params.extent.temporal = [this.collectionSearch.extent.temporal[0], this.collectionSearch.extent.temporal[1]];
+			}
+
+			// actual query
+			axios.post('/collections/search', params)
+				.then(response => {
+					this.matchedCollections = response.data;
 				})
 				.catch(error => {
 					console.log(error);
@@ -204,6 +280,16 @@ input[type='checkbox'] {
 	width: 100%;
 	height: 100px;
 	padding: 5px;
+}
+#search .bboxchooser input {
+	width: 30%;
+	margin-left: 30%;
+}
+#search .bboxchooser input:nth-child(1) {
+	display: block;
+}
+#search .bboxchooser input:nth-child(2) {
+	margin-left: 0;
 }
 
 /* results section */
