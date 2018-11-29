@@ -33,22 +33,22 @@
 
 				<h3>Version</h3>
 				<div>
-					<input type="radio" value="any"   v-model="selectedVersion" id="vany"><label for="vany">any</label>
-					<input type="radio" value="0.3.0" v-model="selectedVersion" id="v030"><label for="v030">0.3.0</label>
-					<input type="radio" value="0.3.1" v-model="selectedVersion" id="v031"><label for="v031">0.3.1</label>
+					<input type="radio" value="any"   v-model="backendSearch.version" id="vany"><label for="vany">any</label>
+					<input type="radio" value="0.3.0" v-model="backendSearch.version" id="v030"><label for="v030">0.3.0</label>
+					<input type="radio" value="0.3.1" v-model="backendSearch.version" id="v031"><label for="v031">0.3.1</label>
 				</div>
 
 				<h3>Endpoints</h3>
 				<EndpointChooser :endpoints="allEndpoints" :calledOnChange="setSelectedEndpoints"></EndpointChooser>
 
 				<h3>Collections</h3>
-				<textarea v-model="specifiedCollections" placeholder="Specify collection identifiers, each on a new line"></textarea>
+				<textarea v-model="backendSearch.collections" placeholder="Specify collection identifiers, each on a new line"></textarea>
 
 				<h3>Processes</h3>
-				<textarea v-model="specifiedProcesses" placeholder="Specify process identifiers, each on a new line"></textarea>
+				<textarea v-model="backendSearch.processes" placeholder="Specify process identifiers, each on a new line"></textarea>
 
 				<h3>Process Graph</h3>
-				<textarea v-model="specifiedProcessGraph" placeholder="Paste an openEO process graph"></textarea>
+				<textarea v-model="backendSearch.processGraph" placeholder="Paste an openEO process graph"></textarea>
 
 				<h3>Actions</h3>
 				<button @click="queryBackends()">Submit</button>
@@ -121,13 +121,15 @@ export default {
 	},
 	data() {
 		return {
-			selectedVersion: 'any',
 			// sort alphabetically by endpoint path (i.e. delete HTTP method (always uppercased) for sorting)
 			allEndpoints: OPENEO_V0_3_1_ENDPOINTS.sort((e1, e2) => e1.replace(/[A-Z]/g, '') > e2.replace(/[A-Z]/g, '')),
-			selectedEndpoints: [],
-			specifiedCollections: '',
-			specifiedProcesses: '',
-			specifiedProcessGraph: '',
+			backendSearch: {
+				version: 'any',
+				endpoints: [],
+				collections: '',
+				processes: '',
+				processGraph: ''
+			},
 			matchedBackends: [],
 			collectionSearch: {
 				name: '',
@@ -143,7 +145,7 @@ export default {
 	},
 	methods: {
 		setSelectedEndpoints(input) {
-			this.selectedEndpoints = input;
+			this.backendSearch.endpoints = input;
 		},
 
 		setSpatialExtent(input) {
@@ -153,11 +155,11 @@ export default {
 
 		queryBackends() {
 			const params = {
-				version:             (this.selectedVersion == 'any' ? undefined : this.selectedVersion),
-				endpoints:      (this.selectedEndpoints.length == 0 ? undefined : this.selectedEndpoints),
-				collections: (this.specifiedCollections.length == 0 ? undefined : this.specifiedCollections.split("\n")),
-				processes:     (this.specifiedProcesses.length == 0 ? undefined : this.specifiedProcesses.split("\n")),
-				processGraph:     (this.specifiedProcessGraph == '' ? undefined : JSON.parse(this.specifiedProcessGraph))
+				version:            (this.backendSearch.version == 'any' ? undefined : this.backendSearch.version),
+				endpoints:     (this.backendSearch.endpoints.length == 0 ? undefined : this.backendSearch.endpoints),
+				collections: (this.backendSearch.collections.length == 0 ? undefined : this.backendSearch.collections.split("\n")),
+				processes:     (this.backendSearch.processes.length == 0 ? undefined : this.backendSearch.processes.split("\n")),
+				processGraph:     (this.backendSearch.processGraph == '' ? undefined : JSON.parse(this.backendSearch.processGraph))
 			}
 			axios.post('/backends/search', params)
 				.then(response => {
