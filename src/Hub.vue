@@ -7,38 +7,49 @@
 		<main>
 			
 			<section id="search">
-				<h2>Search for collections</h2>
+				<h2>Search for collections across all backends</h2>
 
 				<h3>Name</h3>
 				<input v-model="collectionSearch.name" />
+				<em>case-insensitive, regular expressions possible</em>
 
 				<h3>Title</h3>
 				<input v-model="collectionSearch.title" />
+				<em>case-insensitive, regular expression possible</em>
 
 				<h3>Description</h3>
 				<input v-model="collectionSearch.description" />
+				<em>case-insensitive, regular expression possible</em>
 
 				<h3>Extent</h3>
 				<h4>Spatial</h4>
+				<em>Specify a bounding box in decimal WGS84 coordinates (e.g. 12.345) or click on the map below.</em>
 				<BboxChooser :calledOnChange="setSpatialExtent"></BboxChooser>
 				<h4>Temporal</h4>
-				<input v-model="collectionSearch.extent.temporal[0]" />
-				<input v-model="collectionSearch.extent.temporal[1]" />
+				<em>From</em>
+				<input v-model="collectionSearch.extent.temporal[0]" placeholder="YYYY-MM-DDThh:mm:ssZ"/>
+				<em>until</em>
+				<input v-model="collectionSearch.extent.temporal[1]" placeholder="YYYY-MM-DDThh:mm:ssZ"/>
+				<em>(inclusive)</em>
+				<p><em>Use <a href="https://www.ietf.org/rfc/rfc3339">RFC 3339</a> date-times (format: YYYY-MM-DDThh:mm:ssZ)</em></p>
 
 				<h3>Actions</h3>
 				<button @click="queryCollections()">Submit</button>
 
 
-				<h2>Search for processes</h2>
+				<h2>Search for processes across all backends</h2>
 
 				<h3>Name</h3>
 				<input v-model="processSearch.name" />
+				<em>case-insensitive, regular expression possible</em>
 
 				<h3>Summary</h3>
 				<input v-model="processSearch.summary" />
+				<em>case-insensitive, regular expression possible</em>
 
 				<h3>Description</h3>
 				<input v-model="processSearch.description" />
+				<em>case-insensitive, regular expression possible</em>
 
 				<h3>Deprecation</h3>
 				<input type="checkbox" v-model="processSearch.excludeDeprecated" id="excludeDeprecated">
@@ -46,9 +57,9 @@
 				
 				<h3>Parameters</h3>
 				<h4>Names</h4>
-				<textarea v-model="processSearch.parameterNames" placeholder="Specify parameter names, each on a new line"></textarea>
+				<textarea v-model="processSearch.parameterNames" placeholder="Specify parameter names (exact matching, i.e. case-sensitive and no matching of subterms), each on a new line"></textarea>
 				<h4>Descriptions</h4>
-				<textarea v-model="processSearch.parameterDescriptions" placeholder="Specify parameter description search terms, each on a new line"></textarea>
+				<textarea v-model="processSearch.parameterDescriptions" placeholder="Specify parameter description search terms (case-insensitive, regular expression possible), each on a new line"></textarea>
 
 				<h3>Actions</h3>
 				<button @click="queryProcesses()">Submit</button>
@@ -56,7 +67,7 @@
 				
 				<h2>Search for backends</h2>
 
-				<h3>Version</h3>
+				<h3>openEO API Version</h3>
 				<div>
 					<input type="radio" value="any"   v-model="backendSearch.version" id="vany"><label for="vany">any</label>
 					<input type="radio" value="0.3.0" v-model="backendSearch.version" id="v030"><label for="v030">0.3.0</label>
@@ -65,24 +76,30 @@
 
 				<h3>Endpoints</h3>
 				<EndpointChooser :endpoints="allEndpoints" :calledOnChange="setSelectedEndpoints"></EndpointChooser>
+				<em>Tick all endpoints that the backend must support</em>
 
 				<h3>Collections</h3>
 				<textarea v-model="backendSearch.collections" placeholder="Specify collection identifiers, each on a new line"></textarea>
+				<em>Exact matching (i.e. case-sensitive and no matching of subterms)</em>
 
 				<h3>Processes</h3>
 				<textarea v-model="backendSearch.processes" placeholder="Specify process identifiers, each on a new line"></textarea>
+				<em>Exact matching (i.e. case-sensitive and no matching of subterms)</em>
 
 				<h3>Process Graph</h3>
 				<textarea v-model="backendSearch.processGraph" placeholder="Paste an openEO process graph"></textarea>
+				<em>A backend is considered to support a process graph if it offers all collections and processes used in that process graph. No further checks are carried out.</em>
 
 				<h3>Output formats</h3>
 				<textarea v-model="backendSearch.outputFormats" placeholder="Specify output formats, each on a new line"></textarea>
+				<em>Exact matching (i.e. case-sensitive and no matching of subterms)</em>
 
 				<h3>Service Types</h3>
 				<textarea v-model="backendSearch.serviceTypes" placeholder="Specify service types, each on a new line"></textarea>
+				<em>Exact matching (i.e. case-sensitive and no matching of subterms)</em>
 
 				<h3>Billing</h3>
-				<input type="checkbox" v-model="backendSearch.excludePaidOnly" id="vany"><label for="vany">Exclude backends without a free plan</label>
+				<input type="checkbox" v-model="backendSearch.excludePaidOnly" id="excludePaidOnly"><label for="excludePaidOnly">Exclude backends without a free plan</label>
 
 				<h3>Actions</h3>
 				<button @click="queryBackends()">Submit</button>
@@ -92,7 +109,7 @@
 				<h2>Results</h2>
 
 				<ol>
-					<li v-for="collection in matchedCollections" :key="collection.backend+'/'+collection.collection.name">
+					<li v-for="collection in matchedCollections" :key="collection.collection.backend+'/'+collection.collection.name">
 						{{collection.collection.name}}
 					</li>
 				</ol>
@@ -106,7 +123,7 @@
 				<em v-if="matchedBackends.length == 0">empty</em>
 				<output>
 					<ol>
-						<li v-for="backend in matchedBackends" :key="backend">
+						<li v-for="backend in matchedBackends" :key="backend.backend">
 							<h3>{{backend.backend}}</h3>
 							<dl>
 								<dt><h4>Version</h4></dt>
@@ -363,6 +380,10 @@ input[type='checkbox'] {
 	width: 100%;
 	height: 100px;
 	padding: 5px;
+}
+#search input + em,
+#search em + input {
+	margin-left: 5px;
 }
 
 /* results section */

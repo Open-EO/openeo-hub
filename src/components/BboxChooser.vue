@@ -1,9 +1,9 @@
 <template>
 	<div class="bboxchooser">
-		<input @change="returnState()" v-model="north" />
-		<input @change="returnState()" v-model="west" />
-		<input @change="returnState()" v-model="east" />
-		<input @change="returnState()" v-model="south" />
+		<input @change="returnState()" v-model="north" placeholder="North" />
+		<input @change="returnState()" v-model="west"  placeholder="West"/>
+		<input @change="returnState()" v-model="east"  placeholder="East"/>
+		<input @change="returnState()" v-model="south"  placeholder="South"/>
 		<l-map style="height:400px" :zoom="4" :center="[50,10]" @click="mapClickToBbox">
 			<l-tile-layer
 				url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
