@@ -197,7 +197,7 @@ server.post('/backends/search', async function(req, res, next) {
     if(req.body.collections) {
         var collectionCriteria = {
             "path":"/collections",
-            "$and": req.body.collections.map(c => ({"content.collections.name": c}))
+            "$and": req.body.collections.map(c => ({"content.collections.name": {$regex: c, $options: 'i'}}))
         };
         // get all backends that match the criteria that are validated against the '/collections' document
         var backendsWithCollections = await (await find(collectionCriteria)).toArray();
@@ -218,7 +218,7 @@ server.post('/backends/search', async function(req, res, next) {
     if(req.body.processes) {
         var processCriteria = {
             "path":"/processes",
-            "$and": req.body.processes.map(p => ({"content.processes.name": p}))
+            "$and": req.body.processes.map(p => ({"content.processes.name": {$regex: p, $options: 'i'}}))
         };
         // get all backends that match the criteria that are validated against the '/processes' document
         var backendsWithProcesses = await (await find(processCriteria)).toArray();
@@ -412,7 +412,7 @@ server.post('/processes/search', async function(req, res, next) {
 
     // PARAMETER NAMES
     if(req.body.parameterNames) {
-        req.body.parameterNames.forEach(p => {criteria['process.parameters.'+p] = {$exists: true}});
+        req.body.parameterNames.forEach(p => {criteria['process.parametersAsArray.k'] = {$regex: p, $options: 'i'}});
     }
 
     // PARAMETER DESCRIPTIONS

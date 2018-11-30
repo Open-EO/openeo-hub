@@ -57,7 +57,7 @@
 				
 				<h3>Parameters</h3>
 				<h4>Names</h4>
-				<textarea v-model="processSearch.parameterNames" placeholder="Specify parameter names (exact matching, i.e. case-sensitive and no matching of subterms), each on a new line"></textarea>
+				<textarea v-model="processSearch.parameterNames" placeholder="Specify parameter names (case-insensitive, regular expression possible), each on a new line"></textarea>
 				<h4>Descriptions</h4>
 				<textarea v-model="processSearch.parameterDescriptions" placeholder="Specify parameter description search terms (case-insensitive, regular expression possible), each on a new line"></textarea>
 
@@ -80,11 +80,11 @@
 
 				<h3>Collections</h3>
 				<textarea v-model="backendSearch.collections" placeholder="Specify collection identifiers, each on a new line"></textarea>
-				<em>Exact matching (i.e. case-sensitive and no matching of subterms)</em>
+				<em>(case-insensitive, regular expression possible)</em>
 
 				<h3>Processes</h3>
 				<textarea v-model="backendSearch.processes" placeholder="Specify process identifiers, each on a new line"></textarea>
-				<em>Exact matching (i.e. case-sensitive and no matching of subterms)</em>
+				<em>(case-insensitive, regular expression possible)</em>
 
 				<h3>Process Graph</h3>
 				<textarea v-model="backendSearch.processGraph" placeholder="Paste an openEO process graph"></textarea>
