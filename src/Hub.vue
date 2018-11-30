@@ -76,27 +76,27 @@
 
 				<h3>Endpoints</h3>
 				<EndpointChooser :endpoints="allEndpoints" :calledOnChange="setSelectedEndpoints"></EndpointChooser>
-				<em>Tick all endpoints that the backend must support</em>
+				<p><em>Tick all endpoints that the backend must support</em></p>
 
 				<h3>Collections</h3>
 				<textarea v-model="backendSearch.collections" placeholder="Specify collection identifiers, each on a new line"></textarea>
-				<em>(case-insensitive, regular expression possible)</em>
+				<p><em>(case-insensitive, regular expression possible)</em></p>
 
 				<h3>Processes</h3>
 				<textarea v-model="backendSearch.processes" placeholder="Specify process identifiers, each on a new line"></textarea>
-				<em>(case-insensitive, regular expression possible)</em>
+				<p><em>(case-insensitive, regular expression possible)</em></p>
 
 				<h3>Process Graph</h3>
 				<textarea v-model="backendSearch.processGraph" placeholder="Paste an openEO process graph"></textarea>
-				<em>A backend is considered to support a process graph if it offers all collections and processes used in that process graph. No further checks are carried out.</em>
+				<p><em>A backend is considered to support a process graph if it offers all collections and processes used in that process graph. No further checks are carried out.</em></p>
 
 				<h3>Output formats</h3>
 				<textarea v-model="backendSearch.outputFormats" placeholder="Specify output formats, each on a new line"></textarea>
-				<em>Exact matching (i.e. case-sensitive and no matching of subterms)</em>
+				<p><em>Exact matching (i.e. case-sensitive and no matching of subterms)</em></p>
 
 				<h3>Service Types</h3>
 				<textarea v-model="backendSearch.serviceTypes" placeholder="Specify service types, each on a new line"></textarea>
-				<em>Exact matching (i.e. case-sensitive and no matching of subterms)</em>
+				<p><em>Exact matching (i.e. case-sensitive and no matching of subterms)</em></p>
 
 				<h3>Billing</h3>
 				<input type="checkbox" v-model="backendSearch.excludePaidOnly" id="excludePaidOnly"><label for="excludePaidOnly">Exclude backends without a free plan</label>
@@ -317,17 +317,24 @@ ul, ol {
 }
 
 /* general layout */
-html, body, #app {
+html, body, #app, #container {
 	height: 100vh;
 }
 #container {
+	display: flex;
+	flex-direction: column;
+}
+header {
 	padding: 10px;
 }
 main {
 	display: flex;
+	overflow: hidden;
 }
 section {
 	flex: 1;
+	overflow-y: auto;
+	padding: 10px;
 }
 section:first-child {
 	margin-right: 10px;
@@ -336,7 +343,6 @@ section:last-child {
 	margin-left: 10px;
 }
 footer {
-	margin-top: 75px;
 	border-top: 1px dotted #cecbc8;
 	padding: 10px;
 	text-align: center;
@@ -371,19 +377,22 @@ input[type='checkbox'] {
 #endpointchooser {
 	/*column-count: 4;*/
 	height: 100px;
-	width: 100%;
+	width: 90%;
 	overflow-y: scroll;
 	padding: 5px;
 	border: 1px solid #cecbc8;
 }
 #search textarea {
-	width: 100%;
+	width: 90%;
 	height: 100px;
 	padding: 5px;
 }
 #search input + em,
 #search em + input {
 	margin-left: 5px;
+}
+#search p {
+	margin-top: 0;
 }
 
 /* results section */
