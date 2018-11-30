@@ -365,6 +365,69 @@ server.post('/collections/search', async function(req, res, next) {
     res.send(collectionsWithCriteria);
 });
 
+const GET_ALL_PROCESSES_PIPELINE = [
+    // basically like for collections
+    { $match: { path: '/processes' } },
+    { $addFields: { 'content.processes.backend': '$backend', 'content.processes.retrieved': '$retrieved' } },
+    { $project: { 'process': '$content.processes' } },
+    { $unwind: '$process' },
+    // convert parameters object to array because otherwise we can't search for parameter descriptions (MongoDB doesn't support wildcards for object keys)
+    { $addFields: { 'process.parametersAsArray' : { $objectToArray: '$process.parameters' }}}
+];
+
+// list processes
+server.get('/processes', function(req, res, next) {
+    aggregate(GET_ALL_PROCESSES_PIPELINE).then(async cursor => {
+        res.send(await getAllDocsFromCursor(cursor));
+    })
+    .catch(error => res.send(error));
+});
+
+// search processes via JSON document in POST body
+// supports all parameters, which are currently: name, summary, description, excludeDeprecated, parameterNames, parameterDescriptions
+server.post('/processes/search', async function(req, res, next) {
+    // INIT
+    var pipeline = Array.from(GET_ALL_PROCESSES_PIPELINE);  // copy the array so we don't overwrite the constant
+    var criteria = {};
+    
+    // NAME
+    if(req.body.name) {
+        criteria['process.name'] = {$regex: req.body.name, $options: 'i'};
+    }
+
+    // SUMMARY
+    if(req.body.summary) {
+        criteria['process.summary'] = {$regex: req.body.summary, $options: 'i'};
+    }
+
+    // DESCRIPTION
+    if(req.body.description) {
+        criteria['process.description'] = {$regex: req.body.description, $options: 'i'};
+    }
+
+    // EXCLUDE DEPRECATED
+    if(req.body.excludeDeprecated) {
+        criteria['process.deprecated'] = {$exists: false};
+    }
+
+    // PARAMETER NAMES
+    if(req.body.parameterNames) {
+        req.body.parameterNames.forEach(p => {criteria['process.parameters.'+p] = {$exists: true}});
+    }
+
+    // PARAMETER DESCRIPTIONS
+    if(req.body.parameterDescriptions) {
+        req.body.parameterDescriptions.forEach(p => {criteria['process.parametersAsArray.v.description'] = {$regex: p, $options: 'i'}});
+    }
+
+    // add the match stage to the process pipeline
+    pipeline.push({$match: criteria});
+    // execute pipeline
+    var processesWithCriteria = await (await aggregate(pipeline)).toArray();
+    // send end result
+    res.send(processesWithCriteria);
+});
+
 // serve website (UI)
 server.get('/*', restify.plugins.serveStatic({
     directory: './dist',
