@@ -7,6 +7,15 @@
 		<main>
 			
 			<section id="search">
+				<nav>
+					<ul>
+						<li @click="searchPanel = 'backends'" :class="{active: searchPanel == 'backends'}">Backends</li>
+						<li @click="searchPanel = 'collections'" :class="{active: searchPanel == 'collections'}">Collections</li>
+						<li @click="searchPanel = 'processes'" :class="{active: searchPanel == 'processes'}">Processes</li>
+					</ul>
+				</nav>
+
+				<div class="panelContainer" v-show="searchPanel == 'collections'">
 				<h2>Search for collections across all backends</h2>
 
 				<h3>Name</h3>
@@ -35,8 +44,10 @@
 
 				<h3>Actions</h3>
 				<button @click="queryCollections()">Submit</button>
+				</div>
 
 
+				<div class="panelContainer" v-show="searchPanel == 'processes'">
 				<h2>Search for processes across all backends</h2>
 
 				<h3>Name</h3>
@@ -63,8 +74,10 @@
 
 				<h3>Actions</h3>
 				<button @click="queryProcesses()">Submit</button>
+				</div>
 
 				
+				<div class="panelContainer" v-show="searchPanel == 'backends'">
 				<h2>Search for backends</h2>
 
 				<h3>openEO API Version</h3>
@@ -103,23 +116,40 @@
 
 				<h3>Actions</h3>
 				<button @click="queryBackends()">Submit</button>
+				</div>
 			</section>
 
 			<section id="results">
-				<h2>Results</h2>
+				<nav>
+					<ul>
+						<li @click="resultPanel = 'backends'" :class="{active: resultPanel == 'backends'}">Backends</li>
+						<li @click="resultPanel = 'collections'" :class="{active: resultPanel == 'collections'}">Collections</li>
+						<li @click="resultPanel = 'processes'" :class="{active: resultPanel == 'processes'}">Processes</li>
+					</ul>
+				</nav>
 
+				<div class="panelContainer" v-show="resultPanel == 'collections'">
+				<h2>Results from collection search</h2>
+				<em v-if="matchedCollections.length == 0">empty</em>
 				<ol>
 					<li v-for="collection in matchedCollections" :key="collection.collection.backend+'/'+collection.collection.name">
 						{{collection.collection.name}}
 					</li>
 				</ol>
+				</div>
 
+				<div class="panelContainer" v-show="resultPanel == 'processes'">
+				<h2>Results from process search</h2>
+				<em v-if="matchedProcesses.length == 0">empty</em>
 				<ol>
 					<li v-for="process in matchedProcesses" :key="process.process.backend+'/'+process.process.name">
 						{{process.process.backend}} &ndash; {{process.process.name}}
 					</li>
 				</ol>
+				</div>
 
+				<div class="panelContainer" v-show="resultPanel == 'backends'">
+				<h2>Results from backend search</h2>
 				<em v-if="matchedBackends.length == 0">empty</em>
 				<output>
 					<ol>
@@ -149,6 +179,7 @@
 						</li>
 					</ol>
 				</output>
+				</div>
 			</section>
 
 		</main>
@@ -180,6 +211,8 @@ export default {
 		return {
 			// sort alphabetically by endpoint path (i.e. delete HTTP method (always uppercased) for sorting)
 			allEndpoints: OPENEO_V0_3_1_ENDPOINTS.sort((e1, e2) => e1.replace(/[A-Z]/g, '') > e2.replace(/[A-Z]/g, '')),
+			searchPanel: 'backends',
+			resultPanel: 'backends',
 			backendSearch: {
 				version: 'any',
 				endpoints: [],
@@ -236,6 +269,7 @@ export default {
 			axios.post('/backends/search', params)
 				.then(response => {
 					this.matchedBackends = response.data;
+					this.resultPanel = 'backends';
 				})
 				.catch(error => {
 					console.log(error);
@@ -267,6 +301,7 @@ export default {
 			axios.post('/collections/search', params)
 				.then(response => {
 					this.matchedCollections = response.data;
+					this.resultPanel = 'collections';
 				})
 				.catch(error => {
 					console.log(error);
@@ -291,6 +326,7 @@ export default {
 			axios.post('/processes/search', params)
 				.then(response => {
 					this.matchedProcesses = response.data;
+					this.resultPanel = 'processes';
 				})
 				.catch(error => {
 					console.log(error);
@@ -333,14 +369,19 @@ main {
 }
 section {
 	flex: 1;
-	overflow-y: auto;
-	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 }
 section:first-child {
 	margin-right: 10px;
 }
 section:last-child {
 	margin-left: 10px;
+}
+div.panelContainer {
+	overflow: auto;
+	padding: 10px;
 }
 footer {
 	border-top: 1px dotted #cecbc8;
@@ -349,6 +390,9 @@ footer {
 }
 
 /* own standards */
+h2 {
+	margin-top: 10px;
+}
 a {
 	color: #2F649A;
 	text-decoration: none;
@@ -369,8 +413,33 @@ input[type='checkbox'] {
 	vertical-align: bottom;
 }
 
+/* tab-style navigation */
+nav {
+	border-bottom: 1px solid black;
+	padding: 5px;
+	padding-left: 20px;
+}
+nav ul {
+	margin: 0;
+	padding: 0;
+}
+nav li {
+	display: inline;
+	list-style: none;
+	font-size: 120%;
+	font-weight: bold;
+	border: 1px solid black;
+	padding: 5px 10px;
+	margin-left: -1px;
+	cursor: pointer;
+	background-color: #e8e5e2;
+}
+nav li.active {
+	border-bottom: 1px solid white;
+	background-color: white;
+}
+
 /* search section */
-#search h2,
 #search h3 {
 	margin-top: 10px;
 }
