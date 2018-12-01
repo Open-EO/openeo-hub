@@ -209,7 +209,7 @@ server.post('/backends/search', async function(req, res, next) {
                 .find(el => el.backend == b.backend)
                 .content
                 .collections
-                .filter(c => req.body.collections.indexOf(c.name) != -1)
+                .filter(c => req.body.collections.some(s => c.name.match(new RegExp(s, 'i')) != null))
             })
         );
     }
@@ -230,7 +230,7 @@ server.post('/backends/search', async function(req, res, next) {
                 .find(el => el.backend == b.backend)
                 .content
                 .processes
-                .filter(p => req.body.processes.indexOf(p.name) != -1)
+                .filter(p => req.body.processes.some(s => p.name.match(new RegExp(s, 'i')) != null))
             })
         );
     }

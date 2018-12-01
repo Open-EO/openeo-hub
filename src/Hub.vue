@@ -15,7 +15,7 @@
 					</ul>
 				</nav>
 
-				<div class="panelContainer" v-show="searchPanel == 'collections'">
+				<div class="panelContainer" :class="{hidden: searchPanel != 'collections'} /* Don't use `v-show` for div that contains a Leaflet map - it would cause the map to be initiated incorrectly. Setting `height:0` (instead of v-show's `display:none`) solves the problem.*/">
 				<h2>Search for collections across all backends</h2>
 
 				<h3>Name</h3>
@@ -173,7 +173,7 @@
 								
 								<dt v-if="backend.processes"><h4>Processes</h4></dt>
 								<dd v-if="backend.processes">
-									<ProcessPanel v-for="process in backend.processes" :key="process.name" :process="process"></ProcessPanel>
+									<ProcessPanel v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)"></ProcessPanel>
 								</dd>
 							</dl>
 						</li>
@@ -193,7 +193,7 @@
 <script>
 import Vue from 'vue';
 import axios from 'axios';
-import { ProcessPanel } from '@openeo/processes-docgen';
+import { ProcessPanel, utils as DocGenUtils } from '@openeo/processes-docgen';
 import { OPENEO_V0_3_1_ENDPOINTS } from './const.js'
 import EndpointChooser from './components/EndpointChooser.vue';
 import BboxChooser from './components/BboxChooser.vue';
@@ -251,8 +251,11 @@ export default {
 		},
 
 		setSpatialExtent(input) {
-			console.log('called');
 			this.collectionSearch.extent.spatial = input;
+		},
+
+		convertProcessToLatestSpec(proc) {
+			return DocGenUtils.convertProcessToLatestSpec(proc);
 		},
 
 		queryBackends() {
@@ -382,6 +385,10 @@ section:last-child {
 div.panelContainer {
 	overflow: auto;
 	padding: 10px;
+}
+div.panelContainer.hidden {
+	height: 0;
+	padding: 0;
 }
 footer {
 	border-top: 1px dotted #cecbc8;
