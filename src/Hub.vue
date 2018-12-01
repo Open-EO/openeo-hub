@@ -16,106 +16,15 @@
 				</nav>
 
 				<div class="panelContainer" :class="{hidden: searchPanel != 'collections'} /* Don't use `v-show` for div that contains a Leaflet map - it would cause the map to be initiated incorrectly. Setting `height:0` (instead of v-show's `display:none`) solves the problem.*/">
-				<h2>Search for collections across all backends</h2>
-
-				<h3>Name</h3>
-				<input v-model="collectionSearch.name" />
-				<em>case-insensitive, regular expressions possible</em>
-
-				<h3>Title</h3>
-				<input v-model="collectionSearch.title" />
-				<em>case-insensitive, regular expression possible</em>
-
-				<h3>Description</h3>
-				<input v-model="collectionSearch.description" />
-				<em>case-insensitive, regular expression possible</em>
-
-				<h3>Extent</h3>
-				<h4>Spatial</h4>
-				<em>Specify a bounding box in decimal WGS84 coordinates (e.g. 12.345) or click on the map below.</em>
-				<BboxChooser :calledOnChange="setSpatialExtent"></BboxChooser>
-				<h4>Temporal</h4>
-				<em>From</em>
-				<input v-model="collectionSearch.extent.temporal[0]" placeholder="YYYY-MM-DDThh:mm:ssZ"/>
-				<em>until</em>
-				<input v-model="collectionSearch.extent.temporal[1]" placeholder="YYYY-MM-DDThh:mm:ssZ"/>
-				<em>(inclusive)</em>
-				<p><em>Use <a href="https://www.ietf.org/rfc/rfc3339">RFC 3339</a> date-times (format: YYYY-MM-DDThh:mm:ssZ)</em></p>
-
-				<h3>Actions</h3>
-				<button @click="queryCollections()">Submit</button>
+					<CollectionSearch @search-collections="queryCollections"></CollectionSearch>
 				</div>
-
 
 				<div class="panelContainer" v-show="searchPanel == 'processes'">
-				<h2>Search for processes across all backends</h2>
-
-				<h3>Name</h3>
-				<input v-model="processSearch.name" />
-				<em>case-insensitive, regular expression possible</em>
-
-				<h3>Summary</h3>
-				<input v-model="processSearch.summary" />
-				<em>case-insensitive, regular expression possible</em>
-
-				<h3>Description</h3>
-				<input v-model="processSearch.description" />
-				<em>case-insensitive, regular expression possible</em>
-
-				<h3>Deprecation</h3>
-				<input type="checkbox" v-model="processSearch.excludeDeprecated" id="excludeDeprecated">
-				<label for="excludeDeprecated">Exclude processes that are deprecated</label>
-				
-				<h3>Parameters</h3>
-				<h4>Names</h4>
-				<textarea v-model="processSearch.parameterNames" placeholder="Specify parameter names (case-insensitive, regular expression possible), each on a new line"></textarea>
-				<h4>Descriptions</h4>
-				<textarea v-model="processSearch.parameterDescriptions" placeholder="Specify parameter description search terms (case-insensitive, regular expression possible), each on a new line"></textarea>
-
-				<h3>Actions</h3>
-				<button @click="queryProcesses()">Submit</button>
+					<ProcessSearch @search-processes="queryProcesses"></ProcessSearch>
 				</div>
-
 				
 				<div class="panelContainer" v-show="searchPanel == 'backends'">
-				<h2>Search for backends</h2>
-
-				<h3>openEO API Version</h3>
-				<div>
-					<input type="radio" value="any"   v-model="backendSearch.version" id="vany"><label for="vany">any</label>
-					<input type="radio" value="0.3.0" v-model="backendSearch.version" id="v030"><label for="v030">0.3.0</label>
-					<input type="radio" value="0.3.1" v-model="backendSearch.version" id="v031"><label for="v031">0.3.1</label>
-				</div>
-
-				<h3>Endpoints</h3>
-				<EndpointChooser :endpoints="allEndpoints" :calledOnChange="setSelectedEndpoints"></EndpointChooser>
-				<p><em>Tick all endpoints that the backend must support</em></p>
-
-				<h3>Collections</h3>
-				<textarea v-model="backendSearch.collections" placeholder="Specify collection identifiers, each on a new line"></textarea>
-				<p><em>(case-insensitive, regular expression possible)</em></p>
-
-				<h3>Processes</h3>
-				<textarea v-model="backendSearch.processes" placeholder="Specify process identifiers, each on a new line"></textarea>
-				<p><em>(case-insensitive, regular expression possible)</em></p>
-
-				<h3>Process Graph</h3>
-				<textarea v-model="backendSearch.processGraph" placeholder="Paste an openEO process graph"></textarea>
-				<p><em>A backend is considered to support a process graph if it offers all collections and processes used in that process graph. No further checks are carried out.</em></p>
-
-				<h3>Output formats</h3>
-				<textarea v-model="backendSearch.outputFormats" placeholder="Specify output formats, each on a new line"></textarea>
-				<p><em>Exact matching (i.e. case-sensitive and no matching of subterms)</em></p>
-
-				<h3>Service Types</h3>
-				<textarea v-model="backendSearch.serviceTypes" placeholder="Specify service types, each on a new line"></textarea>
-				<p><em>Exact matching (i.e. case-sensitive and no matching of subterms)</em></p>
-
-				<h3>Billing</h3>
-				<input type="checkbox" v-model="backendSearch.excludePaidOnly" id="excludePaidOnly"><label for="excludePaidOnly">Exclude backends without a free plan</label>
-
-				<h3>Actions</h3>
-				<button @click="queryBackends()">Submit</button>
+					<BackendSearch @search-backends="queryBackends"></BackendSearch>
 				</div>
 			</section>
 
@@ -129,56 +38,15 @@
 				</nav>
 
 				<div class="panelContainer" v-show="resultPanel == 'collections'">
-				<h2>Results from collection search</h2>
-				<em v-if="matchedCollections.length == 0">empty</em>
-				<ol>
-					<li v-for="collection in matchedCollections" :key="collection.collection.backend+'/'+collection.collection.name">
-						{{collection.collection.name}}
-					</li>
-				</ol>
+					<CollectionResults :matchedCollections="matchedCollections"></CollectionResults>
 				</div>
 
 				<div class="panelContainer" v-show="resultPanel == 'processes'">
-				<h2>Results from process search</h2>
-				<em v-if="matchedProcesses.length == 0">empty</em>
-				<ol>
-					<li v-for="process in matchedProcesses" :key="process.process.backend+'/'+process.process.name">
-						{{process.process.backend}} &ndash; {{process.process.name}}
-					</li>
-				</ol>
+					<ProcessResults :matchedProcesses="matchedProcesses"></ProcessResults>
 				</div>
 
 				<div class="panelContainer" v-show="resultPanel == 'backends'">
-				<h2>Results from backend search</h2>
-				<em v-if="matchedBackends.length == 0">empty</em>
-				<output>
-					<ol>
-						<li v-for="backend in matchedBackends" :key="backend.backend">
-							<h3>{{backend.backend}}</h3>
-							<dl>
-								<dt><h4>Version</h4></dt>
-								<dd>{{backend.version}}</dd>
-
-								<dt v-if="backend.endpoints"><h4>Endpoints</h4></dt>
-								<dd v-if="backend.endpoints">
-									<ul>
-										<li v-for="endpoint in backend.endpoints" :key="endpoint">{{endpoint}}</li>
-									</ul>
-								</dd>
-
-								<dt v-if="backend.collections"><h4>Collections</h4></dt>
-								<dd v-if="backend.collections">
-									<CollectionPanel v-for="collection in backend.collections" :key="collection.name" :collection="collection"></CollectionPanel>
-								</dd>
-								
-								<dt v-if="backend.processes"><h4>Processes</h4></dt>
-								<dd v-if="backend.processes">
-									<ProcessPanel v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)"></ProcessPanel>
-								</dd>
-							</dl>
-						</li>
-					</ol>
-				</output>
+					<BackendResults :matchedBackends="matchedBackends"></BackendResults>
 				</div>
 			</section>
 
@@ -193,82 +61,34 @@
 <script>
 import Vue from 'vue';
 import axios from 'axios';
-import { ProcessPanel, utils as DocGenUtils } from '@openeo/processes-docgen';
-import { OPENEO_V0_3_1_ENDPOINTS } from './const.js'
-import EndpointChooser from './components/EndpointChooser.vue';
-import BboxChooser from './components/BboxChooser.vue';
-import CollectionPanel from './components/CollectionPanel.vue';
+import BackendSearch from './components/BackendSearch.vue';
+import BackendResults from './components/BackendResults.vue';
+import CollectionSearch from './components/CollectionSearch.vue';
+import CollectionResults from './components/CollectionResults.vue';
+import ProcessSearch from './components/ProcessSearch.vue';
+import ProcessResults from './components/ProcessResults.vue';
 
 export default {
 	name: 'openeo-hub',
 	components: {
-		EndpointChooser,
-		BboxChooser,
-		CollectionPanel,
-		ProcessPanel
+		BackendSearch,
+		BackendResults,
+		CollectionSearch,
+		CollectionResults,
+		ProcessSearch,
+		ProcessResults
 	},
 	data() {
 		return {
-			// sort alphabetically by endpoint path (i.e. delete HTTP method (always uppercased) for sorting)
-			allEndpoints: OPENEO_V0_3_1_ENDPOINTS.sort((e1, e2) => e1.replace(/[A-Z]/g, '') > e2.replace(/[A-Z]/g, '')),
 			searchPanel: 'backends',
 			resultPanel: 'backends',
-			backendSearch: {
-				version: 'any',
-				endpoints: [],
-				collections: '',
-				processes: '',
-				processGraph: '',
-				outputFormats: '',
-				serviceTypes: '',
-				excludePaidOnly: false
-			},
 			matchedBackends: [],
-			collectionSearch: {
-				name: '',
-				title: '',
-				description: '',
-				extent: {
-					spatial: ['', '', '', ''],
-					temporal: ['', '']
-				}
-			},
 			matchedCollections: [],
-			processSearch: {
-				name: '',
-				summary: '',
-				description: '',
-				excludeDeprecated: true,
-				parameterNames: '',
-				parameterDescriptions: ''
-			},
 			matchedProcesses: []
 		};
 	},
 	methods: {
-		setSelectedEndpoints(input) {
-			this.backendSearch.endpoints = input;
-		},
-
-		setSpatialExtent(input) {
-			this.collectionSearch.extent.spatial = input;
-		},
-
-		convertProcessToLatestSpec(proc) {
-			return DocGenUtils.convertProcessToLatestSpec(proc);
-		},
-
-		queryBackends() {
-			const params = {
-				version:          (this.backendSearch.version == 'any' ? undefined : this.backendSearch.version),
-				endpoints:  (this.backendSearch.endpoints.length == 0  ? undefined : this.backendSearch.endpoints),
-				collections:     (this.backendSearch.collections == '' ? undefined : this.backendSearch.collections.split("\n")),
-				processes:         (this.backendSearch.processes == '' ? undefined : this.backendSearch.processes.split("\n")),
-				processGraph:   (this.backendSearch.processGraph == '' ? undefined : JSON.parse(this.backendSearch.processGraph)),
-				outputFormats: (this.backendSearch.outputFormats == '' ? undefined : this.backendSearch.outputFormats.split("\n")),
-				serviceTypes:   (this.backendSearch.serviceTypes == '' ? undefined : this.backendSearch.serviceTypes.split("\n")),
-				excludePaidOnly:  (!this.backendSearch.excludePaidOnly ? undefined : true)
-			}
+		queryBackends(params) {
 			axios.post('/backends/search', params)
 				.then(response => {
 					this.matchedBackends = response.data;
@@ -279,28 +99,7 @@ export default {
 				});
 		},
 
-		queryCollections() {
-			var params = {};
-			
-			// Build `params` object (can't use it directly because empty fields must be removed)
-			Object.keys(this.collectionSearch).forEach(key => {
-				if(this.collectionSearch[key] != '' && typeof this.collectionSearch[key] != 'object') {
-					params[key] = this.collectionSearch[key];
-				}
-			});
-			if(this.collectionSearch.extent.spatial[0] != '') {
-				params.extent = {};
-				params.extent.spatial = [];
-				for(var i=0; i<=3; i++) {
-					params.extent.spatial.push(parseFloat(this.collectionSearch.extent.spatial[i]));
-				}
-			}
-			if(this.collectionSearch.extent.temporal[0] != '') {
-				params.extent = params.extent || {};
-				params.extent.temporal = [this.collectionSearch.extent.temporal[0], this.collectionSearch.extent.temporal[1]];
-			}
-
-			// actual query
+		queryCollections(params) {
 			axios.post('/collections/search', params)
 				.then(response => {
 					this.matchedCollections = response.data;
@@ -311,21 +110,7 @@ export default {
 				});
 		},
 
-		queryProcesses() {
-			var params = {};
-			
-			// Build `params` object (can't use it directly because empty fields must be removed)
-			Object.keys(this.processSearch).forEach(key => {
-				if(this.processSearch[key] != '' || this.processSearch[key] != false) {
-					if(key.indexOf('parameter') == 0) {
-						params[key] = this.processSearch[key].split("\n");
-					} else {
-						params[key] = this.processSearch[key];
-					}
-				}
-			});
-
-			// actual query
+		queryProcesses(params) {
 			axios.post('/processes/search', params)
 				.then(response => {
 					this.matchedProcesses = response.data;
