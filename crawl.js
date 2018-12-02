@@ -1,7 +1,7 @@
 const config = require('./config.json');
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
-const request = require('request');
+const axios = require('axios');
 
 function saveToDb(collection, backend, path, data) {
     collection.insertOne({
@@ -22,15 +22,14 @@ MongoClient.connect(config.dbUrl, function(err, client) {
 
     config.backends.forEach(backend => {
         endpoints.forEach(endpoint => {
-            request(backend+endpoint, function(err, response, json) {
-                const data = JSON.parse(json);
-                saveToDb(collection, backend, endpoint, data);
+            axios(backend+endpoint).then(response => {
+                saveToDb(collection, backend, endpoint, response.data);
                 
                 // fetch the collection details
                 if(endpoint == '/collections') {
-                    data.collections.forEach((coll) => {
-                        request(backend+'/collections/'+coll.name, function(err, response, json) {
-                            saveToDb(collection, backend, '/collections/'+coll.name, JSON.parse(json));     
+                    response.data.collections.forEach((coll) => {
+                        axios(backend+'/collections/'+coll.name).then(response => {
+                            saveToDb(collection, backend, '/collections/'+coll.name, response.data);
                         });
                     });    
                 }
