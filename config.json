@@ -1,0 +1,8 @@
+{
+    "dbUrl": "mongodb://localhost:27017",
+    "dbName": "openeohub",
+    "backends": [
+        "http://earthengine.openeo.org:8080/v0.3",
+        "http://localhost:8000"
+    ]
+}

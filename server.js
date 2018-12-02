@@ -6,12 +6,10 @@ server.use(restify.plugins.bodyParser({ mapParams: false }));
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
-const dbUrl = 'mongodb://localhost:27017';
-const dbName = 'openeohub';
 
 var request = require('request');
 
-const backends = ['http://giv-openeo.uni-muenster.de:8080/v0.3', 'http://localhost:8000'];
+const config = require('./config.json');
 const endpoints = ['/', '/collections', '/processes', '/output_formats', '/service_types'];
 
 function saveToDb(collection, backend, path, data) {
@@ -24,8 +22,8 @@ function saveToDb(collection, backend, path, data) {
 }
 
 function getCollection() {
-    return MongoClient.connect(dbUrl, { useNewUrlParser: true }).then(client => {
-        return client.db(dbName).collection('backends');
+    return MongoClient.connect(config.dbUrl, { useNewUrlParser: true }).then(client => {
+        return client.db(config.dbName).collection('backends');
     });
 }
 
@@ -49,14 +47,14 @@ async function getAllDocsFromCursor(cursor, mappingCallback = undefined) {
 
 // trigger crawling
 server.get('/crawl', function(req, res, next) {
-    MongoClient.connect(dbUrl, function(err, client) {
+    MongoClient.connect(config.dbUrl, function(err, client) {
         assert.equal(null, err);
         console.log('Connected successfully to server');
       
-        const db = client.db(dbName);
+        const db = client.db(config.dbName);
         const collection = db.collection('backends');
 
-        backends.forEach(backend => {
+        config.backends.forEach(backend => {
             endpoints.forEach(endpoint => {
                 request(backend+endpoint, function(err, response, json) {
                     const data = JSON.parse(json);
@@ -81,7 +79,7 @@ server.get('/crawl', function(req, res, next) {
 
 // list backends
 server.get('/backends', function(req, res, next) {
-    res.send(backends);
+    res.send(config.backends);
     return next();
 });
 
