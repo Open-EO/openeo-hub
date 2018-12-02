@@ -5,21 +5,8 @@ server.use(restify.plugins.queryParser({ mapParams: false }));
 server.use(restify.plugins.bodyParser({ mapParams: false }));
 
 const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
-
-var request = require('request');
 
 const config = require('./config.json');
-const endpoints = ['/', '/collections', '/processes', '/output_formats', '/service_types'];
-
-function saveToDb(collection, backend, path, data) {
-    collection.insertOne({
-        backend: backend,
-        path: path,
-        retrieved: new Date().toJSON(),
-        content: data
-    });
-}
 
 function getCollection() {
     return MongoClient.connect(config.dbUrl, { useNewUrlParser: true }).then(client => {
@@ -44,38 +31,6 @@ async function getAllDocsFromCursor(cursor, mappingCallback = undefined) {
     await cursor.map(mappingCallback || (x => x)).forEach(x => list.push(x));
     return list;
 }
-
-// trigger crawling
-server.get('/crawl', function(req, res, next) {
-    MongoClient.connect(config.dbUrl, function(err, client) {
-        assert.equal(null, err);
-        console.log('Connected successfully to server');
-      
-        const db = client.db(config.dbName);
-        const collection = db.collection('backends');
-
-        config.backends.forEach(backend => {
-            endpoints.forEach(endpoint => {
-                request(backend+endpoint, function(err, response, json) {
-                    const data = JSON.parse(json);
-                    saveToDb(collection, backend, endpoint, data);
-                    
-                    // fetch the collection details
-                    if(endpoint == '/collections') {
-                        data.collections.forEach((coll) => {
-                            request(backend+'/collections/'+coll.name, function(err, response, json) {
-                                saveToDb(collection, backend, '/collections/'+coll.name, JSON.parse(json));     
-                            });
-                        });    
-                    }
-                });
-            });
-        });
-        res.send('done');
-    });
-    
-    return next();
-});
 
 // list backends
 server.get('/backends', function(req, res, next) {

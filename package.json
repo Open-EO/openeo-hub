@@ -17,6 +17,7 @@
     "url": "https://github.com/Open-EO/openeo-hub.git"
   },
   "scripts": {
+    "crawl": "node crawl.js",
     "start:backend": "node server.js",
     "start:frontend": "vue-cli-service serve",
     "start": "vue-cli-service build && node server.js",
