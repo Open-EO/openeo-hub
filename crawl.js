@@ -2,39 +2,86 @@ const config = require('./config.json');
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const axios = require('axios');
+const OpenEO = require('@openeo/js-client').OpenEO;
 
-function saveToDb(collection, backend, path, data) {
-    collection.insertOne({
-        backend: backend,
-        path: path,
-        retrieved: new Date().toJSON(),
-        content: data
-    });
-}
+const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true } );
+const openeo = new OpenEO();
 
-MongoClient.connect(config.dbUrl, function(err, client) {
+console.log('Connecting to database server...');
+mongo.connect(async (err, client) => {
     assert.equal(null, err);
-    console.log('Connected successfully to server');
-  
     const db = client.db(config.dbName);
     const collection = db.collection('backends');
-    const endpoints = ['/', '/collections', '/processes', '/output_formats', '/service_types'];
+    console.log('Connected to database server.');
+    console.log('');
 
-    config.backends.forEach(backend => {
-        endpoints.forEach(endpoint => {
-            axios(backend+endpoint).then(response => {
-                saveToDb(collection, backend, endpoint, response.data);
-                
-                // fetch the collection details
-                if(endpoint == '/collections') {
-                    response.data.collections.forEach((coll) => {
-                        axios(backend+'/collections/'+coll.name).then(response => {
-                            saveToDb(collection, backend, '/collections/'+coll.name, response.data);
-                        });
-                    });    
-                }
-            });
+    const endpoints = {
+        capabilities: '/',
+        listCollections: '/collections',
+        listProcesses: '/processes',
+        listFileTypes: '/output_formats',
+        listServiceTypes: '/service_types'
+    };
+
+    var promises = [];
+
+    // use a for-loop instead of forEach because forEach wouldn't `await` the result of the callback and thus mess up the order
+    for(var i in config.backends) {
+        // set shorthand
+        const backend = config.backends[i];
+
+        console.log('Gathering endpoint URLs for ' + backend + ' ...');
+
+        const con = await openeo.connect(backend);
+        const caps = await con.capabilities();
+        var paths = [];
+
+        // add all standard endpoints that are supported
+        for (var method in endpoints) {
+            if(caps.hasFeature(method)) {
+                paths.push(endpoints[method]);
+            }
+        }
+
+        // if `/collections/{name}` is supported: add the individual collections too
+        if(caps.hasFeature('listCollections') && caps.hasFeature('describeCollection')) {
+            const collections = await con.listCollections();
+            paths = paths.concat(collections.collections.map(c => '/collections/' + (c.name || c.id)));
+        }
+
+        console.log('Starting crawling of ' + backend + ' ...');
+
+        // Request them all
+        paths.forEach(path => {
+            promises.push(
+                axios(backend+path)
+                .then(response => {
+                    // save to database
+                    collection.insertOne({
+                        backend: backend,
+                        path: path,
+                        retrieved: new Date().toJSON(),
+                        content: response.data
+                    });
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+            );
         });
-    });
-    console.log('done');
+    }
+
+    // once all requests have finished
+    Promise.all(promises)
+    .then(() => {
+        console.log('');
+        console.log('Finished crawling of all backends.');
+        console.log('');
+        console.log('Closing database connection...');
+        mongo.close();
+        console.log('Closed database connection.')
+        console.log('');
+        console.log('DONE!');
+    })
+    .catch(error => console.log(error));
 });

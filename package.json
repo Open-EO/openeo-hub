@@ -24,6 +24,7 @@
     "start:dev": "vue-cli-service build --mode development && node server.js"
   },
   "dependencies": {
+    "@openeo/js-client": "0.3.0",
     "@openeo/processes-docgen": "^0.2.2",
     "axios": "^0.18.0",
     "mongodb": "^3.1.10",
