@@ -1,10 +1,14 @@
 <template>
 	<div class="collectionPanel">
 		<a class="anchor" :name="collection.name"></a><!-- ToDo: Replace name with id -->
-		<h2>{{ collection.name }}</h2>
+		<h2>{{collection.name}}</h2>
 
 		<div class="summary" v-if="collection.title">
-            {{ collection.title }}
+            {{collection.title}}
+		</div>
+
+		<div class="backendname">
+			<em>{{collection.backend}}</em>
 		</div>
 
 		<div class="description" v-if="collection.description">
@@ -28,6 +32,10 @@
 			<LinkList :links="collection.links"></LinkList>
 		</div>
 
+		<div class="retrieved">
+			<em>This data was retrieved from the backend server at {{collection.retrieved}}.</em>
+		</div>
+			
 	</div>
 </template>
 
@@ -43,7 +51,7 @@ export default {
     },
     methods: {
         getNonTrivialMetadataKeys(collection) {
-            return Object.keys(collection).filter(k => ['name', 'title', 'description', 'links'].indexOf(k) == -1)
+            return Object.keys(collection).filter(k => ['name', 'title', 'description', 'links', 'backend', 'retrieved'].indexOf(k) == -1)
         }
     }
 }

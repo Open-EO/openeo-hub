@@ -1,7 +1,7 @@
 <template>
     <div>
-        <em v-if="matchedBackends.length == 0">empty</em>
         <h2>Results from backend search ({{matchedBackends.length}})</h2>
+        <em v-if="matchedBackends.length == 0" class="emptyNotice">empty</em>
         <output>
             <ol>
                 <li v-for="backend in matchedBackends" :key="backend.backend">
@@ -27,6 +27,9 @@
                             <ProcessPanel v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)"></ProcessPanel>
                         </dd>
                     </dl>
+                    <div class="retrieved">
+                        <em>This data was retrieved from the backend server at {{backend.retrieved}}.</em>
+                    </div>
                 </li>
             </ol>
         </output>

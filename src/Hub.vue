@@ -270,7 +270,7 @@ nav li.active {
 #results h5 {
 	font-weight: normal;
 }
-#results em {
+#results .emptyNotice {
 	margin-left: 20px;
 }
 #results output > ol > li { /* with "direct child" selectors so that it doesn't affect `li`s of other lists further down */
@@ -283,8 +283,7 @@ nav li.active {
 	padding-left: 15px;
 }
 #results .processPanel {
-	margin-top: 0;
-	margin-bottom: 0;
+	margin: 0;
 }
 #results .processPanel h2,
 #results .processPanel h3,
@@ -292,5 +291,21 @@ nav li.active {
 #results .collectionPanel h3 {
 	font-size: 100%;
 	margin-top: 10px;
+}
+#results .collectionPanel + .collectionPanel,
+#results .collectionPanelParent + .collectionPanelParent,
+#results .processPanel + .processPanel,
+#results .processPanelParent + .processPanelParent {
+	/* margin between neighbouring panels */
+	margin-top: 30px;
+}
+
+/* Panels */
+.backendname {
+	margin: 10px 0;
+}
+.retrieved {
+	margin-top: 20px;
+	margin-bottom: 10px;
 }
 </style>
