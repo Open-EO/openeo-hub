@@ -4,7 +4,7 @@
         <em v-if="matchedProcesses.length == 0" class="emptyNotice">empty</em>
         <ol>
             <li v-for="process in matchedProcesses" :key="process.process.backend+'/'+process.process.name" class="processPanelParent">
-                <ProcessPanel :process="convertProcessToLatestSpec(process.process)"></ProcessPanel>
+                <ProcessPanel :process="convertProcessToLatestSpec(process.process)" initiallyCollapsed="true"></ProcessPanel>
             </li>
         </ol>
     </div>

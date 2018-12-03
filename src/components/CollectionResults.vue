@@ -4,7 +4,7 @@
         <em v-if="matchedCollections.length == 0" class="emptyNotice">empty</em>
         <ol>
             <li v-for="collection in matchedCollections" :key="collection.collection.backend+'/'+collection.collection.name" class="collectionPanelParent">
-                <CollectionPanel :collection="collection.collection"></CollectionPanel>
+                <CollectionPanel :collection="collection.collection" :initiallyCollapsed="true"></CollectionPanel>
             </li>
         </ol>
     </div>

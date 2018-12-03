@@ -11,6 +11,10 @@
 			<em>{{collection.backend}}</em>
 		</div>
 
+		<button v-if="initiallyCollapsed" class="showMoreButton" @click="collapsed = !collapsed">Show {{collapsed ? 'more' : 'less'}}</button>
+
+		<div v-show="!collapsed">
+
 		<div class="description" v-if="collection.description">
 			<h3>Description</h3>
 			<DescriptionElement :description="collection.description"></DescriptionElement>
@@ -36,6 +40,8 @@
 			<em>This data was retrieved from the backend server at {{collection.retrieved}}.</em>
 		</div>
 			
+		</div>
+
 	</div>
 </template>
 
@@ -44,11 +50,16 @@ import { DescriptionElement, LinkList } from '@openeo/processes-docgen';
 
 export default {
 	name: 'CollectionPanel',
-	props: ['collection'],
+	props: ['collection', 'initiallyCollapsed'],
 	components: {
 		DescriptionElement,
 		LinkList
-    },
+	},
+	data() {
+		return {
+			collapsed: this.initiallyCollapsed || false
+		};
+	},
     methods: {
         getNonTrivialMetadataKeys(collection) {
             return Object.keys(collection).filter(k => ['name', 'title', 'description', 'links', 'backend', 'retrieved'].indexOf(k) == -1)

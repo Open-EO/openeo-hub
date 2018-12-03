@@ -19,12 +19,12 @@
 
                         <dt v-if="backend.collections"><h4>Matched collections ({{backend.collections.length}})</h4></dt>
                         <dd v-if="backend.collections">
-                            <CollectionPanel v-for="collection in backend.collections" :key="collection.name" :collection="collection"></CollectionPanel>
+                            <CollectionPanel v-for="collection in backend.collections" :key="collection.name" :collection="collection" initiallyCollapsed="true"></CollectionPanel>
                         </dd>
                         
                         <dt v-if="backend.processes"><h4>Matched processes ({{backend.processes.length}})</h4></dt>
                         <dd v-if="backend.processes">
-                            <ProcessPanel v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)"></ProcessPanel>
+                            <ProcessPanel v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)" initiallyCollapsed="true"></ProcessPanel>
                         </dd>
                     </dl>
                     <div class="retrieved">

@@ -301,6 +301,17 @@ nav li.active {
 }
 
 /* Panels */
+.collectionPanel,
+.processPanel {
+	/* set `position` because... */
+	position: relative;
+}
+.showMoreButton {
+	/* ...the "show more/less" button is aligned to it with `position:absolute` */
+	position: absolute;
+	top: 0;
+	right: 0;
+}
 .backendname {
 	margin: 10px 0;
 }
