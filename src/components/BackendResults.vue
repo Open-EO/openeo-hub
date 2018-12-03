@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h2>Results from backend search</h2>
         <em v-if="matchedBackends.length == 0">empty</em>
+        <h2>Results from backend search ({{matchedBackends.length}})</h2>
         <output>
             <ol>
                 <li v-for="backend in matchedBackends" :key="backend.backend">
@@ -10,19 +10,19 @@
                         <dt><h4>Version</h4></dt>
                         <dd>{{backend.version}}</dd>
 
-                        <dt v-if="backend.endpoints"><h4>Endpoints</h4></dt>
+                        <dt v-if="backend.endpoints"><h4>Matched endpoints ({{backend.endpoints.length}})</h4></dt>
                         <dd v-if="backend.endpoints">
                             <ul>
                                 <li v-for="endpoint in backend.endpoints" :key="endpoint">{{endpoint}}</li>
                             </ul>
                         </dd>
 
-                        <dt v-if="backend.collections"><h4>Collections</h4></dt>
+                        <dt v-if="backend.collections"><h4>Matched collections ({{backend.collections.length}})</h4></dt>
                         <dd v-if="backend.collections">
                             <CollectionPanel v-for="collection in backend.collections" :key="collection.name" :collection="collection"></CollectionPanel>
                         </dd>
                         
-                        <dt v-if="backend.processes"><h4>Processes</h4></dt>
+                        <dt v-if="backend.processes"><h4>Matched processes ({{backend.processes.length}})</h4></dt>
                         <dd v-if="backend.processes">
                             <ProcessPanel v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)"></ProcessPanel>
                         </dd>

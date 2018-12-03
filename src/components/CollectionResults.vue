@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h2>Results from collection search</h2>
         <em v-if="matchedCollections.length == 0">empty</em>
+        <h2>Results from collection search ({{matchedCollections.length}})</h2>
         <ol>
             <li v-for="collection in matchedCollections" :key="collection.collection.backend+'/'+collection.collection.name">
                 {{collection.collection.name}}

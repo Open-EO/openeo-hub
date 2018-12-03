@@ -3,15 +3,15 @@
         <h2>Search for processes across all backends</h2>
 
         <h3>Name</h3>
-        <input v-model="processSearch.name" />
+        <input v-model="processSearch.name" @keyup.enter="queryProcesses()"/>
         <em>case-insensitive, regular expression possible</em>
 
         <h3>Summary</h3>
-        <input v-model="processSearch.summary" />
+        <input v-model="processSearch.summary" @keyup.enter="queryProcesses()"/>
         <em>case-insensitive, regular expression possible</em>
 
         <h3>Description</h3>
-        <input v-model="processSearch.description" />
+        <input v-model="processSearch.description" @keyup.enter="queryProcesses()"/>
         <em>case-insensitive, regular expression possible</em>
 
         <h3>Deprecation</h3>

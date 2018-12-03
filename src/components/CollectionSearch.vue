@@ -3,15 +3,15 @@
         <h2>Search for collections across all backends</h2>
 
         <h3>Name</h3>
-        <input v-model="collectionSearch.name" />
-        <em>case-insensitive, regular expressions possible</em>
+        <input v-model="collectionSearch.name" @keyup.enter="queryCollections()"/>
+        <em>case-insensitive, regular expression possible</em>
 
         <h3>Title</h3>
-        <input v-model="collectionSearch.title" />
+        <input v-model="collectionSearch.title" @keyup.enter="queryCollections()"/>
         <em>case-insensitive, regular expression possible</em>
 
         <h3>Description</h3>
-        <input v-model="collectionSearch.description" />
+        <input v-model="collectionSearch.description" @keyup.enter="queryCollections()"/>
         <em>case-insensitive, regular expression possible</em>
 
         <h3>Extent</h3>
@@ -20,9 +20,9 @@
         <BboxChooser :calledOnChange="setSpatialExtent"></BboxChooser>
         <h4>Temporal</h4>
         <em>From</em>
-        <input v-model="collectionSearch.extent.temporal[0]" placeholder="YYYY-MM-DDThh:mm:ssZ"/>
+        <input v-model="collectionSearch.extent.temporal[0]" placeholder="YYYY-MM-DDThh:mm:ssZ" @keyup.enter="queryCollections()"/>
         <em>until</em>
-        <input v-model="collectionSearch.extent.temporal[1]" placeholder="YYYY-MM-DDThh:mm:ssZ"/>
+        <input v-model="collectionSearch.extent.temporal[1]" placeholder="YYYY-MM-DDThh:mm:ssZ" @keyup.enter="queryCollections()"/>
         <em>(inclusive)</em>
         <p><em>Use <a href="https://www.ietf.org/rfc/rfc3339">RFC 3339</a> date-times (format: YYYY-MM-DDThh:mm:ssZ)</em></p>
 
