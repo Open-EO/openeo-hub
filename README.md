@@ -24,8 +24,15 @@ If you want to set it up yourself, follow these steps:
 3. It should output `waiting for connections on port 27017`
 
 ### Frontend and API backend
-1. Clone this repo
+1. Clone this repo, `cd /path/to/openeo-hub/`
 2. `npm install` -> wait...
+3. Locally link dependency package with contributions that are necessary for the hub but are not yet published to NPM:
+   1. Clone https://github.com/christophfriedrich/openeo-processes-docgen.git, `cd /path/to/openeo-processes-docgen`
+   2. `git checkout add-hub-needs`
+   2. `npm install`
+   3. `npm link`
+   4. `cd /path/to/openeo-hub/`
+   5. `npm link @openeo/processes-docgen`
 3. Edit `config.json` with the URL and name of your DB and the list of backends to crawl
 4. `npm run crawl` -> wait until finished with output "DONE!"
 5. `npm start`
