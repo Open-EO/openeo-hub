@@ -14,6 +14,11 @@
         <input v-model="collectionSearch.description" @keyup.enter="queryCollections()"/>
         <em>case-insensitive, regular expression possible</em>
 
+		<h3>Full-text search</h3>
+        <input v-model="collectionSearch.fulltext" @keyup.enter="queryCollections()"/>
+        <em>in name, title and description</em>
+		<p><em>Supports word stemming, phrases (in quotes) and negation (prepend a hyphen), but no regular expressions. The search is case- and diacritic-insensitive. By default, search terms are connected with a logical OR &ndash; put terms that MUST appear into quotes.</em></p>
+
         <h3>Extent</h3>
         <h4>Spatial</h4>
         <em>Specify a bounding box in decimal WGS84 coordinates (e.g. 12.345) or click on the map below.</em>
@@ -46,6 +51,7 @@ export default {
 				name: '',
 				title: '',
 				description: '',
+				fulltext: '',
 				extent: {
 					spatial: ['', '', '', ''],
 					temporal: ['', '']

@@ -3,8 +3,8 @@
         <h2>Results from process search ({{matchedProcesses.length}})</h2>
         <em v-if="matchedProcesses.length == 0" class="emptyNotice">empty</em>
         <ol>
-            <li v-for="process in matchedProcesses" :key="process.process.backend+'/'+process.process.name" class="processPanelParent">
-                <ProcessPanel :process="convertProcessToLatestSpec(process.process)" initiallyCollapsed="true"></ProcessPanel>
+            <li v-for="process in matchedProcesses" :key="process.backend+'/'+process.name" class="processPanelParent">
+                <ProcessPanel :process="convertProcessToLatestSpec(process)" initiallyCollapsed="true"></ProcessPanel>
             </li>
         </ol>
     </div>

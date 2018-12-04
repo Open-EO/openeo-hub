@@ -14,6 +14,11 @@
         <input v-model="processSearch.description" @keyup.enter="queryProcesses()"/>
         <em>case-insensitive, regular expression possible</em>
 
+		<h3>Full-text search</h3>
+        <input v-model="processSearch.fulltext" @keyup.enter="queryProcesses()"/>
+        <em>in name, summary, description, param names and descriptions</em>
+		<p><em>Supports word stemming, phrases (in quotes) and negation (prepend a hyphen), but no regular expressions. The search is case- and diacritic-insensitive. By default, search terms are connected with a logical OR &ndash; put terms that MUST appear into quotes.</em></p>
+
         <h3>Deprecation</h3>
         <input type="checkbox" v-model="processSearch.excludeDeprecated" id="excludeDeprecated">
         <label for="excludeDeprecated">Exclude processes that are deprecated</label>
@@ -38,6 +43,7 @@ export default {
 				name: '',
 				summary: '',
 				description: '',
+				fulltext: '',
 				excludeDeprecated: true,
 				parameterNames: '',
 				parameterDescriptions: ''

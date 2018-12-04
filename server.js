@@ -8,9 +8,13 @@ const MongoClient = require('mongodb').MongoClient;
 
 const config = require('./config.json');
 
-function getCollection() {
+const consts = require('./src/dbqueries.js');
+
+function getCollection(collectionName = 'backends') {
     return MongoClient.connect(config.dbUrl, { useNewUrlParser: true }).then(client => {
-        return client.db(config.dbName).collection('backends');
+        return client.db(config.dbName).collection(collectionName);
+    }).catch(error => {
+        console.log(error);
     });
 }
 
@@ -240,26 +244,18 @@ server.get('/backends/:backend/*', function(req, res, next) {
     return next();
 });
 
-const GET_ALL_COLLECTIONS_PIPELINE = [
-    { $match: { path: '/collections' } },
-    { $addFields: { 'content.collections.backend': '$backend', 'content.collections.retrieved': '$retrieved' } },
-    { $project: { 'collection': '$content.collections' } },
-    { $unwind: '$collection' }
-];
-
 // list collections
 server.get('/collections', function(req, res, next) {
-    aggregate(GET_ALL_COLLECTIONS_PIPELINE).then(async cursor => {
+    aggregate(consts.GET_ALL_COLLECTIONS_PIPELINE).then(async cursor => {
         res.send(await getAllDocsFromCursor(cursor));
     })
     .catch(error => res.send(error));
 });
 
 // search collections via JSON document in POST body
-// supports all parameters, which are currently: name, title, description, extent (spatial and temporal)
+// supports all parameters, which are currently: name, title, description, fulltext, extent (spatial and temporal)
 server.post('/collections/search', async function(req, res, next) {
     // INIT
-    var pipeline = Array.from(GET_ALL_COLLECTIONS_PIPELINE);  // copy the array so we don't overwrite the constant
     var criteria = {};
     
     // NAME
@@ -275,6 +271,11 @@ server.post('/collections/search', async function(req, res, next) {
     // DESCRIPTION
     if(req.body.description) {
         criteria['collection.description'] = {$regex: req.body.description, $options: 'i'};
+    }
+
+    // FULLTEXT
+    if(req.body.fulltext) {
+        criteria['$text'] = {$search: req.body.fulltext};
     }
 
     // EXTENT
@@ -309,38 +310,23 @@ server.post('/collections/search', async function(req, res, next) {
             }
         }
     }
-
-    // add the match stage to the collection pipeline
-    pipeline.push({$match: criteria});
-    // execute pipeline
-    var collectionsWithCriteria = await (await aggregate(pipeline)).toArray();
+    
     // send end result
-    res.send(collectionsWithCriteria);
+    getCollection('collections').then(coll => coll.find(criteria).toArray().then(result => res.send(result)));
 });
-
-const GET_ALL_PROCESSES_PIPELINE = [
-    // basically like for collections
-    { $match: { path: '/processes' } },
-    { $addFields: { 'content.processes.backend': '$backend', 'content.processes.retrieved': '$retrieved' } },
-    { $project: { 'process': '$content.processes' } },
-    { $unwind: '$process' },
-    // convert parameters object to array because otherwise we can't search for parameter descriptions (MongoDB doesn't support wildcards for object keys)
-    { $addFields: { 'process.parametersAsArray' : { $objectToArray: '$process.parameters' }}}
-];
 
 // list processes
 server.get('/processes', function(req, res, next) {
-    aggregate(GET_ALL_PROCESSES_PIPELINE).then(async cursor => {
+    aggregate(consts.GET_ALL_PROCESSES_PIPELINE).then(async cursor => {
         res.send(await getAllDocsFromCursor(cursor));
     })
     .catch(error => res.send(error));
 });
 
 // search processes via JSON document in POST body
-// supports all parameters, which are currently: name, summary, description, excludeDeprecated, parameterNames, parameterDescriptions
+// supports all parameters, which are currently: name, summary, description, fulltext, excludeDeprecated, parameterNames, parameterDescriptions
 server.post('/processes/search', async function(req, res, next) {
     // INIT
-    var pipeline = Array.from(GET_ALL_PROCESSES_PIPELINE);  // copy the array so we don't overwrite the constant
     var criteria = {};
     
     // NAME
@@ -358,6 +344,11 @@ server.post('/processes/search', async function(req, res, next) {
         criteria['process.description'] = {$regex: req.body.description, $options: 'i'};
     }
 
+    // FULLTEXT
+    if(req.body.fulltext) {
+        criteria['$text'] = {$search: req.body.fulltext};
+    }
+
     // EXCLUDE DEPRECATED
     if(req.body.excludeDeprecated) {
         criteria['process.deprecated'] = {$exists: false};
@@ -373,12 +364,8 @@ server.post('/processes/search', async function(req, res, next) {
         req.body.parameterDescriptions.forEach(p => {criteria['process.parametersAsArray.v.description'] = {$regex: p, $options: 'i'}});
     }
 
-    // add the match stage to the process pipeline
-    pipeline.push({$match: criteria});
-    // execute pipeline
-    var processesWithCriteria = await (await aggregate(pipeline)).toArray();
     // send end result
-    res.send(processesWithCriteria);
+    getCollection('processes').then(coll => coll.find(criteria).toArray().then(result => res.send(result)));
 });
 
 // serve website (UI)
