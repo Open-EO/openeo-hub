@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Search for backends</h2>
+        <h2>Search for backends <button @click="queryBackends()" class="submitbutton">Submit</button></h2>
 
         <h3>openEO API Version</h3>
         <div>

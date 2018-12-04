@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Search for collections across all backends</h2>
+        <h2>Search for collections across all backends <button @click="queryCollections()" class="submitbutton">Submit</button></h2>
 
         <h3>Name</h3>
         <input v-model="collectionSearch.name" @keyup.enter="queryCollections()"/>

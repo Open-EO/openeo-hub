@@ -152,6 +152,7 @@ header {
 	padding: 10px;
 }
 main {
+	flex: 1;
 	display: flex;
 	overflow: hidden;
 }
@@ -170,6 +171,7 @@ section:last-child {
 div.panelContainer {
 	overflow: auto;
 	padding: 10px;
+	padding-top: 0;
 }
 div.panelContainer.hidden {
 	height: 0;
@@ -255,6 +257,9 @@ nav li.active {
 #search p {
 	margin-top: 0;
 }
+#search .submitbutton {
+	float: right;
+}
 
 /* results section */
 #results h2,
@@ -301,6 +306,16 @@ nav li.active {
 }
 
 /* Panels */
+div:not(.collectionPanel):not(.processPanel) > h2 { /* all normal `h2`s, but not the ones that are part of the ProcessPanel */
+	position: sticky;
+	top: 0;
+	z-index: 500; /* would lie under Leaflet map if less */
+	background-color: white;
+	margin-top: 0;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px dotted #cecbc8;
+}
 .collectionPanel,
 .processPanel {
 	/* set `position` because... */

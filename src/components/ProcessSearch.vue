@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Search for processes across all backends</h2>
+        <h2>Search for processes across all backends <button @click="queryProcesses()" class="submitbutton">Submit</button></h2>
 
         <h3>Name</h3>
         <input v-model="processSearch.name" @keyup.enter="queryProcesses()"/>
