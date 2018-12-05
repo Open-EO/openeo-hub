@@ -260,17 +260,17 @@ server.post('/collections/search', async function(req, res, next) {
     
     // NAME
     if(req.body.name) {
-        criteria['collection.name'] = {$regex: req.body.name, $options: 'i'};
+        criteria['name'] = {$regex: req.body.name, $options: 'i'};
     }
 
     // TITLE
     if(req.body.title) {
-        criteria['collection.title'] = {$regex: req.body.title, $options: 'i'};
+        criteria['title'] = {$regex: req.body.title, $options: 'i'};
     }
 
     // DESCRIPTION
     if(req.body.description) {
-        criteria['collection.description'] = {$regex: req.body.description, $options: 'i'};
+        criteria['description'] = {$regex: req.body.description, $options: 'i'};
     }
 
     // FULLTEXT
@@ -285,28 +285,28 @@ server.post('/collections/search', async function(req, res, next) {
             // inspired by https://github.com/morganherlocker/bbox-intersect
             /*criteria['$not'] = {
                 '$or': {
-                    'collection.extent.spatial.0': {$gt: req.body.extent.spatial[2]},
-                    'collection.extent.spatial.2': {$lt: req.body.extent.spatial[0]},
-                    'collection.extent.spatial.1': {$gt: req.body.extent.spatial[3]},
-                    'collection.extent.spatial.3': {$lt: req.body.extent.spatial[1]},
+                    'extent.spatial.0': {$gt: req.body.extent.spatial[2]},
+                    'extent.spatial.2': {$lt: req.body.extent.spatial[0]},
+                    'extent.spatial.1': {$gt: req.body.extent.spatial[3]},
+                    'extent.spatial.3': {$lt: req.body.extent.spatial[1]},
                 }
             }*/
             // $not can't be used like that, so rewrite as:
             criteria['$and'] = [
-                {'collection.extent.spatial.0': {$lte: req.body.extent.spatial[2]}},
-                {'collection.extent.spatial.2': {$gte: req.body.extent.spatial[0]}},
-                {'collection.extent.spatial.1': {$lte: req.body.extent.spatial[3]}},
-                {'collection.extent.spatial.3': {$gte: req.body.extent.spatial[1]}},
+                {'extent.spatial.0': {$lte: req.body.extent.spatial[2]}},
+                {'extent.spatial.2': {$gte: req.body.extent.spatial[0]}},
+                {'extent.spatial.1': {$lte: req.body.extent.spatial[3]}},
+                {'extent.spatial.3': {$gte: req.body.extent.spatial[1]}},
             ]
         }
 
         // TEMPORAL
         if(req.body.extent.temporal) {
             if(req.body.extent.temporal[0] != null) {
-                criteria['collection.extent.temporal.0'] = {$lte: req.body.extent.temporal[0]};
+                criteria['extent.temporal.0'] = {$lte: req.body.extent.temporal[0]};
             }
             if(req.body.extent.temporal[1] != null) {
-                criteria['collection.extent.temporal.1'] = {$gte: req.body.extent.temporal[1]};
+                criteria['extent.temporal.1'] = {$gte: req.body.extent.temporal[1]};
             }
         }
     }
@@ -331,17 +331,17 @@ server.post('/processes/search', async function(req, res, next) {
     
     // NAME
     if(req.body.name) {
-        criteria['process.name'] = {$regex: req.body.name, $options: 'i'};
+        criteria['name'] = {$regex: req.body.name, $options: 'i'};
     }
 
     // SUMMARY
     if(req.body.summary) {
-        criteria['process.summary'] = {$regex: req.body.summary, $options: 'i'};
+        criteria['summary'] = {$regex: req.body.summary, $options: 'i'};
     }
 
     // DESCRIPTION
     if(req.body.description) {
-        criteria['process.description'] = {$regex: req.body.description, $options: 'i'};
+        criteria['description'] = {$regex: req.body.description, $options: 'i'};
     }
 
     // FULLTEXT
@@ -351,17 +351,17 @@ server.post('/processes/search', async function(req, res, next) {
 
     // EXCLUDE DEPRECATED
     if(req.body.excludeDeprecated) {
-        criteria['process.deprecated'] = {$exists: false};
+        criteria['deprecated'] = {$exists: false};
     }
 
     // PARAMETER NAMES
     if(req.body.parameterNames) {
-        req.body.parameterNames.forEach(p => {criteria['process.parametersAsArray.k'] = {$regex: p, $options: 'i'}});
+        req.body.parameterNames.forEach(p => {criteria['parametersAsArray.k'] = {$regex: p, $options: 'i'}});
     }
 
     // PARAMETER DESCRIPTIONS
     if(req.body.parameterDescriptions) {
-        req.body.parameterDescriptions.forEach(p => {criteria['process.parametersAsArray.v.description'] = {$regex: p, $options: 'i'}});
+        req.body.parameterDescriptions.forEach(p => {criteria['parametersAsArray.v.description'] = {$regex: p, $options: 'i'}});
     }
 
     // send end result

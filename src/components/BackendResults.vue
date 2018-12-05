@@ -26,6 +26,20 @@
                         <dd v-if="backend.processes">
                             <ProcessPanel v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)" initiallyCollapsed="true"></ProcessPanel>
                         </dd>
+
+                        <dt v-if="backend.outputFormats"><h4>Matched output formats ({{Object.keys(backend.outputFormats).length}})</h4></dt>
+                        <dd v-if="backend.outputFormats">
+                            <ul>
+                                <li v-for="of in Object.keys(backend.outputFormats)" :key="of">{{of}}</li>
+                            </ul>
+                        </dd>
+
+                        <dt v-if="backend.serviceTypes"><h4>Matched service types ({{Object.keys(backend.serviceTypes).length}})</h4></dt>
+                        <dd v-if="backend.serviceTypes">
+                            <ul>
+                                <li v-for="st in Object.keys(backend.serviceTypes)" :key="st">{{st}}</li>
+                            </ul>
+                        </dd>
                     </dl>
                     <div class="retrieved">
                         <em>This data was retrieved from the backend server at {{backend.retrieved}}.</em>
