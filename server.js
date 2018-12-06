@@ -1,55 +1,54 @@
+const config = require('./config.json');
+
+const mongodb = require('mongodb');
+const mongo = new mongodb.MongoClient(config.dbUrl, { useNewUrlParser: true } );
+var db;
+mongo.connect().then(client => db = client.db(config.dbName));
+
 var restify = require('restify');
 var server = restify.createServer();
-
 server.use(restify.plugins.queryParser({ mapParams: false }));
 server.use(restify.plugins.bodyParser({ mapParams: false }));
 
-const MongoClient = require('mongodb').MongoClient;
-
-const config = require('./config.json');
-
-const consts = require('./src/dbqueries.js');
-
 function getCollection(collectionName = 'backends') {
-    return MongoClient.connect(config.dbUrl, { useNewUrlParser: true }).then(client => {
-        return client.db(config.dbName).collection(collectionName);
-    }).catch(error => {
-        console.log(error);
-    });
+    return db.collection(collectionName);
 }
 
-function findOne(findCriteria) {
-    return getCollection().then(collection => collection.findOne(findCriteria));
+function findOne(findCriteria, collectionName) {
+    return getCollection(collectionName).findOne(findCriteria);
 }
 
-function find(findCriteria, projection = undefined) {
-    return getCollection().then(collection => collection.find(findCriteria));
+function find(findCriteria, collectionName) {
+    return getCollection(collectionName).find(findCriteria);
 }
 
-function aggregate(pipeline) {
-    return getCollection().then(collection => collection.aggregate(pipeline));
+function aggregate(pipeline, collectionName) {
+    return getCollection(collectionName).aggregate(pipeline);
 }
 
-async function getAllDocsFromCursor(cursor, mappingCallback = undefined) {
-    var list = [];
-    await cursor.map(mappingCallback || (x => x)).forEach(x => list.push(x));
-    return list;
-}
+async function send(data, res, next) {
+    const sendReally = (response) => { res.send(response || {}); next(); }
+    const handleError = (error) => { res.send(error); next(); }
+    if(data instanceof mongodb.Cursor || data instanceof mongodb.AggregationCursor) {
+        data = data.toArray();
+    }
+    if(data instanceof Promise) {
+        data.then(sendReally).catch(handleError);
+    } else {
+        sendReally(data);
+    }
+}   
 
 // list backends
 server.get('/backends', function(req, res, next) {
-    res.send(config.backends);
-    return next();
+    send(config.backends, res, next);
 });
 
 // search backends via parameters in URL query string
 // only supports `version` parameter
 server.get('/backends/search', function(req, res, next) {
     const criteria = (req.query.version ? {'content.version': req.query.version} : {path: '/'});
-    find(criteria).then(async cursor => {
-        res.send(await getAllDocsFromCursor(cursor, b => b.backend));
-    })
-   .catch(error => res.send(error));
+    send(find(criteria), res, next);
 });
 
 // search backends via JSON document in POST body
@@ -235,21 +234,17 @@ server.post('/backends/search', async function(req, res, next) {
     }
 
     // send end result
-    res.send(backendsWithCriteria);
+    send(backendsWithCriteria, res, next);
 });
 
 // proxy backends
 server.get('/backends/:backend/*', function(req, res, next) {
-    findOne({backend: req.params.backend, path: '/'+req.params['*']}).then(r => res.send(r));
-    return next();
+    send(findOne({backend: req.params.backend, path: '/'+req.params['*']}), res, next);
 });
 
 // list collections
 server.get('/collections', function(req, res, next) {
-    aggregate(consts.GET_ALL_COLLECTIONS_PIPELINE).then(async cursor => {
-        res.send(await getAllDocsFromCursor(cursor));
-    })
-    .catch(error => res.send(error));
+    send(find({}, 'collections'), res, next);
 });
 
 // search collections via JSON document in POST body
@@ -312,15 +307,12 @@ server.post('/collections/search', async function(req, res, next) {
     }
     
     // send end result
-    getCollection('collections').then(coll => coll.find(criteria).toArray().then(result => res.send(result)));
+    send(find(criteria, 'collections'), res, next);
 });
 
 // list processes
 server.get('/processes', function(req, res, next) {
-    aggregate(consts.GET_ALL_PROCESSES_PIPELINE).then(async cursor => {
-        res.send(await getAllDocsFromCursor(cursor));
-    })
-    .catch(error => res.send(error));
+    send(find({}, 'processes'), res, next);
 });
 
 // search processes via JSON document in POST body
@@ -365,7 +357,7 @@ server.post('/processes/search', async function(req, res, next) {
     }
 
     // send end result
-    getCollection('processes').then(coll => coll.find(criteria).toArray().then(result => res.send(result)));
+    send(find(criteria, 'processes'), res, next);
 });
 
 // serve website (UI)
