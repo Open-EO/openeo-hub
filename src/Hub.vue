@@ -287,11 +287,11 @@ nav li.active {
 #results dd > ul {
 	padding-left: 15px;
 }
-#results .processPanel {
+#results .process {
 	margin: 0;
 }
-#results .processPanel h2,
-#results .processPanel h3,
+#results .process h2,
+#results .process h3,
 #results .collectionPanel h2,
 #results .collectionPanel h3 {
 	font-size: 100%;
@@ -299,14 +299,14 @@ nav li.active {
 }
 #results .collectionPanel + .collectionPanel,
 #results .collectionPanelParent + .collectionPanelParent,
-#results .processPanel + .processPanel,
-#results .processPanelParent + .processPanelParent {
+#results .process + .process,
+#results .processParent + .processParent {
 	/* margin between neighbouring panels */
 	margin-top: 30px;
 }
 
 /* Panels */
-div:not(.collectionPanel):not(.processPanel) > h2 { /* all normal `h2`s, but not the ones that are part of the ProcessPanel */
+div:not(.collectionPanel):not(.process) > h2 { /* all normal `h2`s, but not the ones that are part of the `Process` */
 	position: sticky;
 	top: 0;
 	z-index: 500; /* would lie under Leaflet map if less */
@@ -317,11 +317,11 @@ div:not(.collectionPanel):not(.processPanel) > h2 { /* all normal `h2`s, but not
 	border-bottom: 1px dotted #cecbc8;
 }
 .collectionPanel,
-.processPanel {
+.process {
 	/* set `position` because... */
 	position: relative;
 }
-.showMoreButton {
+.show-more-button {
 	/* ...the "show more/less" button is aligned to it with `position:absolute` */
 	position: absolute;
 	top: 0;

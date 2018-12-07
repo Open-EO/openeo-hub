@@ -24,7 +24,7 @@
                         
                         <dt v-if="backend.processes"><h4>Matched processes ({{backend.processes.length}})</h4></dt>
                         <dd v-if="backend.processes">
-                            <ProcessPanel v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)" initiallyCollapsed="true"></ProcessPanel>
+                            <Process v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)" :baseConfig="{processesInitiallyCollapsed:true}"></Process>
                         </dd>
 
                         <dt v-if="backend.outputFormats"><h4>Matched output formats ({{Object.keys(backend.outputFormats).length}})</h4></dt>
@@ -51,14 +51,14 @@
 </template>
 
 <script>
-import { ProcessPanel, utils as DocGenUtils } from '@openeo/processes-docgen';
+import { Process, Utils as DocGenUtils } from '@openeo/processes-docgen';
 import CollectionPanel from './CollectionPanel.vue';
 
 export default {
     name: 'BackendResults',
     components: {
         CollectionPanel,
-        ProcessPanel
+        Process
     },
     props: ['matchedBackends'],
     methods: {
