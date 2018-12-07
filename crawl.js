@@ -9,6 +9,8 @@ const openeo = new OpenEO();
 
 const consts = require('./src/dbqueries.js');
 
+const starttimestamp = new Date().toJSON();
+
 console.log('Connecting to database server...');
 mongo.connect(async (err, client) => {
     assert.equal(null, err);
@@ -16,6 +18,7 @@ mongo.connect(async (err, client) => {
     const collection = db.collection('backends');
     console.log('Connected to database server.');
     console.log('Setting up database indexes...');
+    db.collection('backends').createIndex({backend: 1, path: 1}, { name: 'backend-path_unique', unique: true });
     db.collection('collections').createIndex({name: "text", title: "text", description: "text"}, { name: 'name-title-description_text' });
     db.collection('processes').createIndex({name: "text", summary: "text", description: "text", "returns.description": "text", "parametersAsArray.k": "text", "parametersAsArray.v.description": "text"}, {name: 'name-summary-description-paramname-paramdescription_text'});
     console.log('Set up database indexes.');
@@ -36,11 +39,11 @@ mongo.connect(async (err, client) => {
         // set shorthand
         const backend = config.backends[i];
 
+        try {
         console.log('Gathering endpoint URLs for ' + backend + ' ...');
-
+        var paths = [];
         const con = await openeo.connect(backend);
         const caps = await con.capabilities();
-        var paths = [];
 
         // add all standard endpoints that are supported
         for (var method in endpoints) {
@@ -54,20 +57,34 @@ mongo.connect(async (err, client) => {
             const collections = await con.listCollections();
             paths = paths.concat(collections.collections.map(c => '/collections/' + (c.name || c.id)));
         }
+        }  
+        catch(error) {
+            console.log('An error occured while gathering endpoint URLs for ' + backend + ' :');
+            console.log(error);
+        }
 
+        if(paths.length > 0) {
         console.log('Starting crawling of ' + backend + ' ...');
+        }
 
         // Request them all
         paths.forEach(path => {
+            if(process.argv.length > 2 && process.argv[2] == '--verbose') { console.log('Download scheduled for ' + backend+path); }
             promises.push(
                 axios(backend+path)
                 .then(response => {
                     // save to database
-                    collection.insertOne({
+                    collection.findOneAndUpdate({
                         backend: backend,
-                        path: path,
-                        retrieved: new Date().toJSON(),
-                        content: response.data
+                        path: path
+                    }, {
+                        $set: {
+                            retrieved: new Date().toJSON(),
+                            unsuccessfulCrawls: 0,
+                            content: response.data
+                        }
+                    }, {
+                        upsert: true
                     });
                 })
                 .catch(error => {
@@ -85,6 +102,8 @@ mongo.connect(async (err, client) => {
         console.log('');
 
         console.log('Processing data...');
+        collection.updateMany({retrieved: {$lt: starttimestamp}}, {$inc: {unsuccessfulCrawls: 1}});
+        collection.deleteMany({unsuccessfulCrawls: {$gte: config.unsuccessfulCrawls.deleteAfter}});
         // Get all collections as usual, but in the end remove `id` from result to avoid "duplicate key" errors and output.
         // Call `hasNext` because as long as there's no I/O request the Mongo Node driver doesn't actually execute the pipeline.
         collection.aggregate(consts.GET_ALL_COLLECTIONS_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'collections'}])).hasNext();
