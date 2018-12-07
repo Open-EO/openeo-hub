@@ -20,6 +20,22 @@
 			<DescriptionElement :description="collection.description"></DescriptionElement>
 		</div>
 
+		<div class="extent">
+			<h3>Spatial Extent</h3>
+			Bounding Box: North: {{collection.extent.spatial[3]}}, South: {{collection.extent.spatial[1]}}, East: {{collection.extent.spatial[2]}}, West: {{collection.extent.spatial[0]}}
+			<l-map style="height:400px" zoom="1" :options="{scrollWheelZoom:false}" v-if="!collapsed /*otherwise the map size is not initiated correctly!*/">
+				<l-tile-layer
+					url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+					attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+					:options="{noWrap:true}">
+				</l-tile-layer>
+				<l-rectangle :bounds="[[collection.extent.spatial[3], collection.extent.spatial[0]], [collection.extent.spatial[1], collection.extent.spatial[2]]]"></l-rectangle>
+			</l-map>
+
+			<h3>Temporal Extent</h3>
+			{{collection.extent.temporal[0] || 'open'}} &ndash; {{collection.extent.temporal[1] || 'open'}}
+		</div>
+
 		<div class="metadata">
 			<h3>Metadata</h3>
             <dl v-if="getNonTrivialMetadataKeys(collection).length > 0">
@@ -47,13 +63,18 @@
 
 <script>
 import { DescriptionElement, LinkList } from '@openeo/processes-docgen';
+import { LMap, LTileLayer, LRectangle } from 'vue2-leaflet';
+import "leaflet/dist/leaflet.css";
 
 export default {
 	name: 'CollectionPanel',
 	props: ['collection', 'initiallyCollapsed'],
 	components: {
 		DescriptionElement,
-		LinkList
+		LinkList,
+		LMap,
+		LTileLayer,
+		LRectangle
 	},
 	data() {
 		return {
@@ -62,7 +83,7 @@ export default {
 	},
     methods: {
         getNonTrivialMetadataKeys(collection) {
-            return Object.keys(collection).filter(k => ['name', 'title', 'description', 'links', 'backend', 'retrieved'].indexOf(k) == -1)
+            return Object.keys(collection).filter(k => ['name', 'title', 'description', 'links', 'backend', 'retrieved', 'extent'].indexOf(k) == -1)
         }
     }
 }
