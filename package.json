@@ -19,7 +19,7 @@
   "scripts": {
     "crawl": "node crawl.js",
     "start:backend": "node server.js",
-    "start:frontend": "vue-cli-service serve",
+    "start:frontend": "vue-cli-service serve --port 9000",
     "start": "vue-cli-service build && node server.js",
     "start:dev": "vue-cli-service build --mode development && node server.js"
   },

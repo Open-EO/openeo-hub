@@ -36,7 +36,7 @@ If you want to set it up yourself, follow these steps:
 3. Edit `config.json` with the URL and name of your DB and the list of backends to crawl
 4. `npm run crawl` -> wait until finished with output "DONE!"
 5. `npm start`
-6. Go to http://localhost:8080/
+6. Go to http://localhost:9000/
 
 ### For development
 There are several start scripts for different dev scenarios:
