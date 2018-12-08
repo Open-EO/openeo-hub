@@ -210,7 +210,6 @@ input[type='checkbox'] {
 /* tab-style navigation */
 nav {
 	border-bottom: 1px solid black;
-	padding: 5px;
 	padding-left: 20px;
 }
 nav ul {
@@ -218,13 +217,14 @@ nav ul {
 	padding: 0;
 }
 nav li {
-	display: inline;
+	display: inline-block;
 	list-style: none;
 	font-size: 120%;
 	font-weight: bold;
 	border: 1px solid black;
 	padding: 5px 10px;
 	margin-left: -1px;
+	margin-bottom: -1px;
 	cursor: pointer;
 	background-color: #e8e5e2;
 }
