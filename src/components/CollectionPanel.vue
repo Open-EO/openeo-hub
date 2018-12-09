@@ -33,7 +33,7 @@
 			</l-map>
 
 			<h3>Temporal Extent</h3>
-			{{collection.extent.temporal[0] || 'open'}} &ndash; {{collection.extent.temporal[1] || 'open'}}
+			{{formatTemporalExtent(collection.extent.temporal[0], collection.extent.temporal[1])}}
 		</div>
 
 		<div class="metadata">
@@ -65,6 +65,7 @@
 import { DescriptionElement, LinkList } from '@openeo/processes-docgen';
 import { LMap, LTileLayer, LRectangle } from 'vue2-leaflet';
 import "leaflet/dist/leaflet.css";
+import * as moment from 'moment';
 
 export default {
 	name: 'CollectionPanel',
@@ -84,7 +85,22 @@ export default {
     methods: {
         getNonTrivialMetadataKeys(collection) {
             return Object.keys(collection).filter(k => ['name', 'title', 'description', 'links', 'backend', 'retrieved', 'extent'].indexOf(k) == -1)
-        }
+		},
+		formatTemporalExtent(t1, t2) {
+			if(t1 == t2) {
+				return 'Snapshot at ' + this.formatTimestamp(t1);
+			} else if(t1 == null) {
+				return 'Start unknown, ended at ' + this.formatTimestamp(t2);
+			} else if (t2 == null) {
+				return 'Started at ' + this.formatTimestamp(t1) + ' and ongoing';
+			} else {
+				return this.formatTimestamp(t1) + ' – ' + this.formatTimestamp(t2);
+			}
+		},
+		formatTimestamp(input) {
+			const asMoment = moment(input).utc();
+			return asMoment.format('YYYY-MM-DD HH:mm') + ' UTC (' + asMoment.fromNow() + ')';
+		}
     }
 }
 </script>

@@ -24,12 +24,7 @@
         <em>Specify a bounding box in decimal WGS84 coordinates (e.g. 12.345) or click on the map below.</em>
         <BboxChooser :calledOnChange="setSpatialExtent"></BboxChooser>
         <h4>Temporal</h4>
-        <em>From</em>
-        <input v-model="collectionSearch.extent.temporal[0]" placeholder="YYYY-MM-DDThh:mm:ssZ" @keyup.enter="queryCollections()"/>
-        <em>until</em>
-        <input v-model="collectionSearch.extent.temporal[1]" placeholder="YYYY-MM-DDThh:mm:ssZ" @keyup.enter="queryCollections()"/>
-        <em>(inclusive)</em>
-        <p><em>Use <a href="https://www.ietf.org/rfc/rfc3339">RFC 3339</a> date-times (format: YYYY-MM-DDThh:mm:ssZ)</em></p>
+		<DateRangeChooser v-model="collectionSearch.extent.temporal"></DateRangeChooser>
 
         <h3>Actions</h3>
         <button @click="queryCollections()">Submit</button>
@@ -39,11 +34,13 @@
 <script>
 import { OPENEO_V0_3_1_ENDPOINTS } from './../const.js'
 import BboxChooser from './BboxChooser.vue';
+import DateRangeChooser from './DateRangeChooser.vue';
 
 export default {
 	name: 'CollectionSearch',
 	components: {
-		BboxChooser
+		BboxChooser,
+		DateRangeChooser
 	},
 	data() {
 		return {
@@ -54,7 +51,7 @@ export default {
 				fulltext: '',
 				extent: {
 					spatial: ['', '', '', ''],
-					temporal: ['', '']
+					temporal: [null, null]
 				}
 			}
 		};
@@ -80,7 +77,7 @@ export default {
 					params.extent.spatial.push(parseFloat(this.collectionSearch.extent.spatial[i]));
 				}
 			}
-			if(this.collectionSearch.extent.temporal[0] != '') {
+			if(this.collectionSearch.extent.temporal[0] != null || this.collectionSearch.extent.temporal[1] != null) {
 				params.extent = params.extent || {};
 				params.extent.temporal = [this.collectionSearch.extent.temporal[0], this.collectionSearch.extent.temporal[1]];
             }
