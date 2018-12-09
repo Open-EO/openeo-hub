@@ -24,7 +24,8 @@
         <em>Specify a bounding box in decimal WGS84 coordinates (e.g. 12.345) or click on the map below.</em>
         <BboxChooser :calledOnChange="setSpatialExtent"></BboxChooser>
         <h4>Temporal</h4>
-		<DateRangeChooser v-model="collectionSearch.extent.temporal"></DateRangeChooser>
+		<DateRangeChooser v-model="collectionSearch.daterange"></DateRangeChooser>
+		<input type="checkbox" v-model="collectionSearch.openEndOnly" id="openEndOnly"><label for="openEndOnly">Only show "open end" collections</label>
 
         <h3>Actions</h3>
         <button @click="queryCollections()">Submit</button>
@@ -49,16 +50,15 @@ export default {
 				title: '',
 				description: '',
 				fulltext: '',
-				extent: {
-					spatial: ['', '', '', ''],
-					temporal: [null, null]
-				}
+				bbox: ['', '', '', ''],
+				daterange: [null, null],
+				openEndOnly: false
 			}
 		};
 	},
 	methods: {
 		setSpatialExtent(input) {
-			this.collectionSearch.extent.spatial = input;
+			this.collectionSearch.bbox = input;
 		},
 
 		queryCollections() {
@@ -66,21 +66,24 @@ export default {
 			
 			// Build `params` object (can't use it directly because empty fields must be removed)
 			Object.keys(this.collectionSearch).forEach(key => {
-				if(this.collectionSearch[key] != '' && typeof this.collectionSearch[key] != 'object') {
+				if(this.collectionSearch[key] != '' && typeof this.collectionSearch[key] != 'object' && key != 'openEndOnly') { // arrays are typeof object too
 					params[key] = this.collectionSearch[key];
 				}
 			});
-			if(this.collectionSearch.extent.spatial[0] != '') {
-				params.extent = {};
-				params.extent.spatial = [];
-				for(var i=0; i<=3; i++) {
-					params.extent.spatial.push(parseFloat(this.collectionSearch.extent.spatial[i]));
-				}
+			if(this.collectionSearch.bbox[0] != '') {
+				params.bbox = this.collectionSearch.bbox.map(parseFloat);
 			}
-			if(this.collectionSearch.extent.temporal[0] != null || this.collectionSearch.extent.temporal[1] != null) {
-				params.extent = params.extent || {};
-				params.extent.temporal = [this.collectionSearch.extent.temporal[0], this.collectionSearch.extent.temporal[1]];
-            }
+			if(this.collectionSearch.daterange[0] != null) {
+				params.startdate = this.collectionSearch.daterange[0];
+			}
+			if(this.collectionSearch.daterange[1] != null) {
+				params.enddate = this.collectionSearch.daterange[1];
+			}
+			if(this.collectionSearch.openEndOnly) {
+				// convention in API spec: open date range = end date must be `null`
+				// (we can safely overwrite whatever may have already been stored in `enddate` because setting an end date + requesting open end doesn't make sense.
+				params.enddate = null;
+			}
             
             this.$emit('search-collections', params);
 		}

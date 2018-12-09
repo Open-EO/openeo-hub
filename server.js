@@ -248,7 +248,7 @@ server.get('/collections', function(req, res, next) {
 });
 
 // search collections via JSON document in POST body
-// supports all parameters, which are currently: name, title, description, fulltext, extent (spatial and temporal)
+// supports all parameters, which are currently: name, title, description, fulltext, bbox (aka spatial extent), startdate and enddate (aka temporal extent)
 server.post('/collections/search', async function(req, res, next) {
     // INIT
     var criteria = {};
@@ -273,35 +273,40 @@ server.post('/collections/search', async function(req, res, next) {
         criteria['$text'] = {$search: req.body.fulltext};
     }
 
-    // EXTENT
-    if(req.body.extent) {
-        // SPATIAL
-        if(req.body.extent.spatial) {
-            // inspired by https://github.com/morganherlocker/bbox-intersect
-            /*criteria['$not'] = {
-                '$or': {
-                    'extent.spatial.0': {$gt: req.body.extent.spatial[2]},
-                    'extent.spatial.2': {$lt: req.body.extent.spatial[0]},
-                    'extent.spatial.1': {$gt: req.body.extent.spatial[3]},
-                    'extent.spatial.3': {$lt: req.body.extent.spatial[1]},
-                }
-            }*/
-            // $not can't be used like that, so rewrite as:
-            criteria['$and'] = [
-                {'extent.spatial.0': {$lte: req.body.extent.spatial[2]}},
-                {'extent.spatial.2': {$gte: req.body.extent.spatial[0]}},
-                {'extent.spatial.1': {$lte: req.body.extent.spatial[3]}},
-                {'extent.spatial.3': {$gte: req.body.extent.spatial[1]}},
-            ]
-        }
+    // BBOX aka SPATIAL EXTENT
+    if(req.body.bbox) {
+        // inspired by https://github.com/morganherlocker/bbox-intersect
+        // (But rewritten without a NOT because $not can't be top-level in MongoDB. The rules are implicitly connected with AND by MongoDB.)
+        criteria['extent.spatial.0'] = {$lte: req.body.bbox[2]};
+        criteria['extent.spatial.2'] = {$gte: req.body.bbox[0]};
+        criteria['extent.spatial.1'] = {$lte: req.body.bbox[3]};
+        criteria['extent.spatial.3'] = {$gte: req.body.bbox[1]};
+    }
 
-        // TEMPORAL
-        if(req.body.extent.temporal) {
-            if(req.body.extent.temporal[0] != null) {
-                criteria['extent.temporal.0'] = {$lte: req.body.extent.temporal[0]};
-            }
-            if(req.body.extent.temporal[1] != null) {
-                criteria['extent.temporal.1'] = {$gte: req.body.extent.temporal[1]};
+    // STARTDATE aka TEMPORAL EXTENT PART 1 / INDEX 0
+    if(req.body.startdate !== undefined) {  // can be `null` -> strict equality test against `undefined`
+        if(req.body.startdate === null) {
+            criteria['extent.temporal.0'] = {$eq: null};
+        } else {
+            criteria['$or'] = [{'extent.temporal.0': {$lte: req.body.startdate}}, {'extent.temporal.0': {$eq: null}}];
+        }
+    }
+
+    // ENDDATE aka TEMPORAL EXTENT PART 2 / INDEX 1
+    if(req.body.enddate !== undefined) {  // can be `null` -> strict equality test against `undefined`
+        if(req.body.enddate === null) {
+            criteria['extent.temporal.1'] = {$eq: null};
+        } else {
+            const enddateCriteria = [{'extent.temporal.1': {$gte: req.body.enddate}}, {'extent.temporal.1': {$eq: null}}];
+            // don't overwrite `$or` property that may have already been added by startdate's block
+            if(criteria['$or'] == undefined) {
+                // safe
+                criteria['$or'] = enddateCriteria;
+            } else {
+                // connect them with an `$and`
+                criteria['$and'] = [{$or: criteria['$or']}, {$or: enddateCriteria}];
+                // remove the old `$or`
+                delete criteria['$or'];
             }
         }
     }
