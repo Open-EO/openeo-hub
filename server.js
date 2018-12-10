@@ -30,7 +30,7 @@ async function send(data, res, next) {
     const sendReally = (response) => { res.send(response || {}); next(); }
     const handleError = (error) => { res.send(error); next(); }
     if(data instanceof mongodb.Cursor || data instanceof mongodb.AggregationCursor) {
-        data = data.toArray();
+        data = data.toArray().then(arr => arr.map(e => { delete e._id; return e; }));
     }
     if(data instanceof Promise) {
         data.then(sendReally).catch(handleError);

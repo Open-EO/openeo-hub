@@ -270,10 +270,10 @@ nav li.active {
 #results h4,
 #results h5 {
 	font-size: 100%;
+	margin-top: 10px;
 }
-#results h4,
-#results h5 {
-	font-weight: normal;
+#results h4 code {  /* otherwise param names appear really small */
+	font-size: 125%;
 }
 #results .emptyNotice {
 	margin-left: 20px;
@@ -309,7 +309,7 @@ nav li.active {
 div:not(.collectionPanel):not(.process) > h2 { /* all normal `h2`s, but not the ones that are part of the `Process` */
 	position: sticky;
 	top: 0;
-	z-index: 500; /* would lie under Leaflet map if less */
+	z-index: 2000; /* would lie under Leaflet map (500), attribution layer (800) or corner boxes (1000) if less */
 	background-color: white;
 	margin-top: 0;
 	padding-top: 10px;
@@ -333,5 +333,34 @@ div:not(.collectionPanel):not(.process) > h2 { /* all normal `h2`s, but not the 
 .retrieved {
 	margin-top: 20px;
 	margin-bottom: 10px;
+}
+.signature .process-name,
+.signature .param-name {  /* mild syntax highlighting */
+	font-weight: bold;
+}
+.process td {
+	vertical-align: top;
+	padding: 5px;
+}
+h4 + .details { /* indent content below parameter heading */
+	margin-left: 20px;
+}
+.schemaObjectElement table {
+	border-collapse: collapse;
+}
+.schemaObjectElement th {
+	font-weight: normal;
+}
+.schemaObjectElement th[colspan="2"] {  /* center "subheadings" in tables */
+	text-align: center;
+}
+.schemaObjectElement .propKey {  /* don't allow line break between param name and "required asterisk" */
+	white-space: nowrap;
+}
+.schemaObjectElement table p {
+	margin: 0;
+}
+.schemaObjectElement table td:not(:first-child) table {  /* make nested tables stand out so it's easy to see what belongs together */
+	border-left: 5px solid lightgray;
 }
 </style>

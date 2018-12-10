@@ -11,7 +11,7 @@
 			<em>{{collection.backend}}</em>
 		</div>
 
-		<button v-if="initiallyCollapsed" class="showMoreButton" @click="collapsed = !collapsed">Show {{collapsed ? 'more' : 'less'}}</button>
+		<button v-if="initiallyCollapsed" class="show-more-button" @click="collapsed = !collapsed">Show {{collapsed ? 'more' : 'less'}}</button>
 
 		<div v-show="!collapsed">
 
@@ -23,7 +23,7 @@
 		<div class="extent">
 			<h3>Spatial Extent</h3>
 			Bounding Box: North: {{collection.extent.spatial[3]}}, South: {{collection.extent.spatial[1]}}, East: {{collection.extent.spatial[2]}}, West: {{collection.extent.spatial[0]}}
-			<l-map style="height:400px" zoom="1" :options="{scrollWheelZoom:false}" v-if="!collapsed /*otherwise the map size is not initiated correctly!*/">
+			<l-map style="height:400px" :zoom="1" :options="{scrollWheelZoom:false}" v-if="!collapsed /*otherwise the map size is not initiated correctly!*/">
 				<l-tile-layer
 					url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
 					attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -33,7 +33,20 @@
 			</l-map>
 
 			<h3>Temporal Extent</h3>
-			{{formatTemporalExtent(collection.extent.temporal[0], collection.extent.temporal[1])}}
+			<div v-if="collection.extent.temporal[0] == collection.extent.temporal[1]">
+				<FormattedTimestamp :timestamp="collection.extent.temporal[0]"></FormattedTimestamp>
+			</div>
+			<div v-else-if="collection.extent.temporal[0] == null">
+				Until <FormattedTimestamp :timestamp="collection.extent.temporal[1]"></FormattedTimestamp>
+			</div>
+			<div v-else-if="collection.extent.temporal[1] == null">
+				<FormattedTimestamp :timestamp="collection.extent.temporal[0]"></FormattedTimestamp> until present
+			</div>
+			<div v-else>
+				<FormattedTimestamp :timestamp="collection.extent.temporal[0]"></FormattedTimestamp>
+				&ndash;
+				<FormattedTimestamp :timestamp="collection.extent.temporal[1]"></FormattedTimestamp>
+			</div>
 		</div>
 
 		<div class="metadata">
@@ -47,13 +60,13 @@
             <p v-if="getNonTrivialMetadataKeys(collection).length === 0">This collection has no further metadata.</p>
 		</div>
 
-		<div class="links" v-if="collection.links">
+		<div class="links" v-if="filteredLinks.length > 0">
 			<h3>See Also</h3>
-			<LinkList :links="collection.links"></LinkList>
+			<LinkList :links="filteredLinks"></LinkList>
 		</div>
 
 		<div class="retrieved">
-			<em>This data was retrieved from the backend server at {{collection.retrieved}}.</em>
+			<DataRetrievedNotice :timestamp="collection.retrieved"></DataRetrievedNotice>
 		</div>
 			
 		</div>
@@ -66,6 +79,8 @@ import { DescriptionElement, LinkList } from '@openeo/processes-docgen';
 import { LMap, LTileLayer, LRectangle } from 'vue2-leaflet';
 import "leaflet/dist/leaflet.css";
 import * as moment from 'moment';
+import DataRetrievedNotice from './DataRetrievedNotice.vue';
+import FormattedTimestamp from './FormattedTimestamp.vue';
 
 export default {
 	name: 'CollectionPanel',
@@ -75,31 +90,19 @@ export default {
 		LinkList,
 		LMap,
 		LTileLayer,
-		LRectangle
+		LRectangle,
+		DataRetrievedNotice,
+		FormattedTimestamp
 	},
 	data() {
 		return {
-			collapsed: this.initiallyCollapsed || false
+			collapsed: this.initiallyCollapsed || false,
+			filteredLinks: this.collection.links.filter(l => l.rel === undefined || ['self', 'parent', 'root'].indexOf(l.rel) == -1)
 		};
 	},
     methods: {
         getNonTrivialMetadataKeys(collection) {
             return Object.keys(collection).filter(k => ['name', 'title', 'description', 'links', 'backend', 'retrieved', 'extent'].indexOf(k) == -1)
-		},
-		formatTemporalExtent(t1, t2) {
-			if(t1 == t2) {
-				return 'Snapshot at ' + this.formatTimestamp(t1);
-			} else if(t1 == null) {
-				return 'Start unknown, ended at ' + this.formatTimestamp(t2);
-			} else if (t2 == null) {
-				return 'Started at ' + this.formatTimestamp(t1) + ' and ongoing';
-			} else {
-				return this.formatTimestamp(t1) + ' – ' + this.formatTimestamp(t2);
-			}
-		},
-		formatTimestamp(input) {
-			const asMoment = moment(input).utc();
-			return asMoment.format('YYYY-MM-DD HH:mm') + ' UTC (' + asMoment.fromNow() + ')';
 		}
     }
 }
