@@ -26,13 +26,6 @@ If you want to set it up yourself, follow these steps:
 ### Frontend and API backend
 1. Clone this repo, `cd /path/to/openeo-hub/`
 2. `npm install` -> wait...
-3. Locally link dependency package with contributions that are necessary for the hub but are not yet published to NPM:
-   1. Clone https://github.com/christophfriedrich/openeo-processes-docgen.git, `cd /path/to/openeo-processes-docgen`
-   2. `git checkout add-hub-needs`
-   2. `npm install`
-   3. `npm link`
-   4. `cd /path/to/openeo-hub/`
-   5. `npm link @openeo/processes-docgen`
 3. Edit `config.json` with the URL and name of your DB and the list of backends to crawl
 4. `npm run crawl` -> wait until finished with output "DONE!"
 5. `npm start`
@@ -44,3 +37,15 @@ There are several start scripts for different dev scenarios:
 - `npm run start:backend` starts the *Restify* server, so you can test API calls (e.g. with *Postman*). Frontend-wise it serves whatever is found in the `/dist` directory (i.e. the most recent frontend build).
 - `npm run start` builds the frontend to the `dist` directory and *then* starts the *Restify* server, i.e. you can use the latest frontend and make API calls too. But Vue is in production mode, so the *Devtools* are not available.
 - `npm run start:dev` therefore builds the frontend to the `dist` directory *in development mode* and then starts the *Restify* server, i.e. you can use the latest frontend, test API calls and use *Devtools* as well. But there's no HMR, so you need to manually restart everytime you want to see your changes.
+
+The Hub depends on the `openeo-processes-docgen` repo - if you're simultaneously working on that too and want to see how your changes there work together with the Hub, it's smart to link it:
+1. `cd /path/to/openeo-processes-docgen`
+2. `sudo ndm link`
+3. `cd /path/to/openeo-hub/`
+4. `npm link @openeo/processes-docgen`
+
+This makes all references to `@openeo/processes-docgen` in imports etc. point to your current local state of that repo.
+
+Note these caveats:
+- If you do `npm install` in the `openeo-hub` folder, the link gets overwritten, so you have to repeat `npm link @openeo/processes-docgen`.
+- If you make changes in the `openeo-processes-docgen` folder, make sure to run `npm run build_lib` there. Otherwise you're not testing against the version of the code that would *actually end up on NPM* (minified etc.)!

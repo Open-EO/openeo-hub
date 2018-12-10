@@ -17,7 +17,7 @@
 
 		<div class="description" v-if="collection.description">
 			<h3>Description</h3>
-			<DescriptionElement :description="collection.description"></DescriptionElement>
+			<Description :description="collection.description"></Description>
 		</div>
 
 		<div class="extent">
@@ -75,7 +75,7 @@
 </template>
 
 <script>
-import { DescriptionElement, LinkList } from '@openeo/processes-docgen';
+import { Description, LinkList } from '@openeo/processes-docgen';
 import { LMap, LTileLayer, LRectangle } from 'vue2-leaflet';
 import "leaflet/dist/leaflet.css";
 import * as moment from 'moment';
@@ -86,7 +86,7 @@ export default {
 	name: 'CollectionPanel',
 	props: ['collection', 'initiallyCollapsed'],
 	components: {
-		DescriptionElement,
+		Description,
 		LinkList,
 		LMap,
 		LTileLayer,
