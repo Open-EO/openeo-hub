@@ -5,18 +5,18 @@
         <em v-else-if="matchedCollections.length == 0" class="emptyNotice">No search results.</em>
         <ol>
             <li v-for="collection in matchedCollections" :key="collection.backend+'/'+collection.name" class="collectionPanelParent">
-                <CollectionPanel :collection="collection" :initiallyCollapsed="true"></CollectionPanel>
+                <Collection :collection="collection" :initiallyCollapsed="true"></Collection>
             </li>
         </ol>
     </div>
 </template>
 
 <script>
-import CollectionPanel from './CollectionPanel.vue';
+import Collection from './Collection.vue';
 
 export default {
     name: 'CollectionResults',
-    components: { CollectionPanel },
+    components: { Collection },
     props: ['matchedCollections', 'initialInstructionText']
 }
 </script>

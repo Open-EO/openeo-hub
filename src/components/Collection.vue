@@ -83,7 +83,7 @@ import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import FormattedTimestamp from './FormattedTimestamp.vue';
 
 export default {
-	name: 'CollectionPanel',
+	name: 'Collection',
 	props: ['collection', 'initiallyCollapsed'],
 	components: {
 		Description,
