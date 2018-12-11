@@ -1,5 +1,7 @@
 const config = require('./config.json');
 
+const dbqueries = require('./src/dbqueries.js');
+
 const mongodb = require('mongodb');
 const mongo = new mongodb.MongoClient(config.dbUrl, { useNewUrlParser: true } );
 var db;
@@ -41,7 +43,11 @@ async function send(data, res, next) {
 
 // list backends
 server.get('/backends', function(req, res, next) {
-    send(config.backends, res, next);
+    if(!req.query.details) {
+        send(config.backends, res, next);
+    } else {
+        send(aggregate(dbqueries.GET_ALL_BACKENDS_PIPELINE, 'backends'), res, next);
+    }
 });
 
 // search backends via parameters in URL query string

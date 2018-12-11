@@ -18,7 +18,9 @@
 			<section id="discover" :class="{hidden: view != 'discover'}">
 				<p>This is a list of all available openEO backends:</p>
 				<ul>
-					<li v-for="backend in allBackends" :key="backend.backend">{{backend.backend}}</li>
+					<li v-for="backend in allBackends" :key="backend.backend">
+						<Backend :backend="backend"></Backend>
+					</li>
 				</ul>
 			</section>
 			
@@ -87,6 +89,7 @@
 <script>
 import Vue from 'vue';
 import axios from 'axios';
+import Backend from './components/Backend.vue';
 import BackendSearch from './components/BackendSearch.vue';
 import BackendResults from './components/BackendResults.vue';
 import CollectionSearch from './components/CollectionSearch.vue';
@@ -97,6 +100,7 @@ import ProcessResults from './components/ProcessResults.vue';
 export default {
 	name: 'openeo-hub',
 	components: {
+		Backend,
 		BackendSearch,
 		BackendResults,
 		CollectionSearch,
@@ -116,7 +120,7 @@ export default {
 		};
 	},
 	mounted() {
-		axios.post('/backends/search', {})
+		axios.get('/backends?details=true')
 			.then(response => {
 				this.allBackends = response.data;
 			})
