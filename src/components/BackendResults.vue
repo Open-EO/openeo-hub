@@ -1,7 +1,8 @@
 <template>
     <div>
-        <h2>Results from backend search ({{matchedBackends.length}})</h2>
-        <em v-if="matchedBackends.length == 0" class="emptyNotice">empty</em>
+        <h2>Results from backend search {{(matchedBackends ? '('+matchedBackends.length+')' : '')}}</h2>
+        <em v-if="matchedBackends == null" class="emptyNotice">{{initialInstructionText}}</em>
+        <em v-else-if="matchedBackends.length == 0" class="emptyNotice">No search results.</em>
         <output>
             <ol>
                 <li v-for="backend in matchedBackends" :key="backend.backend">
@@ -60,7 +61,7 @@ export default {
         CollectionPanel,
         Process
     },
-    props: ['matchedBackends'],
+    props: ['matchedBackends', 'initialInstructionText'],
     methods: {
         convertProcessToLatestSpec(proc) {
             return DocGenUtils.convertProcessToLatestSpec(proc);

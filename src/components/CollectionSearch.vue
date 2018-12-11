@@ -26,9 +26,6 @@
         <h4>Temporal</h4>
 		<DateRangeChooser v-model="collectionSearch.daterange"></DateRangeChooser>
 		<input type="checkbox" v-model="collectionSearch.openEndOnly" id="openEndOnly"><label for="openEndOnly">Only show "open end" collections</label>
-
-        <h3>Actions</h3>
-        <button @click="queryCollections()">Submit</button>
     </div>
 </template>
 

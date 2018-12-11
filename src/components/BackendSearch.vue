@@ -35,9 +35,6 @@
 
         <h3>Billing</h3>
         <input type="checkbox" v-model="backendSearch.excludePaidOnly" id="excludePaidOnly"><label for="excludePaidOnly">Exclude backends without a free plan</label>
-
-        <h3>Actions</h3>
-        <button @click="queryBackends()">Submit</button>
     </div>
 </template>
 

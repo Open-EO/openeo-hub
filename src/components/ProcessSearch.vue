@@ -28,9 +28,6 @@
         <textarea v-model="processSearch.parameterNames" placeholder="Specify parameter names (case-insensitive, regular expression possible), each on a new line"></textarea>
         <h4>Descriptions</h4>
         <textarea v-model="processSearch.parameterDescriptions" placeholder="Specify parameter description search terms (case-insensitive, regular expression possible), each on a new line"></textarea>
-
-        <h3>Actions</h3>
-        <button @click="queryProcesses()">Submit</button>
     </div>
 </template>
 

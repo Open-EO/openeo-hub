@@ -38,15 +38,15 @@
 				</nav>
 
 				<div class="panelContainer" v-show="resultPanel == 'collections'">
-					<CollectionResults :matchedCollections="matchedCollections"></CollectionResults>
+					<CollectionResults :matchedCollections="matchedCollections" initialInstructionText='Use the "Collections" tab on the left side to compose a search.'></CollectionResults>
 				</div>
 
 				<div class="panelContainer" v-show="resultPanel == 'processes'">
-					<ProcessResults :matchedProcesses="matchedProcesses"></ProcessResults>
+					<ProcessResults :matchedProcesses="matchedProcesses" initialInstructionText='Use the "Processes" tab on the left side to compose a search.'></ProcessResults>
 				</div>
 
 				<div class="panelContainer" v-show="resultPanel == 'backends'">
-					<BackendResults :matchedBackends="matchedBackends"></BackendResults>
+					<BackendResults :matchedBackends="matchedBackends" initialInstructionText='Use the "Backends" tab on the left side to compose a search.'></BackendResults>
 				</div>
 			</section>
 
@@ -82,9 +82,9 @@ export default {
 		return {
 			searchPanel: 'backends',
 			resultPanel: 'backends',
-			matchedBackends: [],
-			matchedCollections: [],
-			matchedProcesses: []
+			matchedBackends: null,
+			matchedCollections: null,
+			matchedProcesses: null
 		};
 	},
 	methods: {
@@ -176,6 +176,9 @@ div.panelContainer {
 div.panelContainer.hidden {
 	height: 0;
 	padding: 0;
+}
+div.panelContainer > div {
+	padding-bottom: 20px;
 }
 footer {
 	border-top: 1px dotted #cecbc8;
