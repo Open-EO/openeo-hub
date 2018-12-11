@@ -21,6 +21,7 @@
     "crawl:verbose": "node crawl.js --verbose",
     "start:backend": "node server.js",
     "start:frontend": "vue-cli-service serve --port 9000",
+    "build": "vue-cli-service build",
     "start": "vue-cli-service build && node server.js",
     "start:dev": "vue-cli-service build --mode development && node server.js"
   },

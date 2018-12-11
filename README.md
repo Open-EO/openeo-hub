@@ -19,15 +19,18 @@ This app will soon be deployed at http://hub.openeo.org/.
 If you want to set it up yourself, follow these steps:
 
 ### Database
-1. Install MongoDB, especially `mongod`
+1. Install MongoDB, especially `mongod` (tested with v4.0.4)
 2. Start it (with write access to the dbpath) - e.g. `sudo mongod --dbpath /var/lib/mongodb`
 3. It should output `waiting for connections on port 27017`
 
 ### Frontend and API backend
 1. Clone this repo, `cd /path/to/openeo-hub/`
 2. `npm install` -> wait...
-3. Edit `config.json` with the URL and name of your DB and the list of backends to crawl
-4. `npm run crawl` -> wait until finished with output "DONE!"
+3. Edit `config.json`:
+   - Specify the URL and name of your MongoDB server and database (required)
+   - Specify the list of backends to crawl (required; specify backend URLs without trailing slash!)
+   - Optional: Change presets for thresholds that control how the crawler handles existing data that is not reachable on re-crawl
+4. `npm run crawl` -> wait until finished with output "DONE!" (if errors occur during crawling, it's probably due to a backend returning JSON that is not compliant with the openEO API spec)
 5. `npm start`
 6. Go to http://localhost:9000/
 
