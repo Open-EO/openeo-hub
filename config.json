@@ -2,7 +2,7 @@
     "dbUrl": "mongodb://localhost:27017",
     "dbName": "openeohub",
     "backends": [
-        "http://earthengine.openeo.org/v0.3"
+        "https://earthengine.openeo.org/v0.3"
     ],
     "unsuccessfulCrawls": {
         "flagAfter": 2,

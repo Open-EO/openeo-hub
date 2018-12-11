@@ -14,7 +14,7 @@ openEO Hub tries to implement some ambitious ideas. It is aimed to be a platform
 * explore publicly available containers to run UDFs
 
 ## Getting started
-This app will soon be deployed at http://hub.openeo.org/.
+This app is deployed at http://hub.openeo.org/.
 
 If you want to set it up yourself, follow these steps:
 
