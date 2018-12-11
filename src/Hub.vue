@@ -2,11 +2,27 @@
 	<div id="container">
 		<header>
 			<h1>openEO hub</h1>
+			<nav>
+				<ul>
+					<li @click="view = 'discover'" :class="{active: view == 'discover'}" title="Discover">Discover</li>
+					<li @click="view = 'search'" :class="{active: view == 'search'}" title="Search">Search</li>
+					<li @click="view = 'share'" :class="{active: view == 'share'}" title="Exchange">Exchange</li>
+					<li @click="view = 'about'" :class="{active: view == 'about'}" title="About">About</li>
+				</ul>
+			</nav>
 		</header>
 
 		<main>
 			
-			<section id="search">
+			<!-- Don't use `v-show` for `div`s that may contain Leaflet maps - it would cause the map to be initiated incorrectly. Setting `height:0` etc. (instead of v-show's `display:none`) solves the problem. -->
+			<section id="discover" :class="{hidden: view != 'discover'}">
+				<p>This is a list of all available openEO backends:</p>
+				<ul>
+					<li v-for="backend in allBackends" :key="backend.backend">{{backend.backend}}</li>
+				</ul>
+			</section>
+			
+			<section id="search" :class="{hidden: view != 'search'}">
 				<nav>
 					<ul>
 						<li @click="searchPanel = 'backends'" :class="{active: searchPanel == 'backends'}">Backends</li>
@@ -28,7 +44,7 @@
 				</div>
 			</section>
 
-			<section id="results">
+			<section id="results" :class="{hidden: view != 'search'}">
 				<nav>
 					<ul>
 						<li @click="resultPanel = 'backends'" :class="{active: resultPanel == 'backends'}">Backends</li>
@@ -48,6 +64,16 @@
 				<div class="panelContainer" v-show="resultPanel == 'backends'">
 					<BackendResults :matchedBackends="matchedBackends" initialInstructionText='Use the "Backends" tab on the left side to compose a search.'></BackendResults>
 				</div>
+			</section>
+
+			<section id="share" :class="{hidden: view != 'share'}">
+				<p>Soon you will be able to upload your process graphs here to share them with fellow openEO users.</p>
+			</section>
+
+			<section id="about" :class="{hidden: view != 'about'}">
+				<p><strong>openEO hub</strong> is a tool to discover backends that support the openEO API. It is also an exchange platform to share process graphs among the openEO community.</p>
+				<p>For more information on openEO, visit the project's homepage: <a href="http://openeo.org/">http://openeo.org/</a></p>
+				<p>The source code of this website is available <a href="https://github.com/Open-EO/openeo-hub">on GitHub</a>.</p>
 			</section>
 
 		</main>
@@ -80,12 +106,23 @@ export default {
 	},
 	data() {
 		return {
+			view: 'discover',
+			allBackends: [],
 			searchPanel: 'backends',
 			resultPanel: 'backends',
 			matchedBackends: null,
 			matchedCollections: null,
 			matchedProcesses: null
 		};
+	},
+	mounted() {
+		axios.post('/backends/search', {})
+			.then(response => {
+				this.allBackends = response.data;
+			})
+			.catch(error => {
+				console.log(error);
+			});
 	},
 	methods: {
 		queryBackends(params) {
@@ -149,9 +186,11 @@ html, body, #app, #container {
 	flex-direction: column;
 }
 header {
+	border-bottom: 1px dotted #cecbc8;
 	padding: 10px;
 }
 main {
+	padding-top: 10px;
 	flex: 1;
 	display: flex;
 	overflow: hidden;
@@ -162,10 +201,10 @@ section {
 	flex-direction: column;
 	overflow: hidden;
 }
-section:first-child {
+section#search {
 	margin-right: 10px;
 }
-section:last-child {
+section#results {
 	margin-left: 10px;
 }
 div.panelContainer {
@@ -173,9 +212,11 @@ div.panelContainer {
 	padding: 10px;
 	padding-top: 0;
 }
-div.panelContainer.hidden {
-	height: 0;
-	padding: 0;
+.hidden {
+	height: 0 !important;
+	max-width: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
 }
 div.panelContainer > div {
 	padding-bottom: 20px;
@@ -210,16 +251,59 @@ input[type='checkbox'] {
 	vertical-align: bottom;
 }
 
-/* tab-style navigation */
-nav {
-	border-bottom: 1px solid black;
-	padding-left: 20px;
+/* pill-style navigation */
+h1 {
+	display: inline-block; /* allow nav to start right next to it */
 }
-nav ul {
+header nav {
+	display: inline-block;
+	margin-left: 100px;
+	vertical-align: top;
+}
+header nav ul {
 	margin: 0;
 	padding: 0;
 }
-nav li {
+header nav li {
+	display: inline-block;
+	list-style: none;
+	font-size: 130%;
+	padding: 5px 10px;
+	margin: 0px 10px;
+	/*border: 1px solid black;*/
+	border: 1px dotted black;
+	border-radius: 10px;
+	cursor: pointer;
+	text-align: center;
+}
+header nav li:hover {
+	border: 1px solid black;
+}
+header nav li.active {
+	/*background-color: #e8e5e2;*/
+	border: 3px solid black;
+	font-weight: bold;
+}
+header nav li::after {
+	/* make un-bold text take up as much space as bold text so it doesn't jump when it becomes active */
+    display: block;
+    content: attr(title);
+    font-weight: bold;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+}
+
+/* tab-style navigation in search+results panels */
+main nav {
+	border-bottom: 1px solid black;
+	padding-left: 20px;
+}
+main nav ul {
+	margin: 0;
+	padding: 0;
+}
+main nav li {
 	display: inline-block;
 	list-style: none;
 	font-size: 120%;
@@ -231,7 +315,7 @@ nav li {
 	cursor: pointer;
 	background-color: #e8e5e2;
 }
-nav li.active {
+main nav li.active {
 	border-bottom: 1px solid white;
 	background-color: white;
 }
