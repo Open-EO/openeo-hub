@@ -19,6 +19,7 @@
   "scripts": {
     "crawl": "node crawl.js",
     "crawl:verbose": "node crawl.js --verbose",
+    "drop": "node drop.js",
     "start:backend": "node server.js",
     "start:frontend": "vue-cli-service serve --port 9000",
     "build": "vue-cli-service build",

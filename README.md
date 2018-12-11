@@ -23,6 +23,8 @@ If you want to set it up yourself, follow these steps:
 2. Start it (with write access to the dbpath) - e.g. `sudo mongod --dbpath /var/lib/mongodb`
 3. It should output `waiting for connections on port 27017`
 
+Should you ever want to hard-reset the database (i.e. drop all collections openeo-hub created), use the `drop` script by calling `node drop.js --yesimsure` or `npm run drop -- --yesimsure`.
+
 ### Frontend and API backend
 1. Clone this repo, `cd /path/to/openeo-hub/`
 2. `npm install` -> wait...
