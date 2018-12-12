@@ -23,7 +23,21 @@ module.exports = {
             retrieved: 1,
             unsuccessfulCrawls: 1,
             version: '$root.version',
-            endpoints: '$root.endpoints',
+            endpoints: {
+                $reduce: {
+                    input: {
+                        $map: { input: '$root.endpoints', as: 'endpoint', in: { 
+                            $map: { input: '$$endpoint.methods', as: 'method', in:{
+                                $concat: ['$$method',' ','$$endpoint.path']
+                            }}
+                        }}
+                    },
+                    initialValue: [],
+                    in: {
+                        $concatArrays: ['$$value', '$$this']
+                    }
+                }
+            },
             collections: '$collections.collections',
             processes: '$processes.processes',
             outputFormats: '$outputFormats.formats',
