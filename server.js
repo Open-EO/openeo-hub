@@ -21,7 +21,16 @@ function findOne(findCriteria, collectionName) {
 }
 
 function find(findCriteria, collectionName) {
-    return getCollection(collectionName).find(findCriteria);
+    if(findCriteria.$text) {
+        // sort by text search score if criteria contain a fulltext search
+        return getCollection(collectionName)
+            .find(findCriteria)
+            .project({ fulltextSearchScore: {$meta:"textScore"} })
+            .sort({ fulltextSearchScore: {$meta:"textScore"} });
+    } else {
+        // don't sort anything if there's no fulltext search involved
+        return getCollection(collectionName).find(findCriteria);
+    }
 }
 
 function aggregate(pipeline, collectionName) {

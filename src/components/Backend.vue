@@ -10,7 +10,7 @@
             </dt>
             <dd v-if="backend.endpoints && !collapsed.endpoints">
                 <ul>
-                    <li v-for="endpoint in backend.endpoints" :key="endpoint">{{endpoint}}</li>
+                    <li v-for="endpoint in preparedBackend.endpoints" :key="endpoint">{{endpoint}}</li>
                 </ul>
             </dd>
 
@@ -18,13 +18,13 @@
                 <h4>{{collapsed.collections ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} collections ({{backend.collections.length}})</h4>
             </dt>
             <dd v-if="backend.collections && !collapsed.collections">
-                <Collection v-for="collection in backend.collections" :key="collection.name" :collection="collection" initiallyCollapsed="true"></Collection>
+                <Collection v-for="collection in preparedBackend.collections" :key="collection.name" :collection="collection" initiallyCollapsed="true"></Collection>
             </dd>
             
             <dt v-if="backend.processes" @click="collapsed.processes = !collapsed.processes">
                 <h4>{{collapsed.processes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
             </dt>
-            <dd v-if="backend.processes && !collapsed.processes">
+            <dd v-if="preparedBackend.processes && !collapsed.processes">
                 <Process v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)" :baseConfig="{processesInitiallyCollapsed:true}"></Process>
             </dd>
 
@@ -33,7 +33,7 @@
             </dt>
             <dd v-if="backend.outputFormats && !collapsed.outputFormats">
                 <ul>
-                    <li v-for="of in Object.keys(backend.outputFormats)" :key="of">{{of}}</li>
+                    <li v-for="of in preparedBackend.outputFormats" :key="of">{{of}}</li>
                 </ul>
             </dd>
 
@@ -42,7 +42,7 @@
             </dt>
             <dd v-if="backend.serviceTypes && !collapsed.serviceTypes">
                 <ul>
-                    <li v-for="st in Object.keys(backend.serviceTypes)" :key="st">{{st}}</li>
+                    <li v-for="st in preparedBackend.serviceTypes" :key="st">{{st}}</li>
                 </ul>
             </dd>
         </dl>
@@ -64,7 +64,24 @@ export default {
         DataRetrievedNotice,
         Collection,
         Process
-	},
+    },
+    computed: {
+        preparedBackend() {
+            if(this.isSearchResult) {
+                // don't touch search result because order may be important
+                return this.backend;
+            } else {
+                // when we get a long list for the discovery section having it sorted alphabetically is very handy
+                var original = this.backend;
+                // endpoints are not sorted because the initial search order is already good
+                original.collections = original.collections.sort((c1, c2) => c1.name.toLowerCase() > c2.name.toLowerCase());
+                original.processes = original.processes.sort((p1, p2) => p1.name.toLowerCase() > p2.name.toLowerCase());
+                original.outputFormats = Object.keys(original.outputFormats).sort((of1, of2) => of1.toLowerCase() > of2.toLowerCase());
+                original.serviceTypes = Object.keys(original.serviceTypes).sort((st1, st2) => st1.toLowerCase() > st2.toLowerCase());
+                return original;
+            }
+        }
+    },
 	data() {
 		return {
 			collapsed: {
