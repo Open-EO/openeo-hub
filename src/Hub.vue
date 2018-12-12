@@ -211,6 +211,9 @@ section#search {
 section#results {
 	margin-left: 10px;
 }
+section#discover {
+	overflow-y: auto;
+}
 div.panelContainer {
 	overflow: auto;
 	padding: 10px;
@@ -324,6 +327,14 @@ main nav li.active {
 	background-color: white;
 }
 
+/* discover section */
+#discover > ul > li {
+	list-style: none;
+}
+#discover > ul > li + li {
+	margin-top: 30px;
+}
+
 /* search section */
 #search h3 {
 	margin-top: 10px;
@@ -358,12 +369,12 @@ main nav li.active {
 	margin-bottom: 10px;
 }
 #results h3,
-#results h4,
-#results h5 {
+#results h4, #discover h4,
+#results h5, #discover h5 {
 	font-size: 100%;
 	margin-top: 10px;
 }
-#results h4 code {  /* otherwise param names appear really small */
+.process h4 code {  /* otherwise param names appear really small */
 	font-size: 125%;
 }
 #results .emptyNotice {
@@ -372,26 +383,28 @@ main nav li.active {
 ol.searchresults > li { /* with "direct child" selectors so that it doesn't affect `li`s of other lists further down */
 	margin-bottom: 20px;
 }
-#results dd {
+.backend dd,
+.collection dd {
 	margin-bottom: 10px;
 }
-#results dd > ul {
+.backend dd > ul,
+.collection dd > ul {
 	padding-left: 15px;
 }
-#results .process {
+.process {
 	margin: 0;
 }
-#results .process h2,
-#results .process h3,
-#results .collection h2,
-#results .collection h3 {
+.process h2,
+.process h3,
+.collection h2,
+.collection h3 {
 	font-size: 100%;
 	margin-top: 10px;
 }
-#results .collection + .collection,
-#results .collectionParent + .collectionParent,
-#results .process + .process,
-#results .processParent + .processParent {
+.collection + .collection,
+.collectionParent + .collectionParent,
+.process + .process,
+.processParent + .processParent {
 	/* margin between neighbouring panels */
 	margin-top: 30px;
 }

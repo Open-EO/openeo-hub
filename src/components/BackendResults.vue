@@ -4,8 +4,8 @@
         <em v-if="matchedBackends == null" class="emptyNotice">{{initialInstructionText}}</em>
         <em v-else-if="matchedBackends.length == 0" class="emptyNotice">No search results.</em>
         <ol class="searchresults">
-            <li v-for="backend in matchedBackends" :key="backend.backend" class="backendPanelParent">
-                <Backend :backend="backend" :initiallyCollapsed="true"></Backend>
+            <li v-for="backend in matchedBackends" :key="backend.backend" class="backendParent">
+                <Backend :backend="backend" :initiallyCollapsed="true" :isSearchResult="true"></Backend>
             </li>
         </ol>
     </div>

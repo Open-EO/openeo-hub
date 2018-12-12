@@ -1,5 +1,5 @@
 <template>
-    <em>This data was retrieved from the backend server at <FormattedTimestamp :timestamp="timestamp"></FormattedTimestamp>.</em>
+    <em>This data was cached at <FormattedTimestamp :timestamp="timestamp"></FormattedTimestamp>.</em>
 </template>
 
 <script>

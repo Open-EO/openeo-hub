@@ -1,36 +1,46 @@
 <template>
-	<div class="backendPanel">
+	<div class="backend">
         <h3>{{backend.backend}}</h3>
         <dl>
             <dt><h4>Version</h4></dt>
             <dd>{{backend.version}}</dd>
 
-            <dt v-if="backend.endpoints"><h4>Matched endpoints ({{backend.endpoints.length}})</h4></dt>
-            <dd v-if="backend.endpoints">
+            <dt v-if="backend.endpoints" @click="collapsed.endpoints = !collapsed.endpoints">
+                <h4>{{collapsed.endpoints ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} endpoints ({{backend.endpoints.length}})</h4>
+            </dt>
+            <dd v-if="backend.endpoints && !collapsed.endpoints">
                 <ul>
                     <li v-for="endpoint in backend.endpoints" :key="endpoint">{{endpoint}}</li>
                 </ul>
             </dd>
 
-            <dt v-if="backend.collections"><h4>Matched collections ({{backend.collections.length}})</h4></dt>
-            <dd v-if="backend.collections">
+            <dt v-if="backend.collections" @click="collapsed.collections = !collapsed.collections">
+                <h4>{{collapsed.collections ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} collections ({{backend.collections.length}})</h4>
+            </dt>
+            <dd v-if="backend.collections && !collapsed.collections">
                 <Collection v-for="collection in backend.collections" :key="collection.name" :collection="collection" initiallyCollapsed="true"></Collection>
             </dd>
             
-            <dt v-if="backend.processes"><h4>Matched processes ({{backend.processes.length}})</h4></dt>
-            <dd v-if="backend.processes">
+            <dt v-if="backend.processes" @click="collapsed.processes = !collapsed.processes">
+                <h4>{{collapsed.processes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
+            </dt>
+            <dd v-if="backend.processes && !collapsed.processes">
                 <Process v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)" :baseConfig="{processesInitiallyCollapsed:true}"></Process>
             </dd>
 
-            <dt v-if="backend.outputFormats"><h4>Matched output formats ({{Object.keys(backend.outputFormats).length}})</h4></dt>
-            <dd v-if="backend.outputFormats">
+            <dt v-if="backend.outputFormats" @click="collapsed.outputFormats = !collapsed.outputFormats">
+                <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{Object.keys(backend.outputFormats).length}})</h4>
+            </dt>
+            <dd v-if="backend.outputFormats && !collapsed.outputFormats">
                 <ul>
                     <li v-for="of in Object.keys(backend.outputFormats)" :key="of">{{of}}</li>
                 </ul>
             </dd>
 
-            <dt v-if="backend.serviceTypes"><h4>Matched service types ({{Object.keys(backend.serviceTypes).length}})</h4></dt>
-            <dd v-if="backend.serviceTypes">
+            <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
+                <h4>{{collapsed.serviceTypes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} service types ({{Object.keys(backend.serviceTypes).length}})</h4>
+            </dt>
+            <dd v-if="backend.serviceTypes && !collapsed.serviceTypes">
                 <ul>
                     <li v-for="st in Object.keys(backend.serviceTypes)" :key="st">{{st}}</li>
                 </ul>
@@ -49,7 +59,7 @@ import Collection from './Collection.vue';
 
 export default {
 	name: 'Backend',
-	props: ['backend', 'initiallyCollapsed'],
+	props: ['backend', 'initiallyCollapsed', 'isSearchResult'],
 	components: {
         DataRetrievedNotice,
         Collection,
@@ -57,7 +67,14 @@ export default {
 	},
 	data() {
 		return {
-			collapsed: this.initiallyCollapsed || false
+			collapsed: {
+                root: this.initiallyCollapsed || false,
+                endpoints: true,
+                collections: true,
+                processes: true,
+                outputFormats: true,
+                serviceTypes: true
+            }
 		};
     },
     methods: {
@@ -68,5 +85,8 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+h4 {
+    cursor: pointer;
+}
 </style>
