@@ -369,7 +369,7 @@ main nav li.active {
 #results .emptyNotice {
 	margin-left: 20px;
 }
-#results output > ol > li { /* with "direct child" selectors so that it doesn't affect `li`s of other lists further down */
+ol.searchresults > li { /* with "direct child" selectors so that it doesn't affect `li`s of other lists further down */
 	margin-bottom: 20px;
 }
 #results dd {
@@ -383,13 +383,13 @@ main nav li.active {
 }
 #results .process h2,
 #results .process h3,
-#results .collectionPanel h2,
-#results .collectionPanel h3 {
+#results .collection h2,
+#results .collection h3 {
 	font-size: 100%;
 	margin-top: 10px;
 }
-#results .collectionPanel + .collectionPanel,
-#results .collectionPanelParent + .collectionPanelParent,
+#results .collection + .collection,
+#results .collectionParent + .collectionParent,
 #results .process + .process,
 #results .processParent + .processParent {
 	/* margin between neighbouring panels */
@@ -397,7 +397,7 @@ main nav li.active {
 }
 
 /* Panels */
-div:not(.collectionPanel):not(.process) > h2 { /* all normal `h2`s, but not the ones that are part of the `Process` */
+div:not(.collection):not(.process) > h2 { /* all normal `h2`s, but not the ones that are part of the `Process` */
 	position: sticky;
 	top: 0;
 	z-index: 2000; /* would lie under Leaflet map (500), attribution layer (800) or corner boxes (1000) if less */
@@ -407,7 +407,7 @@ div:not(.collectionPanel):not(.process) > h2 { /* all normal `h2`s, but not the 
 	padding-bottom: 10px;
 	border-bottom: 1px dotted #cecbc8;
 }
-.collectionPanel,
+.collection,
 .process {
 	/* set `position` because... */
 	position: relative;

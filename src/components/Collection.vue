@@ -1,5 +1,5 @@
 <template>
-	<div class="collectionPanel">
+	<div class="collection">
 		<a class="anchor" :name="collection.name"></a><!-- ToDo: Replace name with id -->
 		<h2>{{collection.name}}</h2>
 
