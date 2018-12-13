@@ -32,7 +32,7 @@
                 <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{Object.keys(backend.outputFormats).length}})</h4>
             </dt>
             <dd v-if="backend.outputFormats && !collapsed.outputFormats">
-                <ul>
+                <ul class="output-formats">
                     <li v-for="of in preparedBackend.outputFormats" :key="of">{{of}}</li>
                 </ul>
             </dd>
@@ -41,7 +41,7 @@
                 <h4>{{collapsed.serviceTypes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} service types ({{Object.keys(backend.serviceTypes).length}})</h4>
             </dt>
             <dd v-if="backend.serviceTypes && !collapsed.serviceTypes">
-                <ul>
+                <ul class="service-types">
                     <li v-for="st in preparedBackend.serviceTypes" :key="st">{{st}}</li>
                 </ul>
             </dd>
@@ -105,5 +105,9 @@ export default {
 <style scoped>
 h4 {
     cursor: pointer;
+}
+ul.output-formats,
+ul.service-types {
+    column-width: 10em;
 }
 </style>

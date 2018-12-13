@@ -194,16 +194,16 @@ header {
 	padding: 10px;
 }
 main {
-	padding-top: 10px;
 	flex: 1;
 	display: flex;
 	overflow: hidden;
 }
-section {
+main > section {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+	padding-top: 10px;
 }
 section#search {
 	margin-right: 10px;
@@ -327,12 +327,36 @@ main nav li.active {
 	background-color: white;
 }
 
+/* sections without tab-style navigation */
+#discover,
+#share,
+#about {
+	padding-left: 20px;
+}
+#discover p,
+#share p,
+#about p {
+	margin: 10px 0;
+}
+#discover p:first-child,
+#share p:first-child,
+#about p:first-child {
+	margin-top: 0;
+}
+#discover > p:last-of-type {
+	margin-bottom: 30px;
+}
+
+
 /* discover section */
 #discover > ul > li {
 	list-style: none;
+	max-width: 50em;
 }
 #discover > ul > li + li {
 	margin-top: 30px;
+	border-top: 1px solid black;
+	padding-top: 30px;
 }
 
 /* search section */
