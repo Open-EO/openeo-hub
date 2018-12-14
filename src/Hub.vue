@@ -364,10 +364,7 @@ main nav li.active {
 	margin-top: 10px;
 }
 #endpointchooser {
-	/*column-count: 4;*/
-	height: 100px;
 	width: 90%;
-	overflow-y: scroll;
 	padding: 5px;
 	border: 1px solid #cecbc8;
 }

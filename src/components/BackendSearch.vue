@@ -9,9 +9,9 @@
             <input type="radio" value="0.3.1" v-model="backendSearch.version" id="v031"><label for="v031">0.3.1</label>
         </div>
 
-        <h3>Endpoints</h3>
-        <EndpointChooser :endpoints="allEndpoints" :calledOnChange="setSelectedEndpoints"></EndpointChooser>
-        <p><em>Tick all endpoints that the backend must support</em></p>
+        <h3>Functionalities</h3>
+        <EndpointChooser :categorizedEndpoints="endpointsByFunctionality" :calledOnChange="setSelectedEndpoints"></EndpointChooser>
+        <p><em>Tick all functionalities that the backend must support</em></p>
 
         <h3>Collections</h3>
         <textarea v-model="backendSearch.collections" placeholder="Specify collection identifiers, each on a new line"></textarea>
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { OPENEO_V0_3_1_ENDPOINTS } from './../const.js'
+import { OPENEO_V0_3_1_ENDPOINTS, OPENEO_V0_3_1_FUNCTIONALITIES } from './../const.js'
 import EndpointChooser from './EndpointChooser.vue';
 
 export default {
@@ -51,6 +51,7 @@ export default {
 		return {
 			// sort alphabetically by endpoint path (i.e. delete HTTP method (always uppercased) for sorting)
 			allEndpoints: OPENEO_V0_3_1_ENDPOINTS.sort((e1, e2) => e1.replace(/[A-Z]/g, '') > e2.replace(/[A-Z]/g, '')),
+			endpointsByFunctionality: OPENEO_V0_3_1_FUNCTIONALITIES,
 			backendSearch: {
 				version: 'any',
 				endpoints: [],

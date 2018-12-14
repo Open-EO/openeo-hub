@@ -30,7 +30,6 @@
 </template>
 
 <script>
-import { OPENEO_V0_3_1_ENDPOINTS } from './../const.js'
 import BboxChooser from './BboxChooser.vue';
 import DateRangeChooser from './DateRangeChooser.vue';
 
