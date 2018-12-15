@@ -4,7 +4,7 @@
 		<input @change="returnState()" v-model="west"  placeholder="West"/>
 		<input @change="returnState()" v-model="east"  placeholder="East"/>
 		<input @change="returnState()" v-model="south"  placeholder="South"/>
-		<l-map style="height:400px" :zoom="4" :center="[50,10]" @click="mapClickToBbox">
+		<l-map style="height:400px" :zoom="4" :center="[50,10]" @click="mapClickToBbox" ref="map">
 			<l-tile-layer
 				url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
 				attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'>
@@ -36,7 +36,13 @@ export default {
 			lastClickWasNorthWest: false
 		}
 	},
+	mounted() {
+		new IntersectionObserver(this.invalidateSize).observe(this.$refs.map.mapObject.getContainer());
+	},
 	methods: {
+		invalidateSize() {
+			this.$refs.map.mapObject.invalidateSize();
+		},
 		returnState() {
 			this.calledOnChange([this.west, this.south, this.east, this.north]);
 		},
