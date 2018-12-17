@@ -69,7 +69,24 @@
 			</section>
 
 			<section id="share" :class="{hidden: view != 'share'}">
-				<p>Soon you will be able to upload your process graphs here to share them with fellow openEO users.</p>
+				<h2>Process Graph Repository</h2>
+				<h3>Upload yours</h3>
+				<p>Upload your process graphs here to share them with fellow openEO users!</p>
+				<input v-model="newProcessGraph.title" placeholder="Title">
+				<textarea v-model="newProcessGraph.description" placeholder="Description"></textarea>
+				<textarea v-model="newProcessGraph.process_graph" placeholder="Process graph as JSON"></textarea>
+				<button @click="uploadProcessGraph">Upload</button>
+
+				<h3>What others have shared</h3>
+				<p v-if="allProcessGraphs.length > 0">These process graphs have been publicly shared:</p>
+				<p v-else>Nothing yet... :( Be the first and use the form above!</p>
+				<ol v-if="allProcessGraphs.length > 0">
+					<li v-for="pg in allProcessGraphs" :key="pg.process_graph_id">
+						<h4>{{pg.title || 'Untitled'}}</h4>
+						<p v-if="pg.description">{{pg.description}}</p>
+						<pre>{{pg.process_graph}}</pre>
+					</li>
+				</ol>
 			</section>
 
 			<section id="about" :class="{hidden: view != 'about'}">
@@ -112,6 +129,12 @@ export default {
 		return {
 			view: 'discover',
 			allBackends: [],
+			allProcessGraphs: [],
+			newProcessGraph: {
+				title: '',
+				description: '',
+				process_graph: ''  // with snake_case because the openEO API spec uses it
+			},
 			searchPanel: 'backends',
 			resultPanel: 'backends',
 			matchedBackends: null,
@@ -120,6 +143,7 @@ export default {
 		};
 	},
 	mounted() {
+		this.getProcessGraphs();
 		axios.get('/backends?details=true')
 			.then(response => {
 				this.allBackends = response.data;
@@ -156,6 +180,31 @@ export default {
 				.then(response => {
 					this.matchedProcesses = response.data;
 					this.resultPanel = 'processes';
+				})
+				.catch(error => {
+					console.log(error);
+				});
+		},
+
+		getProcessGraphs() {
+			axios.get('/process_graphs')
+				.then(response => {
+					this.allProcessGraphs = response.data;
+				})
+				.catch(error => {
+					console.log(error);
+				});
+		},
+
+		uploadProcessGraph() {
+			axios.post('process_graphs', this.newProcessGraph)
+				.then(response => {
+					this.getProcessGraphs();
+					this.newProcessGraph = {
+						title: '',
+						description: '',
+						process_graph: ''
+					}
 				})
 				.catch(error => {
 					console.log(error);
@@ -211,7 +260,8 @@ section#search {
 section#results {
 	margin-left: 10px;
 }
-section#discover {
+section#discover,
+section#share {
 	overflow-y: auto;
 }
 div.panelContainer {
@@ -428,6 +478,24 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 .processParent + .processParent {
 	/* margin between neighbouring panels */
 	margin-top: 30px;
+}
+
+/* Share section */
+#share input {
+	max-width: 500px;
+}
+#share textarea {
+	max-width: 1000px;
+	min-height: 100px;
+}
+#share textarea ~ textarea {
+	min-height: 200px;
+}
+#share button {
+	width: 100px;
+}
+#share h3 {
+	margin-top: 20px;
 }
 
 /* Panels */

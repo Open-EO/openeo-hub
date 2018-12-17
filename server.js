@@ -16,6 +16,10 @@ function getCollection(collectionName = 'backends') {
     return db.collection(collectionName);
 }
 
+function insertOne(data, collectionName) {
+    return getCollection(collectionName).insertOne(data);
+}
+
 function findOne(findCriteria, collectionName) {
     return getCollection(collectionName).findOne(findCriteria);
 }
@@ -378,6 +382,14 @@ server.post('/processes/search', async function(req, res, next) {
 
     // send end result
     send(find(criteria, 'processes'), res, next);
+});
+
+server.get('/process_graphs', function(req, res, next) {
+    send(find({}, 'process_graphs'), res, next);
+});
+
+server.post('/process_graphs', function(req, res, next) {
+    send(insertOne(req.body, 'process_graphs'), res, next);
 });
 
 // serve website (UI)
