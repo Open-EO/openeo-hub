@@ -73,12 +73,17 @@ export default {
                 return this.backend;
             } else {
                 // when we get a long list for the discovery section having it sorted alphabetically is very handy
+                
                 var original = this.backend;
-                // endpoints are not sorted because the initial search order is already good
-                original.collections = original.collections.sort((c1, c2) => c1.name.toLowerCase() > c2.name.toLowerCase());
-                original.processes = original.processes.sort((p1, p2) => p1.name.toLowerCase() > p2.name.toLowerCase());
-                original.outputFormats = Object.keys(original.outputFormats).sort((of1, of2) => of1.toLowerCase() > of2.toLowerCase());
-                original.serviceTypes = Object.keys(original.serviceTypes).sort((st1, st2) => st1.toLowerCase() > st2.toLowerCase());
+                const sortCallback = (of1, of2) => of1.toLowerCase() > of2.toLowerCase();
+                const sortCallbackName = (c1, c2) => c1.name.toLowerCase() > c2.name.toLowerCase();
+
+                // ternary operator check in case the property is `null`
+                original.collections = original.collections ? original.collections.sort(sortCallbackName) : null;
+                original.processes = original.processes ? original.processes.sort(sortCallbackName) : null;
+                original.outputFormats = original.outputFormats ? Object.keys(original.outputFormats).sort(sortCallback) : null;
+                original.serviceTypes = original.serviceTypes ? Object.keys(original.serviceTypes).sort(sortCallback) : null;
+                
                 return original;
             }
         },

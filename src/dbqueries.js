@@ -13,10 +13,22 @@ module.exports = {
         } },
         { $addFields: {
             root: { $arrayElemAt: [ '$contents', { $indexOfArray: ['$paths', '/'] } ] },
-            collections: { $arrayElemAt: [ '$contents', { $indexOfArray: ['$paths', '/collections'] } ] },
-            processes: { $arrayElemAt: [ '$contents', { $indexOfArray: ['$paths', '/processes'] } ] },
-            outputFormats: { $arrayElemAt: [ '$contents', { $indexOfArray: ['$paths', '/output_formats'] } ] },
-            serviceTypes: { $arrayElemAt: [ '$contents', { $indexOfArray: ['$paths', '/service_types'] } ] }
+            collections: { $let: {
+                vars: { index: {$indexOfArray: ['$paths', '/collections']}},
+                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
+            } },
+            processes: { $let: {
+                vars: { index: {$indexOfArray: ['$paths', '/processes']}},
+                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
+            } },
+            outputFormats: { $let: {
+                vars: { index: {$indexOfArray: ['$paths', '/output_formats']}},
+                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
+            } },
+            serviceTypes: { $let: {
+                vars: { index: {$indexOfArray: ['$paths', '/service_types']}},
+                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
+            } }
         } },
         { $project: {
             backend: 1,
