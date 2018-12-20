@@ -25,7 +25,7 @@
                 <h4>{{collapsed.processes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
             </dt>
             <dd v-if="preparedBackend.processes && !collapsed.processes">
-                <Process v-for="process in backend.processes" :key="process.name || process.id" :process="convertProcessToLatestSpec(process)" :baseConfig="{processesInitiallyCollapsed:true}"></Process>
+                <Process v-for="process in backend.processes" :key="process.name || process.id" :process="normalizeProcess(process)" :baseConfig="{processesInitiallyCollapsed:true}"></Process>
             </dd>
 
             <dt v-if="backend.outputFormats" @click="collapsed.outputFormats = !collapsed.outputFormats">
@@ -147,8 +147,8 @@ export default {
 		};
     },
     methods: {
-        convertProcessToLatestSpec(proc) {
-            return DocGenUtils.convertProcessToLatestSpec(proc);
+        normalizeProcess(proc) {
+            return DocGenUtils.normalizeProcess(proc);
         }
     }
 }

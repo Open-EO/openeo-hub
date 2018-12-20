@@ -5,7 +5,7 @@
         <em v-else-if="matchedProcesses.length == 0" class="emptyNotice">No search results.</em>
         <ol>
             <li v-for="process in matchedProcesses" :key="process.backend+'/'+process.name" class="processParent">
-                <Process :process="convertProcessToLatestSpec(process)" :baseConfig="{processesInitiallyCollapsed:true}">
+                <Process :process="normalizeProcess(process)" :baseConfig="{processesInitiallyCollapsed:true}">
                     <div slot="process-after-summary" class="backendname">
                         <em>{{process.backend}}</em>
                     </div>
@@ -27,8 +27,8 @@ export default {
     components: { Process, DataRetrievedNotice },
     props: ['matchedProcesses', 'initialInstructionText'],
     methods: {
-        convertProcessToLatestSpec(proc) {
-            return DocGenUtils.convertProcessToLatestSpec(proc);
+        normalizeProcess(proc) {
+            return DocGenUtils.normalizeProcess(proc);
         }
     }
 }
