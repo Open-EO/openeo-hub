@@ -1,7 +1,7 @@
 <template>
 	<div id="container">
 		<header>
-			<h1>openEO hub</h1>
+			<h1>openEO Hub</h1>
 			<nav>
 				<ul>
 					<li @click="view = 'discover'" :class="{active: view == 'discover'}" title="Discover">Discover</li>

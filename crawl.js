@@ -7,7 +7,7 @@ const OpenEO = require('@openeo/js-client').OpenEO;
 const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true } );
 const openeo = new OpenEO();
 
-const consts = require('./src/dbqueries.js');
+const dbqueries = require('./src/dbqueries.js');
 
 const starttimestamp = new Date().toJSON();
 
@@ -106,8 +106,8 @@ mongo.connect(async (err, client) => {
         collection.deleteMany({unsuccessfulCrawls: {$gte: config.unsuccessfulCrawls.deleteAfter}});
         // Get all collections as usual, but in the end remove `id` from result to avoid "duplicate key" errors and output.
         // Call `hasNext` because as long as there's no I/O request the Mongo Node driver doesn't actually execute the pipeline.
-        collection.aggregate(consts.GET_ALL_COLLECTIONS_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'collections'}])).hasNext();
-        collection.aggregate(consts.GET_ALL_PROCESSES_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'processes'}])).hasNext();
+        collection.aggregate(dbqueries.GET_ALL_COLLECTIONS_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'collections'}])).hasNext();
+        collection.aggregate(dbqueries.GET_ALL_PROCESSES_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'processes'}])).hasNext();
         console.log('Finished processing data.');
         console.log('');
 

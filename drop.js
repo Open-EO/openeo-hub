@@ -14,7 +14,7 @@ mongo.connect((err, client) => {
         console.log('Exiting without doing anything.');
         mongo.close();
     } else {
-        db.listCollections({name: {$in: ['backends', 'collections', 'processes']}}, {nameOnly: true}).toArray()
+        db.listCollections({name: {$in: ['backends', 'collections', 'processes', 'process_graphs']}}, {nameOnly: true}).toArray()
         .then(colls => {
             if(colls.length == 0) {
                 console.log('No collections exist that could be dropped.')
