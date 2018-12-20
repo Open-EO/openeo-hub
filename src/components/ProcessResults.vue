@@ -1,11 +1,11 @@
 <template>
     <div>
         <h2>Results from process search {{(matchedProcesses ? '('+matchedProcesses.length+')' : '')}}</h2>
-        <em v-if="matchedProcesses == null" class="emptyNotice">{{initialInstructionText}}</em>
+        <em v-if="preparedProcesses == null" class="emptyNotice">{{initialInstructionText}}</em>
         <em v-else-if="matchedProcesses.length == 0" class="emptyNotice">No search results.</em>
         <ol>
-            <li v-for="process in matchedProcesses" :key="process.backend+'/'+process.name" class="processParent">
-                <Process :process="normalizeProcess(process)" :baseConfig="{processesInitiallyCollapsed:true}">
+            <li v-for="process in matchedProcesses" :key="process.backend+'/'+(process.id||process.name)" class="processParent">
+                <Process :process="process" :baseConfig="{processesInitiallyCollapsed:true}">
                     <div slot="process-after-summary" class="backendname">
                         <em>{{process.backend}}</em>
                     </div>
@@ -26,9 +26,9 @@ export default {
     name: 'ProcessResults',
     components: { Process, DataRetrievedNotice },
     props: ['matchedProcesses', 'initialInstructionText'],
-    methods: {
-        normalizeProcess(proc) {
-            return DocGenUtils.normalizeProcess(proc);
+    computed: {
+        preparedProcesses() {
+            return Array.isArray(this.matchedProcesses) ? this.matchedProcesses.map(DocGenUtils.normalizeProcess.bind(DocGenUtils)) : null;
         }
     }
 }

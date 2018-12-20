@@ -25,7 +25,7 @@
                 <h4>{{collapsed.processes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
             </dt>
             <dd v-if="preparedBackend.processes && !collapsed.processes">
-                <Process v-for="process in backend.processes" :key="process.name || process.id" :process="normalizeProcess(process)" :baseConfig="{processesInitiallyCollapsed:true}"></Process>
+                <Process v-for="process in backend.processes" :key="process.name || process.id" :process="process" :baseConfig="{processesInitiallyCollapsed:true}"></Process>
             </dd>
 
             <dt v-if="backend.outputFormats" @click="collapsed.outputFormats = !collapsed.outputFormats">
@@ -68,25 +68,28 @@ export default {
     },
     computed: {
         preparedBackend() {
-            if(this.isSearchResult) {
-                // don't touch search result because order may be important
-                return this.backend;
-            } else {
-                // when we get a long list for the discovery section having it sorted alphabetically is very handy
-                
-                var original = this.backend;
-                const sortCallback = (of1, of2) => of1.toLowerCase() > of2.toLowerCase();
-                const sortCallbackName = (c1, c2) => c1.name.toLowerCase() > c2.name.toLowerCase();
+            var original = this.backend;
 
+            // normalize `processes` so the Process component can work with it
+            if(Array.isArray(original.processes)) {
+                original.processes = original.processes.map(DocGenUtils.normalizeProcess.bind(DocGenUtils));
+            }
+
+            // don't touch search result because order may be important
+            // but when we get a long list for the discovery section having it sorted alphabetically is very handy
+            if(!this.isSearchResult) {
+                const sortCallback = (e1, e2) => e1.toLowerCase() > e2.toLowerCase();
+                const sortCallbackName = (e1, e2) => (e1.id || e1.name).toLowerCase() > (e2.id || e2.name).toLowerCase();
                 // ternary operator check in case the property is `null`
                 original.collections = original.collections ? original.collections.sort(sortCallbackName) : null;
                 original.processes = original.processes ? original.processes.sort(sortCallbackName) : null;
                 original.outputFormats = original.outputFormats ? Object.keys(original.outputFormats).sort(sortCallback) : null;
                 original.serviceTypes = original.serviceTypes ? Object.keys(original.serviceTypes).sort(sortCallback) : null;
-                
-                return original;
             }
+
+            return original;
         },
+
         functionalities() {
             if(!this.backend.endpoints) {
                 return undefined;
@@ -124,6 +127,7 @@ export default {
                 */
             }
         },
+
         supportedFunctionalitiesCount() {
             const supported = Object.values(this.functionalities).reduce((sum, currentValue) => sum + (currentValue == true ? 1 : 0), 0);
             const total = Object.keys(OPENEO_V0_3_1_FUNCTIONALITIES).length;
@@ -145,11 +149,6 @@ export default {
                 serviceTypes: true
             }
 		};
-    },
-    methods: {
-        normalizeProcess(proc) {
-            return DocGenUtils.normalizeProcess(proc);
-        }
     }
 }
 </script>
