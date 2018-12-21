@@ -69,24 +69,7 @@
 			</section>
 
 			<section id="share" :class="{hidden: view != 'share'}">
-				<h2>Process Graph Repository</h2>
-				<h3>Upload yours</h3>
-				<p>Upload your process graphs here to share them with fellow openEO users!</p>
-				<input v-model="newProcessGraph.title" placeholder="Title">
-				<textarea v-model="newProcessGraph.description" placeholder="Description"></textarea>
-				<textarea v-model="newProcessGraph.process_graph" placeholder="Process graph as JSON"></textarea>
-				<button @click="uploadProcessGraph">Upload</button>
-
-				<h3>What others have shared</h3>
-				<p v-if="allProcessGraphs.length > 0">These process graphs have been publicly shared:</p>
-				<p v-else>Nothing yet... :( Be the first and use the form above!</p>
-				<ol v-if="allProcessGraphs.length > 0">
-					<li v-for="pg in allProcessGraphs" :key="pg.process_graph_id">
-						<h4>{{pg.title || 'Untitled'}}</h4>
-						<p v-if="pg.description">{{pg.description}}</p>
-						<pre>{{pg.process_graph}}</pre>
-					</li>
-				</ol>
+				<ProcessGraphRepository></ProcessGraphRepository>
 			</section>
 
 			<section id="about" :class="{hidden: view != 'about'}">
@@ -113,6 +96,7 @@ import CollectionSearch from './components/CollectionSearch.vue';
 import CollectionResults from './components/CollectionResults.vue';
 import ProcessSearch from './components/ProcessSearch.vue';
 import ProcessResults from './components/ProcessResults.vue';
+import ProcessGraphRepository from './components/ProcessGraphRepository.vue';
 
 export default {
 	name: 'openeo-hub',
@@ -123,18 +107,13 @@ export default {
 		CollectionSearch,
 		CollectionResults,
 		ProcessSearch,
-		ProcessResults
+		ProcessResults,
+		ProcessGraphRepository
 	},
 	data() {
 		return {
 			view: 'discover',
 			allBackends: [],
-			allProcessGraphs: [],
-			newProcessGraph: {
-				title: '',
-				description: '',
-				process_graph: ''  // with snake_case because the openEO API spec uses it
-			},
 			searchPanel: 'backends',
 			resultPanel: 'backends',
 			matchedBackends: null,
@@ -143,7 +122,6 @@ export default {
 		};
 	},
 	mounted() {
-		this.getProcessGraphs();
 		axios.get('/backends?details=true')
 			.then(response => {
 				this.allBackends = response.data;
@@ -180,31 +158,6 @@ export default {
 				.then(response => {
 					this.matchedProcesses = response.data;
 					this.resultPanel = 'processes';
-				})
-				.catch(error => {
-					console.log(error);
-				});
-		},
-
-		getProcessGraphs() {
-			axios.get('/process_graphs')
-				.then(response => {
-					this.allProcessGraphs = response.data;
-				})
-				.catch(error => {
-					console.log(error);
-				});
-		},
-
-		uploadProcessGraph() {
-			axios.post('process_graphs', this.newProcessGraph)
-				.then(response => {
-					this.getProcessGraphs();
-					this.newProcessGraph = {
-						title: '',
-						description: '',
-						process_graph: ''
-					}
 				})
 				.catch(error => {
 					console.log(error);
@@ -481,6 +434,10 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 }
 
 /* Share section */
+#share div {
+	display: flex;
+	flex-direction: column;
+}
 #share input {
 	max-width: 500px;
 }
@@ -499,7 +456,7 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 }
 
 /* Panels */
-div:not(.collection):not(.process) > h2 { /* all normal `h2`s, but not the ones that are part of the `Process` */
+.panelContainer > div > h2 { /* headings of the tabs */
 	position: sticky;
 	top: 0;
 	z-index: 2000; /* would lie under Leaflet map (500), attribution layer (800) or corner boxes (1000) if less */
