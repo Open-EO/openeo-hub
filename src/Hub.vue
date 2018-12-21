@@ -449,10 +449,23 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 	min-height: 200px;
 }
 #share button {
-	width: 100px;
+	max-width: 100px;
 }
 #share h3 {
 	margin-top: 20px;
+}
+#share li div {
+	max-width: 1000px;
+	margin-bottom: 10px;
+}
+#share pre {
+	background-color: #ececec;
+	border: 1px solid darkgray;
+	overflow: auto;
+	padding: 5px;
+}
+#share pre:not(.expanded) {
+	max-height: 120px;
 }
 
 /* Panels */

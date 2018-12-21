@@ -13,10 +13,13 @@
         <p v-if="allProcessGraphs.length > 0">These process graphs have been publicly shared:</p>
         <p v-else>Nothing yet... :( Be the first and use the form above!</p>
         <ol v-if="allProcessGraphs.length > 0">
-            <li v-for="pg in allProcessGraphs" :key="pg.process_graph_id">
+            <li v-for="(pg, i) in allProcessGraphs" :key="pg.process_graph_id">
                 <h4>{{pg.title || 'Untitled'}}</h4>
                 <p v-if="pg.description">{{pg.description}}</p>
-                <pre>{{pg.process_graph}}</pre>
+                <div>
+                    <pre :class="{expanded: expanded[i]}">{{pg.process_graph}}</pre>
+                    <button @click="$set(expanded, i, !expanded[i])">{{expanded[i] ? '▼' : '◀'}}</button>
+                </div>
             </li>
         </ol>
     </div>
@@ -34,7 +37,8 @@ export default {
 				title: '',
 				description: '',
 				process_graph: ''  // with snake_case because the openEO API spec uses it
-			}
+            },
+            expanded: {}
 		};
 	},
 	mounted() {
@@ -69,5 +73,16 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+div {
+    position: relative;
+}
+pre {
+    margin: 0;
+}
+pre ~ button {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+}
 </style>
