@@ -83,6 +83,10 @@ export default {
                 original.processes = original.processes.map(DocGenUtils.normalizeProcess.bind(DocGenUtils));
             }
 
+            // the file types and service names are stored as the keys of the objects
+            original.outputFormats = original.outputFormats ? Object.keys(original.outputFormats) : null;
+            original.serviceTypes = original.serviceTypes ? Object.keys(original.serviceTypes) : null;
+
             // don't touch search result because order may be important
             // but when we get a long list for the discovery section having it sorted alphabetically is very handy
             if(!this.isSearchResult) {
@@ -91,8 +95,8 @@ export default {
                 // ternary operator check in case the property is `null`
                 original.collections = original.collections ? original.collections.sort(sortCallbackName) : null;
                 original.processes = original.processes ? original.processes.sort(sortCallbackName) : null;
-                original.outputFormats = original.outputFormats ? Object.keys(original.outputFormats).sort(sortCallback) : null;
-                original.serviceTypes = original.serviceTypes ? Object.keys(original.serviceTypes).sort(sortCallback) : null;
+                original.outputFormats = original.outputFormats ? original.outputFormats.sort(sortCallback) : null;
+                original.serviceTypes = original.serviceTypes ? original.serviceTypes.sort(sortCallback) : null;
             }
 
             return original;

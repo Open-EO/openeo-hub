@@ -1,5 +1,5 @@
 <template>
-    <div class="retrieved">
+    <div class="retrieved" v-if="timestamp != undefined">
         <em>This data was cached at <FormattedTimestamp :timestamp="timestamp"></FormattedTimestamp>.</em>
     </div>
 </template>
