@@ -15,10 +15,11 @@ console.log('Connecting to database server...');
 mongo.connect(async (err, client) => {
     assert.equal(null, err);
     const db = client.db(config.dbName);
-    const collection = db.collection('backends');
+    const collection = db.collection('raw');
     console.log('Connected to database server.');
     console.log('Setting up database indexes...');
-    db.collection('backends').createIndex({backend: 1, path: 1}, { name: 'backend-path_unique', unique: true });
+    db.collection('raw').createIndex({backend: 1, path: 1}, { name: 'backend-path_unique', unique: true });
+    db.collection('backends').createIndex({backend: 1}, { name: 'backend_unique', unique: true });
     db.collection('collections').createIndex({name: "text", title: "text", description: "text"}, { name: 'name-title-description_text' });
     db.collection('processes').createIndex({name: "text", summary: "text", description: "text", "returns.description": "text", "parametersAsArray.k": "text", "parametersAsArray.v.description": "text"}, {name: 'name-summary-description-paramname-paramdescription_text'});
     console.log('Set up database indexes.');
@@ -106,8 +107,9 @@ mongo.connect(async (err, client) => {
         collection.deleteMany({unsuccessfulCrawls: {$gte: config.unsuccessfulCrawls.deleteAfter}});
         // Get all collections as usual, but in the end remove `id` from result to avoid "duplicate key" errors and output.
         // Call `hasNext` because as long as there's no I/O request the Mongo Node driver doesn't actually execute the pipeline.
+        collection.aggregate(dbqueries.GET_ALL_BACKENDS_PIPELINE   .concat([{$project: {_id: 0}}, {$out: 'backends'}]))   .hasNext();
         collection.aggregate(dbqueries.GET_ALL_COLLECTIONS_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'collections'}])).hasNext();
-        collection.aggregate(dbqueries.GET_ALL_PROCESSES_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'processes'}])).hasNext();
+        collection.aggregate(dbqueries.GET_ALL_PROCESSES_PIPELINE  .concat([{$project: {_id: 0}}, {$out: 'processes'}]))  .hasNext();
         console.log('Finished processing data.');
         console.log('');
 

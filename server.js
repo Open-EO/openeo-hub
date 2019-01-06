@@ -12,7 +12,7 @@ var server = restify.createServer();
 server.use(restify.plugins.queryParser({ mapParams: false }));
 server.use(restify.plugins.bodyParser({ mapParams: false }));
 
-function getCollection(collectionName = 'backends') {
+function getCollection(collectionName = 'raw') {
     return db.collection(collectionName);
 }
 
@@ -59,7 +59,7 @@ server.get('/backends', function(req, res, next) {
     if(!req.query.details) {
         send(config.backends, res, next);
     } else {
-        send(aggregate(dbqueries.GET_ALL_BACKENDS_PIPELINE, 'backends'), res, next);
+        send(find({}, 'backends'), res, next);
     }
 });
 

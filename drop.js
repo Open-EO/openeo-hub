@@ -17,7 +17,7 @@ mongo.connect((err, client) => {
         console.log('Exiting without doing anything.');
         mongo.close();
     } else {
-        var collectionsToDrop = ['backends', 'collections', 'processes'];
+        var collectionsToDrop = ['raw', 'backends', 'collections', 'processes'];
         if(dropEverything) {
             collectionsToDrop.push('process_graphs');
         }
