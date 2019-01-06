@@ -11,6 +11,8 @@ const dbqueries = require('./src/dbqueries.js');
 
 const starttimestamp = new Date().toJSON();
 
+const verbose = process.argv[2] == '--verbose';
+
 console.log('Connecting to database server...');
 mongo.connect(async (err, client) => {
     assert.equal(null, err);
@@ -61,7 +63,9 @@ mongo.connect(async (err, client) => {
         }  
         catch(error) {
             console.log('An error occured while gathering endpoint URLs for ' + backend + ' :');
-            console.log(error);
+            if(verbose) {
+                console.log(error);
+            }
         }
 
         if(paths.length > 0) {
@@ -69,9 +73,17 @@ mongo.connect(async (err, client) => {
         }
 
         // Request them all
-        paths.forEach(path => {
-            if(process.argv.length > 2 && process.argv[2] == '--verbose') { console.log('Download scheduled for ' + backend+path); }
+        paths.forEach((path, index) => {
+            if(verbose) {
+                console.log('  Scheduling download for ' + backend+path);
+            }
             promises.push(
+                new Promise(resolve => {
+                const downloader = () => {
+                if(verbose) {
+                    console.log('  Now downloading ' + backend+path);
+                }
+                resolve(
                 axios(backend+path)
                 .then(response => {
                     // save to database
@@ -89,7 +101,13 @@ mongo.connect(async (err, client) => {
                     });
                 })
                 .catch(error => {
-                    console.log(error);
+                    console.log('An error occured while downloading ' + backend+path);
+                    if(verbose) {
+                        console.log(error);
+                    }
+                })
+                )};
+                setTimeout(downloader, index*config.crawlDelay);
                 })
             );
         });
@@ -119,5 +137,10 @@ mongo.connect(async (err, client) => {
         console.log('');
         console.log('DONE!');
     })
-    .catch(error => console.log(error));
+    .catch(error => {
+        console.log('An error occured while finalising the crawl process.');
+        if(verbose) {
+            console.log(error);
+        }
+    });
 });

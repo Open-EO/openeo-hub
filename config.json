@@ -6,6 +6,7 @@
         "http://giv-openeo.uni-muenster.de:8000",
         "http://saocompute.eurac.edu/openEO_0_3_0/openeo"
     ],
+    "crawlDelay": 10,
     "unsuccessfulCrawls": {
         "flagAfter": 2,
         "deleteAfter": 14
