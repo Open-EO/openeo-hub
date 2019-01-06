@@ -1,6 +1,7 @@
 <template>
 	<div class="backend">
         <h3>{{backend.backend}}</h3>
+        <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
         <dl>
             <dt><h4>Version</h4></dt>
             <dd>{{backend.version}}</dd>
@@ -25,7 +26,14 @@
                 <h4>{{collapsed.processes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
             </dt>
             <dd v-if="preparedBackend.processes && !collapsed.processes">
-                <Process v-for="process in backend.processes" :key="process.name || process.id" :process="process" :baseConfig="{processesInitiallyCollapsed:true}"></Process>
+                <Process v-for="process in backend.processes" :key="process.name || process.id" :process="process" :baseConfig="{processesInitiallyCollapsed:true}">
+                    <template slot="process-after-summary">
+                        <UnsuccessfulCrawlNotice :unsuccessfulCrawls="process.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
+                    </template>
+                    <template slot="process-after-details">
+                        <DataRetrievedNotice :timestamp="process.retrieved"></DataRetrievedNotice>
+                    </template>
+                </Process>
             </dd>
 
             <dt v-if="backend.outputFormats" @click="collapsed.outputFormats = !collapsed.outputFormats">
@@ -46,14 +54,13 @@
                 </ul>
             </dd>
         </dl>
-        <div class="retrieved">
-            <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
-        </div>
+        <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
     </div>
 </template>
 
 <script>
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
+import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
 import { Process, Utils as DocGenUtils } from '@openeo/processes-docgen';
 import Collection from './Collection.vue';
 import { OPENEO_V0_3_1_FUNCTIONALITIES } from './../const.js'
@@ -63,6 +70,7 @@ export default {
 	props: ['backend', 'initiallyCollapsed', 'isSearchResult'],
 	components: {
         DataRetrievedNotice,
+        UnsuccessfulCrawlNotice,
         Collection,
         Process
     },

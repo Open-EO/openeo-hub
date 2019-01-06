@@ -6,12 +6,15 @@
         <ol>
             <li v-for="process in matchedProcesses" :key="process.backend+'/'+(process.id||process.name)" class="processParent">
                 <Process :process="process" :baseConfig="{processesInitiallyCollapsed:true}">
-                    <div slot="process-after-summary" class="backendname">
-                        <em>{{process.backend}}</em>
-                    </div>
-                    <div slot="process-after-details" class="retrieved">
- 			            <DataRetrievedNotice :timestamp="process.retrieved"></DataRetrievedNotice>
-                    </div>
+                    <template slot="process-after-summary">
+                        <div class="backendname">
+                            <em>{{process.backend}}</em>
+                        </div>
+                        <UnsuccessfulCrawlNotice :unsuccessfulCrawls="process.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
+                    </template>
+                    <template slot="process-after-details">
+                        <DataRetrievedNotice :timestamp="process.retrieved"></DataRetrievedNotice>
+                    </template>
                 </Process>
             </li>
         </ol>
@@ -21,10 +24,11 @@
 <script>
 import { Process, Utils as DocGenUtils } from '@openeo/processes-docgen';
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
+import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
 
 export default {
     name: 'ProcessResults',
-    components: { Process, DataRetrievedNotice },
+    components: { Process, DataRetrievedNotice, UnsuccessfulCrawlNotice },
     props: ['matchedProcesses', 'initialInstructionText'],
     computed: {
         preparedProcesses() {

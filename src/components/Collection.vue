@@ -11,6 +11,8 @@
 			<em>{{collection.backend}}</em>
 		</div>
 
+		<UnsuccessfulCrawlNotice :unsuccessfulCrawls="collection.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
+
 		<button v-if="initiallyCollapsed" class="show-more-button" @click="collapsed = !collapsed">Show {{collapsed ? 'more' : 'less'}}</button>
 
 		<div v-show="!collapsed">
@@ -65,9 +67,7 @@
 			<LinkList :links="filteredLinks"></LinkList>
 		</div>
 
-		<div class="retrieved">
-			<DataRetrievedNotice :timestamp="collection.retrieved"></DataRetrievedNotice>
-		</div>
+		<DataRetrievedNotice :timestamp="collection.retrieved"></DataRetrievedNotice>
 			
 		</div>
 
@@ -81,11 +81,13 @@ import "leaflet/dist/leaflet.css";
 import * as moment from 'moment';
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import FormattedTimestamp from './FormattedTimestamp.vue';
+import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
 
 export default {
 	name: 'Collection',
 	props: ['collection', 'initiallyCollapsed'],
 	components: {
+		UnsuccessfulCrawlNotice,
 		Description,
 		LinkList,
 		LMap,

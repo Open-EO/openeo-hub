@@ -1,5 +1,7 @@
 <template>
-    <em>This data was cached at <FormattedTimestamp :timestamp="timestamp"></FormattedTimestamp>.</em>
+    <div class="retrieved">
+        <em>This data was cached at <FormattedTimestamp :timestamp="timestamp"></FormattedTimestamp>.</em>
+    </div>
 </template>
 
 <script>

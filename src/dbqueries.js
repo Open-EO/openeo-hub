@@ -3,11 +3,12 @@ module.exports = {
         { $match: { path: { $in: ['/', '/collections', '/processes', '/service_types', '/output_formats'] } } },
         // This would be more dynamic and is effectively the same: { $match: { path: { $regex: "^\/[a-z_]*$" } } }
         // But since the endpoints are hardcoded anyway there's no benefit, especially not when considering regex slowness.
+        { $sort: { backend: 1, path: 1 } },
         { $group: {
             _id: '$backend',
             backend: { $first: '$backend' },
             retrieved: { $max: '$retrieved' },
-            unsuccessfulCrawls: { $max: '$unsuccessfulCrawls' },
+            unsuccessfulCrawls: { $first: '$unsuccessfulCrawls' },
             contents: { $push: '$content' },
             paths: {$push: '$path'}
         } },
@@ -58,7 +59,7 @@ module.exports = {
     ],
     GET_ALL_COLLECTIONS_PIPELINE: [
         { $match: { path: '/collections' } },
-        { $addFields: { 'content.collections.backend': '$backend', 'content.collections.retrieved': '$retrieved' } },
+        { $addFields: { 'content.collections.backend': '$backend', 'content.collections.retrieved': '$retrieved', 'content.collections.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'collection': '$content.collections' } },
         { $unwind: '$collection' },
         { $replaceRoot: { newRoot: '$collection' } }
@@ -66,7 +67,7 @@ module.exports = {
     GET_ALL_PROCESSES_PIPELINE: [
         // basically like for collections
         { $match: { path: '/processes' } },
-        { $addFields: { 'content.processes.backend': '$backend', 'content.processes.retrieved': '$retrieved' } },
+        { $addFields: { 'content.processes.backend': '$backend', 'content.processes.retrieved': '$retrieved', 'content.processes.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'process': '$content.processes' } },
         { $unwind: '$process' },
         { $replaceRoot: {newRoot: '$process'} },

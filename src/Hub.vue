@@ -389,7 +389,8 @@ main nav li.active {
 
 /* results section */
 #results h2,
-#results h3 {
+#results h3,
+#discover h3 {
 	margin-bottom: 10px;
 }
 #results h3,
