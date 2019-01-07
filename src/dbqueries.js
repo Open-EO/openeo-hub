@@ -54,7 +54,8 @@ module.exports = {
             collections: '$collections.collections',
             processes: '$processes.processes',
             outputFormats: '$outputFormats.formats',
-            serviceTypes: 1
+            serviceTypes: 1,
+            billing: '$root.billing'
         } }
     ],
     GET_ALL_COLLECTIONS_PIPELINE: [

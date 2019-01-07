@@ -341,9 +341,9 @@ main nav li.active {
 #about p {
 	margin: 10px 0;
 }
-#discover p:first-child,
-#share p:first-child,
-#about p:first-child {
+#discover > p:first-child,
+#share > p:first-child,
+#about > p:first-child {
 	margin-top: 0;
 }
 #discover > p:last-of-type {
@@ -422,7 +422,8 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 .process h2,
 .process h3,
 .collection h2,
-.collection h3 {
+.collection h3,
+.plan h2 {
 	font-size: 100%;
 	margin-top: 10px;
 }
@@ -432,6 +433,10 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 .processParent + .processParent {
 	/* margin between neighbouring panels */
 	margin-top: 30px;
+}
+
+.billing p {
+	margin-top: 10px;
 }
 
 /* Share section */

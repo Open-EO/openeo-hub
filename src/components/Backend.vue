@@ -53,6 +53,20 @@
                     <li v-for="st in preparedBackend.serviceTypes" :key="st">{{st}}</li>
                 </ul>
             </dd>
+
+            <dt v-if="backend.billing" @click="collapsed.billing = !collapsed.billing">
+                <h4>{{collapsed.billing ? '▶' : '▼'}} Available plans ({{backend.billing.plans.length}})</h4>
+            </dt>
+            <dd v-if="backend.billing && !collapsed.billing" class="billing">
+                <p><strong>Currency:</strong> {{preparedBackend.billing.currency}}</p>
+                <ul class="plans">
+                    <li v-for="p in preparedBackend.billing.plans" :key="p" class="plan">
+                        <h2>{{p.name}} <template v-if="preparedBackend.billing.default_plan == p.name">(default)</template></h2>
+                        {{p.description}}
+                        <a v-if="p.url" :href="p.url">More information</a>
+                    </li>
+                </ul>
+            </dd>
         </dl>
         <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
     </div>
@@ -158,7 +172,8 @@ export default {
                 collections: true,
                 processes: true,
                 outputFormats: true,
-                serviceTypes: true
+                serviceTypes: true,
+                billing: true
             }
 		};
     }
