@@ -32,14 +32,17 @@ Should you ever want to hard-reset the database (i.e. drop all collections opene
    - Specify the URL and name of your MongoDB server and database (required)
    - Specify the list of backends to crawl (required; specify backend URLs without trailing slash!)
    - Optional: Change presets for thresholds that control how the crawler handles existing data that is not reachable on re-crawl
-4. `npm run crawl` -> wait until finished with output "DONE!" (see below if something doesn't go to plan)
+4. `npm run crawl` -> wait until finished with output "DONE!" (see below if something doesn't look right or any line starts with "An error...")
 5. `npm start`
 6. Go to http://localhost:9000/
 
-### Troubleshooting
+## Troubleshooting
 If errors occur during crawling, this is probably caused by one of the crawled backends (a) returning JSON that is not compliant to the openEO API specification, or (b) malfunctioning under the load of many requests in quick succession. In the first case (a), the `--verbose` option may be helpful to locate the error (be sure to pass the option to the *script* and not to NPM, i.e. call `node crawl.js --verbose` or `npm run crawl -- --verbose`). In the second case (b), the problem may be fixed by increasing the value of the `crawlDelay` option in the `config.json` -- it controls how many milliseconds the crawler pauses between each request to the same backend.
 
-### For development
+## Scheduling re-crawling
+On Linux systems, you can use the cron daemon to schedule recurring crawling. For example, adding the following line to `/etc/crontab` executes the crawl script every six hours, as the user johndoe: `0 */6 * * * johndoe node /path/to/openeo-hub/crawl.js`
+
+## Development
 There are several start scripts for different dev scenarios:
 - `npm run start:frontend` runs a *vue-cli-service* dev server with Hot-Module-Replacement (HMR) - handy when working on the frontend only. Major downside: The backend is not available in this mode (i.e. you can't test API calls).
 - `npm run start:backend` starts the *Restify* server, so you can test API calls (e.g. with *Postman*). Frontend-wise it serves whatever is found in the `/dist` directory (i.e. the most recent frontend build).

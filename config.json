@@ -8,7 +8,7 @@
     ],
     "crawlDelay": 10,
     "unsuccessfulCrawls": {
-        "flagAfter": 2,
-        "deleteAfter": 14
+        "flagAfter": 8,
+        "deleteAfter": 56
     }
 }
