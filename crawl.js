@@ -43,23 +43,23 @@ mongo.connect(async (err, client) => {
         const backend = config.backends[i];
 
         try {
-        console.log('Gathering endpoint URLs for ' + backend + ' ...');
-        var paths = [];
-        const con = await openeo.connect(backend);
-        const caps = await con.capabilities();
+            console.log('Gathering endpoint URLs for ' + backend + ' ...');
+            var paths = [];
+            const con = await openeo.connect(backend);
+            const caps = await con.capabilities();
 
-        // add all standard endpoints that are supported
-        for (var method in endpoints) {
-            if(caps.hasFeature(method)) {
-                paths.push(endpoints[method]);
+            // add all standard endpoints that are supported
+            for (var method in endpoints) {
+                if(caps.hasFeature(method)) {
+                    paths.push(endpoints[method]);
+                }
             }
-        }
 
-        // if `/collections/{name}` is supported: add the individual collections too
-        if(caps.hasFeature('listCollections') && caps.hasFeature('describeCollection')) {
-            const collections = await con.listCollections();
-            paths = paths.concat(collections.collections.map(c => '/collections/' + (c.name || c.id)));
-        }
+            // if `/collections/{name}` is supported: add the individual collections too
+            if(caps.hasFeature('listCollections') && caps.hasFeature('describeCollection')) {
+                const collections = await con.listCollections();
+                paths = paths.concat(collections.collections.map(c => '/collections/' + (c.name || c.id)));
+            }
         }  
         catch(error) {
             console.log('An error occured while gathering endpoint URLs for ' + backend + ' :');
@@ -69,7 +69,7 @@ mongo.connect(async (err, client) => {
         }
 
         if(paths.length > 0) {
-        console.log('Starting crawling of ' + backend + ' ...');
+            console.log('Starting crawling of ' + backend + ' ...');
         }
 
         // Request them all
@@ -79,35 +79,29 @@ mongo.connect(async (err, client) => {
             }
             promises.push(
                 new Promise(resolve => {
-                const downloader = () => {
-                if(verbose) {
-                    console.log('  Now downloading ' + backend+path);
-                }
-                resolve(
-                axios(backend+path)
-                .then(response => {
-                    // save to database
-                    collection.findOneAndUpdate({
-                        backend: backend,
-                        path: path
-                    }, {
-                        $set: {
-                            retrieved: new Date().toJSON(),
-                            unsuccessfulCrawls: 0,
-                            content: response.data
+                    const downloader = () => {
+                        if(verbose) {
+                            console.log('  Now downloading ' + backend+path);
                         }
-                    }, {
-                        upsert: true
-                    });
-                })
-                .catch(error => {
-                    console.log('An error occured while downloading ' + backend+path);
-                    if(verbose) {
-                        console.log(error);
-                    }
-                })
-                )};
-                setTimeout(downloader, index*config.crawlDelay);
+                        resolve(
+                            axios(backend+path)
+                            .then(response => {
+                                // save to database
+                                collection.findOneAndUpdate(
+                                    { backend: backend, path: path},
+                                    { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: response.data } },
+                                    { upsert: true }
+                                );
+                            })
+                            .catch(error => {
+                                console.log('An error occured while downloading ' + backend+path);
+                                if(verbose) {
+                                    console.log(error);
+                                }
+                            })
+                        );
+                    };
+                    setTimeout(downloader, index * config.crawlDelay);
                 })
             );
         });
