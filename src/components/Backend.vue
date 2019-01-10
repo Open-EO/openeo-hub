@@ -55,12 +55,14 @@
             </dd>
 
             <dt v-if="backend.billing" @click="collapsed.billing = !collapsed.billing">
-                <h4>{{collapsed.billing ? '▶' : '▼'}} Available plans ({{backend.billing.plans.length}})</h4>
+                <h4>{{collapsed.billing ? '▶' : '▼'}} Billing information</h4>
             </dt>
             <dd v-if="backend.billing && !collapsed.billing" class="billing">
-                <p><strong>Currency:</strong> {{preparedBackend.billing.currency}}</p>
-                <ul class="plans">
-                    <li v-for="p in preparedBackend.billing.plans" :key="p" class="plan">
+                <h5>Currency</h5>
+                {{preparedBackend.billing.currency}}
+                <h5 v-if="backend.billing.plans">Available plans ({{backend.billing.plans.length}})</h5>
+                <ul v-if="backend.billing.plans" class="plans">
+                    <li v-for="p in preparedBackend.billing.plans" :key="p.name" class="plan">
                         <h2>{{p.name}} <template v-if="preparedBackend.billing.default_plan == p.name">(default)</template></h2>
                         {{p.description}}
                         <a v-if="p.url" :href="p.url">More information</a>
