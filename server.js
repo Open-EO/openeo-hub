@@ -63,13 +63,6 @@ server.get('/backends', function(req, res, next) {
     }
 });
 
-// search backends via parameters in URL query string
-// only supports `version` parameter
-server.get('/backends/search', function(req, res, next) {
-    const criteria = (req.query.version ? {'content.version': req.query.version} : {path: '/'});
-    send(find(criteria), res, next);
-});
-
 // search backends via JSON document in POST body
 // supports all parameters, which are currently: version, endpoints, collections, processes, processGraph, outputFormats, processTypes, excludePaidOnly
 server.post('/backends/search', async function(req, res, next) {
