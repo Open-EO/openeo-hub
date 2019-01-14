@@ -99,7 +99,7 @@ export default {
 	data() {
 		return {
 			collapsed: this.initiallyCollapsed || false,
-			filteredLinks: this.collection.links.filter(l => l.rel === undefined || ['self', 'parent', 'root'].indexOf(l.rel) == -1)
+			filteredLinks: Array.isArray(this.collection.links) ? this.collection.links.filter(l => l.rel === undefined || ['self', 'parent', 'root'].indexOf(l.rel) == -1) : []
 		};
 	},
     methods: {
