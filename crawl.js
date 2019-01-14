@@ -35,16 +35,10 @@ mongo.connect(async (err, client) => {
         listServiceTypes: '/service_types'
     };
 
-    var promises = [];
-
-    // use a for-loop instead of forEach because forEach wouldn't `await` the result of the callback and thus mess up the order
-    for(var i in config.backends) {
-        // set shorthand
-        const backend = config.backends[i];
-
+    for (var backend in config.backends) {
         try {
-            console.log('Gathering endpoint URLs for ' + backend + ' ...');
-            var paths = [];
+            console.log('Gathering endpoint URLs for ' + config.backends[backend] + ' at ' + backend + ' ...');
+            var paths = ['/'];
             const con = await openeo.connect(backend);
             const caps = await con.capabilities();
 
@@ -68,48 +62,35 @@ mongo.connect(async (err, client) => {
             }
         }
 
-        if(paths.length > 0) {
-            console.log('Starting crawling of ' + backend + ' ...');
-        }
+        for(var index in paths) {
+            var path = paths[index];
+            console.log('Crawling of ' + backend+path + ' ...');
+            await axios(backend+path)
+            .then(response => {
+                // save to database
+                var data = response.data;
+                if (path === '/') {
+                    data.title = config.backends[backend];
+                }
+                collection.findOneAndUpdate(
+                    { backend: backend, path: path },
+                    { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: data } },
+                    { upsert: true }
+                );
+            })
+            .catch(error => {
+                console.log('An error occured while downloading ' + backend+path);
+                if(verbose) {
+                    console.log(error);
+                }
+            });
+        };
 
-        // Request them all
-        paths.forEach((path, index) => {
-            if(verbose) {
-                console.log('  Scheduling download for ' + backend+path);
-            }
-            promises.push(
-                new Promise(resolve => {
-                    const downloader = () => {
-                        if(verbose) {
-                            console.log('  Now downloading ' + backend+path);
-                        }
-                        resolve(
-                            axios(backend+path)
-                            .then(response => {
-                                // save to database
-                                collection.findOneAndUpdate(
-                                    { backend: backend, path: path},
-                                    { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: response.data } },
-                                    { upsert: true }
-                                );
-                            })
-                            .catch(error => {
-                                console.log('An error occured while downloading ' + backend+path);
-                                if(verbose) {
-                                    console.log(error);
-                                }
-                            })
-                        );
-                    };
-                    setTimeout(downloader, index * config.crawlDelay);
-                })
-            );
-        });
+        console.log('');
     }
 
     // once all requests have finished
-    Promise.all(promises)
-    .then(() => {
+    try {
         console.log('');
         console.log('Finished crawling of all backends.');
         console.log('');
@@ -130,11 +111,11 @@ mongo.connect(async (err, client) => {
         console.log('Closed database connection.')
         console.log('');
         console.log('DONE!');
-    })
-    .catch(error => {
+    }
+    catch(error) {
         console.log('An error occured while finalising the crawl process.');
         if(verbose) {
             console.log(error);
         }
-    });
+    }
 });

@@ -1,11 +1,12 @@
 <template>
 	<div class="backend">
-        <h3>{{backend.backend}}</h3>
+        <h3>
+            {{backend.title}}
+            <template v-if="backend.version"> | v{{backend.version}}</template>
+        </h3>
+        <small><code>{{backend.backend}}</code></small>
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
         <dl>
-            <dt><h4>Version</h4></dt>
-            <dd>{{backend.version}}</dd>
-
             <dt v-if="functionalities" @click="collapsed.functionalities = !collapsed.functionalities">
                 <h4>{{collapsed.functionalities ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'Supported'}} functionalities ({{supportedFunctionalitiesCount}})</h4>
             </dt>
