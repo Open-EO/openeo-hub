@@ -106,6 +106,7 @@ server.post('/backends/search', async function(req, res, next) {
     // cleanup response object (add version and endpoints to root scope, remove all other unnecessary properties)
     backendsWithCriteria = backendsWithCriteria.map(b => {
         b.version = b.content.version;
+        b.title = b.content.title;
         // endpoints in `"METHOD /path"` format like in the request
         b.endpoints = req.body.endpoints;
         // endpoints in `{path:'/path', methods:['METHOD']}` format like in the openEO API spec

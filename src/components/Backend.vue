@@ -1,11 +1,12 @@
 <template>
 	<div class="backend">
-        <h3>{{backend.backend}}</h3>
+        <h3>
+            {{backend.title}}
+            <template v-if="backend.version"> | v{{backend.version}}</template>
+        </h3>
+        <small><code>{{backend.backend}}</code></small>
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
         <dl>
-            <dt><h4>Version</h4></dt>
-            <dd>{{backend.version}}</dd>
-
             <dt v-if="functionalities" @click="collapsed.functionalities = !collapsed.functionalities">
                 <h4>{{collapsed.functionalities ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'Supported'}} functionalities ({{supportedFunctionalitiesCount}})</h4>
             </dt>
@@ -120,40 +121,40 @@ export default {
 
         functionalities() {
             if(!this.backend.endpoints) {
-                return undefined;
-            } else {
-                let yesno = Object.assign({}, OPENEO_V0_3_1_FUNCTIONALITIES);
-
-                Object.keys(yesno).forEach(key =>  // for each functionality
-                    yesno[key] = yesno[key].every(endpoint =>  // to be labelled "supported", ALL endpoints of the functionality must be supported
-                        this.backend.endpoints.some(e =>  // the functionality's endpoint must be found in the returned endpoints array
-                            e.match(new RegExp(endpoint.replace(/{[^}]+}/g, '{[^}]+}')))  // allow arbitrary parameter names (aka don't care about content in curly brackets)
-                        )
-                    )
-                );
-
-                if(this.isSearchResult) {
-                    // "filter" out all false values (if it was a search, we don't care about we *didn't* find)
-                    Object.keys(yesno).forEach(key => {
-                        if(!yesno[key]) {
-                            delete yesno[key];
-                        }
-                    });
-                }
-
-                return yesno;
-
-                // solution that returns array of supported functionalities (but doesn't include unsupported ones and doesn't map to true/false)
-                /*
-                return Object.keys(OPENEO_V0_3_1_FUNCTIONALITIES).filter(func =>  // filter functionality names
-                    OPENEO_V0_3_1_FUNCTIONALITIES[func].every(endpoint =>  // rest as above
-                        this.backend.endpoints.some(e =>
-                            e.match(new RegExp(endpoint.replace(/{[^}]+}/g, '{[^}]+}')))
-                        )
-                    )
-                );
-                */
+                this.backend.endpoints = [];
             }
+
+            let yesno = Object.assign({}, OPENEO_V0_3_1_FUNCTIONALITIES);
+
+            Object.keys(yesno).forEach(key =>  // for each functionality
+                yesno[key] = yesno[key].every(endpoint =>  // to be labelled "supported", ALL endpoints of the functionality must be supported
+                    this.backend.endpoints.some(e =>  // the functionality's endpoint must be found in the returned endpoints array
+                        e.match(new RegExp(endpoint.replace(/{[^}]+}/g, '{[^}]+}')))  // allow arbitrary parameter names (aka don't care about content in curly brackets)
+                    )
+                )
+            );
+
+            if(this.isSearchResult) {
+                // "filter" out all false values (if it was a search, we don't care about we *didn't* find)
+                Object.keys(yesno).forEach(key => {
+                    if(!yesno[key]) {
+                        delete yesno[key];
+                    }
+                });
+            }
+
+            return yesno;
+
+            // solution that returns array of supported functionalities (but doesn't include unsupported ones and doesn't map to true/false)
+            /*
+            return Object.keys(OPENEO_V0_3_1_FUNCTIONALITIES).filter(func =>  // filter functionality names
+                OPENEO_V0_3_1_FUNCTIONALITIES[func].every(endpoint =>  // rest as above
+                    this.backend.endpoints.some(e =>
+                        e.match(new RegExp(endpoint.replace(/{[^}]+}/g, '{[^}]+}')))
+                    )
+                )
+            );
+            */
         },
 
         supportedFunctionalitiesCount() {
