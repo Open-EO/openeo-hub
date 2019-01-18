@@ -30,7 +30,7 @@ mongo.connect((err, client) => {
             } else {
                 Promise
                 .all(colls.map(c => db.dropCollection(c.name)))
-                .then(() => console.log('Successfully dropped all collections' + (dropEverything ? '' : ' (expect user-generated content)') + '.'))
+                .then(() => console.log('Successfully dropped all collections' + (dropEverything ? '' : ' (except user-generated content)') + '.'))
                 .catch(e => console.log(e))
                 .then(() => mongo.close());  // always executed
             }

@@ -37,7 +37,7 @@ Should you ever want to hard-reset the database (i.e. drop all collections opene
 6. Go to http://localhost:9000/
 
 ## Troubleshooting
-If errors occur during crawling, this is probably caused by one of the crawled backends (a) returning JSON that is not compliant to the openEO API specification, or (b) malfunctioning under the load of many requests in quick succession. In the first case (a), the `--verbose` option may be helpful to locate the error (be sure to pass the option to the *script* and not to NPM, i.e. call `node crawl.js --verbose` or `npm run crawl -- --verbose`). In the second case (b), the problem may be fixed by increasing the value of the `crawlDelay` option in the `config.json` -- it controls how many milliseconds the crawler pauses between each request to the same backend.
+If errors occur during crawling, this is probably caused by one of the crawled backends (a) returning JSON that is not compliant to the openEO API specification, or (b) malfunctioning under the load of many requests in quick succession. In the first case (a), the `--verbose` option may be helpful to locate the error (be sure to pass the option to the *script* and not to NPM, i.e. call `node crawl.js --verbose` or `npm run crawl -- --verbose`).
 
 ## Scheduling re-crawling
 On Linux systems, you can use the cron daemon to schedule recurring crawling. For example, adding the following line to `/etc/crontab` executes the crawl script every six hours, as the user johndoe: `0 */6 * * * johndoe node /path/to/openeo-hub/crawl.js`

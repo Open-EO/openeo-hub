@@ -28,7 +28,6 @@ mongo.connect(async (err, client) => {
     console.log('');
 
     const endpoints = {
-        capabilities: '/',
         listCollections: '/collections',
         listProcesses: '/processes',
         listFileTypes: '/output_formats',
@@ -56,7 +55,7 @@ mongo.connect(async (err, client) => {
             }
         }  
         catch(error) {
-            console.log('An error occured while gathering endpoint URLs for ' + backend + ' :');
+            console.log('An error occured while gathering endpoint URLs for ' + backend);
             if(verbose) {
                 console.log(error);
             }
@@ -64,7 +63,7 @@ mongo.connect(async (err, client) => {
 
         for(var index in paths) {
             var path = paths[index];
-            console.log('Crawling of ' + backend+path + ' ...');
+            console.log('Downloading ' + backend+path + ' ...');
             await axios(backend+path)
             .then(response => {
                 // save to database
