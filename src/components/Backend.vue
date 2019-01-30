@@ -121,7 +121,11 @@ export default {
 
         functionalities() {
             if(!this.backend.endpoints) {
-                this.backend.endpoints = [];
+                if(this.isSearchResult) {
+                    return undefined;
+                } else {
+                    this.backend.endpoints = [];
+                }
             }
 
             let yesno = Object.assign({}, OPENEO_V0_3_1_FUNCTIONALITIES);
