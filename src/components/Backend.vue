@@ -1,11 +1,17 @@
 <template>
 	<div class="backend">
+        <a :href="'https://editor.openeo.org/?server='+backend.backend" target="_blank" class="open-in-web-editor">
+            <button>Open in openEO Web Editor</button>
+        </a>
+        
         <h3>
             {{backend.title}}
             <template v-if="backend.version"> | v{{backend.version}}</template>
         </h3>
         <small><code>{{backend.backend}}</code></small>
+        
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
+
         <dl>
             <dt v-if="functionalities" @click="collapsed.functionalities = !collapsed.functionalities">
                 <h4>{{collapsed.functionalities ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'Supported'}} functionalities ({{supportedFunctionalitiesCount}})</h4>
@@ -197,5 +203,8 @@ ul.functionalities {
 ul.output-formats,
 ul.service-types {
     column-width: 10em;
+}
+.open-in-web-editor {
+    float: right;
 }
 </style>
