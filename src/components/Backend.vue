@@ -1,6 +1,6 @@
 <template>
 	<div class="backend">
-        <a :href="'https://editor.openeo.org/?server='+backend.backend" target="_blank" class="open-in-web-editor">
+        <a :href="webEditorUrl" target="_blank" class="open-in-web-editor">
             <button>Open in openEO Web Editor</button>
         </a>
         
@@ -175,6 +175,14 @@ export default {
             } else {
                 return supported + '/' + total;
             }
+        },
+
+        webEditorUrl() {
+            var protocol = 'https:';
+            if (this.backend.backend.toLowerCase().substr(0,5) === 'http:') {
+                protocol = 'http:';
+            }
+            return protocol + '//editor.openeo.org/?server=' + encodeURIComponent(this.backend.backend)
         }
     },
 	data() {
