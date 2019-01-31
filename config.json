@@ -5,8 +5,9 @@
         "https://earthengine.openeo.org/v0.3": "Google Earth Engine",
         "http://giv-openeo.uni-muenster.de:8000": "R Demo Server",
         "http://saocompute.eurac.edu/openEO_0_3_0/openeo": "EURAC WCPS",
-        "http://openeo.vgt.vito.be/openeo": "Vito GeoPySpark",
-        "http://openeo.eodc.eu/api/v0.3": "EODC OpenShift"
+        "http://openeo.vgt.vito.be/openeo": "VITO GeoPySpark",
+        "http://openeo.eodc.eu/api/v0.3": "EODC OpenShift",
+        "https://openeo.mundialis.de/api/v0.3": "mundialis GRASS GIS (Actinia Core)"
     },
     "unsuccessfulCrawls": {
         "flagAfter": 8,
