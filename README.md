@@ -49,14 +49,14 @@ There are several start scripts for different dev scenarios:
 - `npm run start` builds the frontend to the `dist` directory and *then* starts the *Restify* server, i.e. you can use the latest frontend and make API calls too. But Vue is in production mode, so the *Devtools* are not available.
 - `npm run start:dev` therefore builds the frontend to the `dist` directory *in development mode* and then starts the *Restify* server, i.e. you can use the latest frontend, test API calls and use *Devtools* as well. But there's no HMR, so you need to manually restart everytime you want to see your changes.
 
-The Hub depends on the `openeo-processes-docgen` repo - if you're simultaneously working on that too and want to see how your changes there work together with the Hub, it's smart to link it:
-1. `cd /path/to/openeo-processes-docgen`
+The Hub depends on the `openeo-vue-components` repo - if you're simultaneously working on that too and want to see how your changes there work together with the Hub, it's smart to link it:
+1. `cd /path/to/openeo-vue-components`
 2. `sudo ndm link`
 3. `cd /path/to/openeo-hub/`
-4. `npm link @openeo/processes-docgen`
+4. `npm link @openeo/vue-components`
 
-This makes all references to `@openeo/processes-docgen` in imports etc. point to your current local state of that repo.
+This makes all references to `@openeo/vue-components` in imports etc. point to your current local state of that repo.
 
 Note these caveats:
-- If you do `npm install` in the `openeo-hub` folder, the link gets overwritten, so you have to repeat `npm link @openeo/processes-docgen`.
-- If you make changes in the `openeo-processes-docgen` folder, make sure to run `npm run build_lib` there. Otherwise you're not testing against the version of the code that would *actually end up on NPM* (minified etc.)!
+- If you do `npm install` in the `openeo-hub` folder, the link gets overwritten, so you have to repeat `npm link @openeo/vue-components`.
+- If you make changes in the `openeo-vue-components` folder, make sure to run `npm run build` there. Otherwise you're not testing against the version of the code that would *actually end up on NPM* (minified etc.)!

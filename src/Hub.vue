@@ -530,7 +530,4 @@ h4 + .details { /* indent content below parameter heading */
 .schemaObjectElement table p {
 	margin: 0;
 }
-.schemaObjectElement table td:not(:first-child) table {  /* make nested tables stand out so it's easy to see what belongs together */
-	border-left: 5px solid lightgray;
-}
 </style>

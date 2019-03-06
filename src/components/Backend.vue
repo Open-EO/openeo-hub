@@ -33,7 +33,7 @@
                 <h4>{{collapsed.processes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
             </dt>
             <dd v-if="preparedBackend.processes && !collapsed.processes">
-                <Process v-for="process in backend.processes" :key="process.name || process.id" :process="process" :baseConfig="{processesInitiallyCollapsed:true}">
+                <Process v-for="process in backend.processes" :key="process.name || process.id" :processData="process" :initiallyCollapsed="true" :provideDownload="false">
                     <template slot="process-after-summary">
                         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="process.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
                     </template>
@@ -84,7 +84,7 @@
 <script>
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
-import { Process, Utils as DocGenUtils } from '@openeo/processes-docgen';
+import { Process } from '@openeo/vue-components';
 import Collection from './Collection.vue';
 import { OPENEO_V0_3_1_FUNCTIONALITIES } from './../const.js'
 
@@ -101,10 +101,7 @@ export default {
         preparedBackend() {
             var original = this.backend;
 
-            // normalize `processes` so the Process component can work with it
-            if(Array.isArray(original.processes)) {
-                original.processes = original.processes.map(DocGenUtils.normalizeProcess.bind(DocGenUtils));
-            }
+            // normalizing of `processes` array entries (via `convertProcessToLatestSpec`) is done by the Process component
 
             // the file types and service names are stored as the keys of the objects
             original.outputFormats = original.outputFormats ? Object.keys(original.outputFormats) : null;
