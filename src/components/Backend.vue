@@ -26,7 +26,7 @@
                 <h4>{{collapsed.collections ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} collections ({{backend.collections.length}})</h4>
             </dt>
             <dd v-if="backend.collections && !collapsed.collections">
-                <Collection v-for="collection in preparedBackend.collections" :key="collection.name" :collection="collection" initiallyCollapsed="true"></Collection>
+                <CollectionWrapper v-for="collection in preparedBackend.collections" :key="collection.name" :collectionData="collection" :initiallyCollapsed="true"></CollectionWrapper>
             </dd>
             
             <dt v-if="backend.processes" @click="collapsed.processes = !collapsed.processes">
@@ -85,7 +85,7 @@
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
 import { Process } from '@openeo/vue-components';
-import Collection from './Collection.vue';
+import CollectionWrapper from './Collection.vue';
 import { OPENEO_V0_3_1_FUNCTIONALITIES } from './../const.js'
 
 export default {
@@ -94,7 +94,7 @@ export default {
 	components: {
         DataRetrievedNotice,
         UnsuccessfulCrawlNotice,
-        Collection,
+        CollectionWrapper,
         Process
     },
     computed: {
