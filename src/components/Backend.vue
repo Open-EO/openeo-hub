@@ -85,7 +85,7 @@
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
 import { Process } from '@openeo/vue-components';
-import CollectionWrapper from './Collection.vue';
+import CollectionWrapper from './CollectionWrapper.vue';
 import { OPENEO_V0_3_1_FUNCTIONALITIES } from './../const.js'
 
 export default {

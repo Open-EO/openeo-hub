@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import CollectionWrapper from './Collection.vue';
+import CollectionWrapper from './CollectionWrapper.vue';
 
 export default {
     name: 'CollectionResults',
