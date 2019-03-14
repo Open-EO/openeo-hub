@@ -107,18 +107,20 @@ export default {
                 original.serviceTypes = original.serviceTypes ? original.serviceTypes.sort(sortCallback) : null;
             }
 
-            // convert `endpoints` array from `['METHOD path', 'METHOD2 path', ...]` format into `[{path:'path', methods:['METHOD','METHOD2']}, ...]` format
-            let inOtherFormat = [];
-            original.endpoints.forEach(e => {
-                let splitted = e.split(' ');
-                let index = inOtherFormat.findIndex(x => x.path == splitted[1]);
-                if(index > -1) {
-                    inOtherFormat[index].methods.push(splitted[0]);
-                } else {
-                    inOtherFormat.push({path: splitted[1], methods: [splitted[0]]});
-                }
-            });
-            original.endpoints = inOtherFormat;
+            if(original.endpoints) {
+                // convert `endpoints` array from `['METHOD path', 'METHOD2 path', ...]` format into `[{path:'path', methods:['METHOD','METHOD2']}, ...]` format
+                let inOtherFormat = [];
+                original.endpoints.forEach(e => {
+                    let splitted = e.split(' ');
+                    let index = inOtherFormat.findIndex(x => x.path == splitted[1]);
+                    if(index > -1) {
+                        inOtherFormat[index].methods.push(splitted[0]);
+                    } else {
+                        inOtherFormat.push({path: splitted[1], methods: [splitted[0]]});
+                    }
+                });
+                original.endpoints = inOtherFormat;
+            }
 
             return original;
         },

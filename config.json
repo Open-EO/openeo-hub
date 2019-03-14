@@ -2,8 +2,8 @@
     "dbUrl": "mongodb://localhost:27017",
     "dbName": "openeohub",
     "backends": {
-        "https://earthengine.openeo.org/v0.3": "Google Earth Engine [0.3]",
-        "https://earthengine.openeo.org/v0.4": "Google Earth Engine [0.4]",
+        "https://earthengine.openeo.org/v0.3": "Google Earth Engine",
+        "https://earthengine.openeo.org/v0.4": "Google Earth Engine",
         "https://r-server.openeo.org": "R Demo Server",
         "http://saocompute.eurac.edu/openEO_0_3_0/openeo": "EURAC WCPS",
         "http://openeo.vgt.vito.be/openeo": "VITO GeoPySpark",

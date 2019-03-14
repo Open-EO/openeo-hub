@@ -47,7 +47,6 @@
 import { Collection } from '@openeo/vue-components';
 import { LMap, LTileLayer, LRectangle } from 'vue2-leaflet';
 import "leaflet/dist/leaflet.css";
-import * as moment from 'moment';
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import FormattedTimestamp from './FormattedTimestamp.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
