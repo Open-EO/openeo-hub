@@ -13,13 +13,11 @@
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
 
         <dl>
-            <dt v-if="functionalities" @click="collapsed.functionalities = !collapsed.functionalities">
-                <h4>{{collapsed.functionalities ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'Supported'}} functionalities ({{supportedFunctionalitiesCount}})</h4>
+            <dt v-if="backend.endpoints" @click="collapsed.functionalities = !collapsed.functionalities">
+                <h4>{{collapsed.functionalities ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'Supported'}} functionalities {{supportedFunctionalitiesCount}}</h4>
             </dt>
-            <dd v-if="functionalities && !collapsed.functionalities">
-                <ul class="functionalities">
-                    <li v-for="(yesno, functionality) in functionalities" :key="functionality">{{yesno ? '✔️' : '❌'}} {{functionality}}</li>
-                </ul>
+            <dd v-show="backend.endpoints && !collapsed.functionalities">
+                <SupportedFeatures :endpoints="preparedBackend.endpoints" ref="supportedFeaturesComponent"></SupportedFeatures>
             </dd>
 
             <dt v-if="backend.collections" @click="collapsed.collections = !collapsed.collections">
@@ -47,34 +45,21 @@
                 <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{Object.keys(backend.outputFormats).length}})</h4>
             </dt>
             <dd v-if="backend.outputFormats && !collapsed.outputFormats">
-                <ul class="output-formats">
-                    <li v-for="of in preparedBackend.outputFormats" :key="of">{{of}}</li>
-                </ul>
+                <SupportedFileFormats :formats="preparedBackend.outputFormats"></SupportedFileFormats>
             </dd>
 
             <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
                 <h4>{{collapsed.serviceTypes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} service types ({{Object.keys(backend.serviceTypes).length}})</h4>
             </dt>
             <dd v-if="backend.serviceTypes && !collapsed.serviceTypes">
-                <ul class="service-types">
-                    <li v-for="st in preparedBackend.serviceTypes" :key="st">{{st}}</li>
-                </ul>
+                <SupportedServiceTypes :services="preparedBackend.serviceTypes"></SupportedServiceTypes>
             </dd>
 
             <dt v-if="backend.billing" @click="collapsed.billing = !collapsed.billing">
                 <h4>{{collapsed.billing ? '▶' : '▼'}} Billing information</h4>
             </dt>
             <dd v-if="backend.billing && !collapsed.billing" class="billing">
-                <h5>Currency</h5>
-                {{preparedBackend.billing.currency}}
-                <h5 v-if="backend.billing.plans">Available plans ({{backend.billing.plans.length}})</h5>
-                <ul v-if="backend.billing.plans" class="plans">
-                    <li v-for="p in preparedBackend.billing.plans" :key="p.name" class="plan">
-                        <h2>{{p.name}} <template v-if="preparedBackend.billing.default_plan == p.name">(default)</template></h2>
-                        {{p.description}}
-                        <a v-if="p.url" :href="p.url">More information</a>
-                    </li>
-                </ul>
+                <BillingPlans :billing="backend.billing"></BillingPlans>
             </dd>
         </dl>
         <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
@@ -84,14 +69,17 @@
 <script>
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
-import { Process } from '@openeo/vue-components';
+import { Process, SupportedFeatures, SupportedFileFormats, SupportedServiceTypes, BillingPlans } from '@openeo/vue-components';
 import CollectionWrapper from './CollectionWrapper.vue';
-import { OPENEO_V0_3_1_FUNCTIONALITIES } from './../const.js'
 
 export default {
 	name: 'Backend',
 	props: ['backend', 'initiallyCollapsed', 'isSearchResult'],
 	components: {
+        SupportedFeatures,
+        SupportedFileFormats,
+        SupportedServiceTypes,
+        BillingPlans,
         DataRetrievedNotice,
         UnsuccessfulCrawlNotice,
         CollectionWrapper,
@@ -119,59 +107,20 @@ export default {
                 original.serviceTypes = original.serviceTypes ? original.serviceTypes.sort(sortCallback) : null;
             }
 
-            return original;
-        },
-
-        functionalities() {
-            if(!this.backend.endpoints) {
-                if(this.isSearchResult) {
-                    return undefined;
+            // convert `endpoints` array from `['METHOD path', 'METHOD2 path', ...]` format into `[{path:'path', methods:['METHOD','METHOD2']}, ...]` format
+            let inOtherFormat = [];
+            original.endpoints.forEach(e => {
+                let splitted = e.split(' ');
+                let index = inOtherFormat.findIndex(x => x.path == splitted[1]);
+                if(index > -1) {
+                    inOtherFormat[index].methods.push(splitted[0]);
                 } else {
-                    this.backend.endpoints = [];
+                    inOtherFormat.push({path: splitted[1], methods: [splitted[0]]});
                 }
-            }
+            });
+            original.endpoints = inOtherFormat;
 
-            let yesno = Object.assign({}, OPENEO_V0_3_1_FUNCTIONALITIES);
-
-            Object.keys(yesno).forEach(key =>  // for each functionality
-                yesno[key] = yesno[key].every(endpoint =>  // to be labelled "supported", ALL endpoints of the functionality must be supported
-                    this.backend.endpoints.some(e =>  // the functionality's endpoint must be found in the returned endpoints array
-                        e.match(new RegExp(endpoint.replace(/{[^}]+}/g, '{[^}]+}')))  // allow arbitrary parameter names (aka don't care about content in curly brackets)
-                    )
-                )
-            );
-
-            if(this.isSearchResult) {
-                // "filter" out all false values (if it was a search, we don't care about we *didn't* find)
-                Object.keys(yesno).forEach(key => {
-                    if(!yesno[key]) {
-                        delete yesno[key];
-                    }
-                });
-            }
-
-            return yesno;
-
-            // solution that returns array of supported functionalities (but doesn't include unsupported ones and doesn't map to true/false)
-            /*
-            return Object.keys(OPENEO_V0_3_1_FUNCTIONALITIES).filter(func =>  // filter functionality names
-                OPENEO_V0_3_1_FUNCTIONALITIES[func].every(endpoint =>  // rest as above
-                    this.backend.endpoints.some(e =>
-                        e.match(new RegExp(endpoint.replace(/{[^}]+}/g, '{[^}]+}')))
-                    )
-                )
-            );
-            */
-        },
-
-        supportedFunctionalitiesCount() {
-            const supported = Object.values(this.functionalities).reduce((sum, currentValue) => sum + (currentValue == true ? 1 : 0), 0);
-            const total = Object.keys(OPENEO_V0_3_1_FUNCTIONALITIES).length;
-            if(this.isSearchResult) {
-                return supported;
-            } else {
-                return supported + '/' + total;
-            }
+            return original;
         },
 
         webEditorUrl() {
@@ -180,8 +129,17 @@ export default {
                 protocol = 'http:';
             }
             return protocol + '//editor.openeo.org/?server=' + encodeURIComponent(this.backend.backend)
+        },
+    },
+
+    mounted: function() {
+        if(this.$refs.features != undefined) {
+            const supported = this.$refs.supportedFeaturesComponent.getSupportedFeatureCount();
+            const total = this.$refs.supportedFeaturesComponent.getFeatureCount();
+            this.supportedFunctionalitiesCount = '(' + supported + '/' + total + ')';
         }
     },
+
 	data() {
 		return {
 			collapsed: {
@@ -192,7 +150,8 @@ export default {
                 outputFormats: true,
                 serviceTypes: true,
                 billing: true
-            }
+            },
+            supportedFunctionalitiesCount: ''
 		};
     }
 }
