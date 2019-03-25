@@ -5,8 +5,7 @@
         </a>
         
         <h3>
-            {{backend.backendTitle}}
-            <template v-if="backend.version"> | v{{backend.version}}</template>
+            <BackendName :data="backend"></BackendName>
         </h3>
         <small><code>{{backend.backendUrl}}</code></small>
         
@@ -60,6 +59,7 @@
 </template>
 
 <script>
+import BackendName from './BackendName.vue';
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
 import { SupportedFeatures, SupportedFileFormats, SupportedServiceTypes, BillingPlans } from '@openeo/vue-components';
@@ -70,6 +70,7 @@ export default {
 	name: 'Backend',
 	props: ['backend', 'initiallyCollapsed', 'isSearchResult'],
 	components: {
+        BackendName,
         SupportedFeatures,
         SupportedFileFormats,
         SupportedServiceTypes,

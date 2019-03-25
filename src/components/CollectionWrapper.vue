@@ -1,9 +1,7 @@
 <template>
 	<Collection :collectionData="collectionData" :initiallyCollapsed="initiallyCollapsed">
 		<template slot="collection-after-summary">
-			<div class="backendname">
-				<em>{{collectionData.backendUrl}}</em>
-			</div>
+			<BackendName :data="collectionData"></BackendName>
 			<UnsuccessfulCrawlNotice :unsuccessfulCrawls="collectionData.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
 		</template>
 
@@ -44,6 +42,7 @@
 </template>
 
 <script>
+import BackendName from './BackendName.vue';
 import { Collection } from '@openeo/vue-components';
 import { LMap, LTileLayer, LRectangle } from 'vue2-leaflet';
 import "leaflet/dist/leaflet.css";
@@ -55,6 +54,7 @@ export default {
 	name: 'CollectionWrapper',
 	props: ['collectionData', 'initiallyCollapsed'],
 	components: {
+		BackendName,
 		Collection,
 		UnsuccessfulCrawlNotice,
 		LMap,
