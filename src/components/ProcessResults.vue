@@ -5,30 +5,18 @@
         <em v-else-if="matchedProcesses.length == 0" class="emptyNotice">No search results.</em>
         <ol>
             <li v-for="process in matchedProcesses" :key="process.backendUrl+'/'+(process.id||process.name)" class="processParent">
-                <Process :processData="process" :initiallyCollapsed="true" :provideDownload="false">
-                    <template slot="process-after-summary">
-                        <div class="backendname">
-                            <em>{{process.backendUrl}}</em>
-                        </div>
-                        <UnsuccessfulCrawlNotice :unsuccessfulCrawls="process.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
-                    </template>
-                    <template slot="process-after-details">
-                        <DataRetrievedNotice :timestamp="process.retrieved"></DataRetrievedNotice>
-                    </template>
-                </Process>
+                <ProcessWrapper :processData="process" :initiallyCollapsed="true" :provideDownload="false"></ProcessWrapper>
             </li>
         </ol>
     </div>
 </template>
 
 <script>
-import { Process } from '@openeo/vue-components';
-import DataRetrievedNotice from './DataRetrievedNotice.vue';
-import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
+import ProcessWrapper from './ProcessWrapper.vue';
 
 export default {
     name: 'ProcessResults',
-    components: { Process, DataRetrievedNotice, UnsuccessfulCrawlNotice },
+    components: { ProcessWrapper },
     props: ['matchedProcesses', 'initialInstructionText']
 }
 </script>

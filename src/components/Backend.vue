@@ -31,14 +31,7 @@
                 <h4>{{collapsed.processes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
             </dt>
             <dd v-if="preparedBackend.processes && !collapsed.processes">
-                <Process v-for="process in backend.processes" :key="process.name || process.id" :processData="process" :initiallyCollapsed="true" :provideDownload="false">
-                    <template slot="process-after-summary">
-                        <UnsuccessfulCrawlNotice :unsuccessfulCrawls="process.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
-                    </template>
-                    <template slot="process-after-details">
-                        <DataRetrievedNotice :timestamp="process.retrieved"></DataRetrievedNotice>
-                    </template>
-                </Process>
+                <ProcessWrapper v-for="process in backend.processes" :key="process.name || process.id" :processData="process" :initiallyCollapsed="true" :provideDownload="false"></ProcessWrapper>
             </dd>
 
             <dt v-if="backend.outputFormats" @click="collapsed.outputFormats = !collapsed.outputFormats">
@@ -69,8 +62,9 @@
 <script>
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
-import { Process, SupportedFeatures, SupportedFileFormats, SupportedServiceTypes, BillingPlans } from '@openeo/vue-components';
+import { SupportedFeatures, SupportedFileFormats, SupportedServiceTypes, BillingPlans } from '@openeo/vue-components';
 import CollectionWrapper from './CollectionWrapper.vue';
+import ProcessWrapper from './ProcessWrapper.vue';
 
 export default {
 	name: 'Backend',
@@ -83,7 +77,7 @@ export default {
         DataRetrievedNotice,
         UnsuccessfulCrawlNotice,
         CollectionWrapper,
-        Process
+        ProcessWrapper
     },
     computed: {
         preparedBackend() {
