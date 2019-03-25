@@ -1,6 +1,5 @@
 const config = require('./config.json');
 const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
 const axios = require('axios');
 const OpenEO = require('@openeo/js-client').OpenEO;
 
@@ -15,7 +14,19 @@ const verbose = process.argv[2] == '--verbose';
 
 console.log('Connecting to database server...');
 mongo.connect(async (err, client) => {
-    assert.equal(null, err);
+    if(err != null) {
+        console.log();
+        console.log('An error occurred while connecting to the database server: ' + err.name);
+        console.log('Error message: ' + err.message);
+        if(verbose) {
+            console.log('Stack:');
+            console.log(err.stack);
+        }
+        console.log();
+        console.log('CRAWLING ABORTED!')
+        return 1;  // abort with non-zero exit code
+    }
+
     const db = client.db(config.dbName);
     const collection = db.collection('raw');
     console.log('Connected to database server.');
@@ -55,7 +66,7 @@ mongo.connect(async (err, client) => {
             }
         }  
         catch(error) {
-            console.log('An error occured while gathering endpoint URLs for ' + backendUrl);
+            console.log('An error occurred while gathering endpoint URLs for ' + backendUrl);
             if(verbose) {
                 console.log(error);
             }
@@ -75,7 +86,7 @@ mongo.connect(async (err, client) => {
                 );
             })
             .catch(error => {
-                console.log('An error occured while downloading ' + backendUrl+path);
+                console.log('An error occurred while downloading ' + backendUrl+path);
                 if(verbose) {
                     console.log(error);
                 }
@@ -109,7 +120,7 @@ mongo.connect(async (err, client) => {
         console.log('DONE!');
     }
     catch(error) {
-        console.log('An error occured while finalising the crawl process.');
+        console.log('An error occurred while finalising the crawl process.');
         if(verbose) {
             console.log(error);
         }
