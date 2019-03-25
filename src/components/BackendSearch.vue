@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { OPENEO_V0_3_1_ENDPOINTS, OPENEO_V0_3_1_FUNCTIONALITIES } from './../const.js'
+import { FeatureList } from '@openeo/js-commons';
 import EndpointChooser from './EndpointChooser.vue';
 
 export default {
@@ -49,9 +49,7 @@ export default {
 	},
 	data() {
 		return {
-			// sort alphabetically by endpoint path (i.e. delete HTTP method (always uppercased) for sorting)
-			allEndpoints: OPENEO_V0_3_1_ENDPOINTS.sort((e1, e2) => e1.replace(/[A-Z]/g, '') > e2.replace(/[A-Z]/g, '')),
-			endpointsByFunctionality: OPENEO_V0_3_1_FUNCTIONALITIES,
+			endpointsByFunctionality: FeatureList.features,
 			backendSearch: {
 				version: 'any',
 				endpoints: [],

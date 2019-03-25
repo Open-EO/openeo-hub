@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@openeo/js-client": "0.3.2",
+    "@openeo/js-commons": "0.3.4",
     "@openeo/vue-components": "0.3.3",
     "axios": "^0.18.0",
     "moment": "^2.22.2",
