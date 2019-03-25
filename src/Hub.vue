@@ -18,7 +18,7 @@
 			<section id="discover" :class="{hidden: view != 'discover'}">
 				<p>This is a list of all available openEO backends:</p>
 				<ul>
-					<li v-for="backend in allBackends" :key="backend.backend">
+					<li v-for="backend in allBackends" :key="backend.backendUrl">
 						<Backend :backend="backend"></Backend>
 					</li>
 				</ul>

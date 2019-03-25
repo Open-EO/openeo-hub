@@ -7,7 +7,6 @@ module.exports = {
         { $group: {
             _id: '$backend',
             backend: { $first: '$backend' },
-            title: { $first: '$title' },
             retrieved: { $max: '$retrieved' },
             unsuccessfulCrawls: { $first: '$unsuccessfulCrawls' },
             contents: { $push: '$content' },
@@ -37,7 +36,6 @@ module.exports = {
             retrieved: 1,
             unsuccessfulCrawls: 1,
             version: '$root.version',
-            title: '$root.title',
             endpoints: {
                 $reduce: {
                     input: {

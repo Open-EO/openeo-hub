@@ -41,8 +41,25 @@ function aggregate(pipeline, collectionName) {
     return getCollection(collectionName).aggregate(pipeline);
 }
 
+function prepare(data) {
+    function addBackendTitles(item) {
+        if(typeof item.backend == 'string') {
+            item.backendUrl = item.backend;
+            item.backendTitle = config.backends[item.backend];
+            delete item.backend;
+        }
+        return item;
+    }
+    
+    if(Array.isArray(data)) {
+        return data.map(addBackendTitles);
+    } else {
+        return addBackendTitles(data);
+    }
+}
+
 async function send(data, res, next) {
-    const sendReally = (response) => { res.send(response || {}); next(); }
+    const sendReally = (response) => { res.send(prepare(response || {})); next(); }
     const handleError = (error) => { res.send(error); next(); }
     if(data instanceof mongodb.Cursor || data instanceof mongodb.AggregationCursor) {
         data = data.toArray().then(arr => arr.map(e => { delete e._id; return e; }));
@@ -106,7 +123,6 @@ server.post('/backends/search', async function(req, res, next) {
     // cleanup response object (add version and endpoints to root scope, remove all other unnecessary properties)
     backendsWithCriteria = backendsWithCriteria.map(b => {
         b.version = b.content.version;
-        b.title = b.content.title;
         // endpoints in `"METHOD /path"` format like in the request
         b.endpoints = req.body.endpoints;
         // endpoints in `{path:'/path', methods:['METHOD']}` format like in the openEO API spec

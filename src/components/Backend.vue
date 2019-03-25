@@ -5,10 +5,10 @@
         </a>
         
         <h3>
-            {{backend.title}}
+            {{backend.backendTitle}}
             <template v-if="backend.version"> | v{{backend.version}}</template>
         </h3>
-        <small><code>{{backend.backend}}</code></small>
+        <small><code>{{backend.backendUrl}}</code></small>
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
 
@@ -127,10 +127,10 @@ export default {
 
         webEditorUrl() {
             var protocol = 'https:';
-            if (this.backend.backend.toLowerCase().substr(0,5) === 'http:') {
+            if (this.backend.backendUrl.toLowerCase().substr(0,5) === 'http:') {
                 protocol = 'http:';
             }
-            return protocol + '//editor.openeo.org/?server=' + encodeURIComponent(this.backend.backend)
+            return protocol + '//editor.openeo.org/?server=' + encodeURIComponent(this.backend.backendUrl)
         },
     },
 

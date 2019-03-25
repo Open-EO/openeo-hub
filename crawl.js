@@ -34,11 +34,11 @@ mongo.connect(async (err, client) => {
         listServiceTypes: '/service_types'
     };
 
-    for (var backend in config.backends) {
+    for (var backendUrl in config.backends) {
         try {
-            console.log('Gathering endpoint URLs for ' + config.backends[backend] + ' at ' + backend + ' ...');
+            console.log('Gathering endpoint URLs for ' + config.backends[backendUrl] + ' at ' + backendUrl + ' ...');
             var paths = ['/'];
-            const con = await openeo.connect(backend);
+            const con = await openeo.connect(backendUrl);
             const caps = await con.capabilities();
 
             // add all standard endpoints that are supported
@@ -55,7 +55,7 @@ mongo.connect(async (err, client) => {
             }
         }  
         catch(error) {
-            console.log('An error occured while gathering endpoint URLs for ' + backend);
+            console.log('An error occured while gathering endpoint URLs for ' + backendUrl);
             if(verbose) {
                 console.log(error);
             }
@@ -63,22 +63,19 @@ mongo.connect(async (err, client) => {
 
         for(var index in paths) {
             var path = paths[index];
-            console.log('Downloading ' + backend+path + ' ...');
-            await axios(backend+path)
+            console.log('Downloading ' + backendUrl+path + ' ...');
+            await axios(backendUrl+path)
             .then(response => {
                 // save to database
                 var data = response.data;
-                if (path === '/') {
-                    data.title = config.backends[backend];
-                }
                 collection.findOneAndUpdate(
-                    { backend: backend, path: path },
+                    { backend: backendUrl, path: path },
                     { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: data } },
                     { upsert: true }
                 );
             })
             .catch(error => {
-                console.log('An error occured while downloading ' + backend+path);
+                console.log('An error occured while downloading ' + backendUrl+path);
                 if(verbose) {
                     console.log(error);
                 }

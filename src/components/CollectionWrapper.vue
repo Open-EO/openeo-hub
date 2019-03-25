@@ -2,7 +2,7 @@
 	<Collection :collectionData="collectionData" :initiallyCollapsed="initiallyCollapsed">
 		<template slot="collection-after-summary">
 			<div class="backendname">
-				<em>{{collectionData.backend}}</em>
+				<em>{{collectionData.backendUrl}}</em>
 			</div>
 			<UnsuccessfulCrawlNotice :unsuccessfulCrawls="collectionData.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
 		</template>
