@@ -19,7 +19,7 @@
 				<p>This is a list of all available openEO backends:</p>
 				<ul>
 					<li v-for="backend in allBackends" :key="backend.backendUrl">
-						<Backend :backend="backend"></Backend>
+						<Backend :backend="backend" :initiallyCollapsed="true"></Backend>
 					</li>
 				</ul>
 			</section>

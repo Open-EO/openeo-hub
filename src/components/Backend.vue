@@ -4,9 +4,13 @@
             <button>Open in openEO Web Editor</button>
         </a>
         
-        <h3>
+        <h3 @click="collapsed.root = !collapsed.root">
+            {{collapsed.root ? '▶' : '▼'}}
             <BackendName :data="backend"></BackendName>
         </h3>
+
+        <div v-if="!collapsed.root">
+
         <small><code>{{backend.backendUrl}}</code></small>
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
@@ -54,7 +58,10 @@
                 <BillingPlans :billing="backend.billing"></BillingPlans>
             </dd>
         </dl>
+        
         <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
+
+        </div>
     </div>
 </template>
 
@@ -141,7 +148,7 @@ export default {
 		return {
 			collapsed: {
                 root: this.initiallyCollapsed || false,
-                functionalities: true,
+                functionalities: false,
                 collections: true,
                 processes: true,
                 outputFormats: true,
@@ -155,7 +162,7 @@ export default {
 </script>
 
 <style scoped>
-h4 {
+h3, h4 {
     cursor: pointer;
 }
 ul.functionalities {

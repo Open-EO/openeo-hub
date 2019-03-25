@@ -1,12 +1,12 @@
 <template>
-    <div class="backendname" v-if="data.backendUrl">
+    <span class="backendname" v-if="data.backendUrl">
         <em :title="data.backendUrl">
             {{data.backendTitle}}
         </em>
         <template v-if="data.version">
             | v{{data.version}}
         </template>
-    </div>
+    </span>
 </template>
 
 <script>
