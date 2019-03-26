@@ -1,6 +1,6 @@
 <template>
     <div v-if="needsFlag()" class="unsuccessfulCrawlNotice">
-        ⚠️ recently unavailable
+        This backend was recently unavailable for crawling.
     </div>
 </template>
 
@@ -21,5 +21,6 @@ export default {
 <style scoped>
 div.unsuccessfulCrawlNotice {
     color: firebrick;
+    margin-top: 10px;
 }
 </style>

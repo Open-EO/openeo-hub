@@ -1,6 +1,6 @@
 <template>
     <div class="retrieved" v-if="timestamp != undefined">
-        <em>This data was cached at <FormattedTimestamp :timestamp="timestamp"></FormattedTimestamp>.</em>
+        <small><em>This data was cached at <FormattedTimestamp :timestamp="timestamp"></FormattedTimestamp>.</em></small>
     </div>
 </template>
 
@@ -14,4 +14,7 @@ export default {
 </script>
 
 <style scoped>
+.retrieved {
+    color: gray;
+}
 </style>
