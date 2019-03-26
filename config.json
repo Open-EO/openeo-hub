@@ -13,5 +13,6 @@
     "unsuccessfulCrawls": {
         "flagAfter": 8,
         "deleteAfter": 56
-    }
+    },
+    "flagWhenOlderThanXHours": 24
 }
