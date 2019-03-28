@@ -1,5 +1,5 @@
 <template>
-    <span class="backendname" v-if="data.backendUrl">
+    <div class="backendname" v-if="data.backendUrl">
         <em :title="data.backendUrl">
             {{data.backendTitle}}
         </em>
@@ -7,7 +7,7 @@
             | v{{data.version}}
         </template>
         <span v-if="needsWarningSign" :title="warningText">️⚠</span>
-    </span>
+    </div>
 </template>
 
 <script>

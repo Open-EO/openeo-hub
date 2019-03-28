@@ -500,6 +500,9 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 .backendname {
 	margin: 10px 0;
 }
+h3 .backendname {
+	display: inline;
+}
 .retrieved {
 	margin-top: 20px;
 	margin-bottom: 10px;
