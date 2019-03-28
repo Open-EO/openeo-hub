@@ -105,7 +105,7 @@ server.post('/backends/search', async function(req, res, next) {
                     $elemMatch: {
                         $or: [ {methods: method.toLowerCase()}, {methods: method.toUpperCase()} ],  // case-insensitive
                         // if path contains parameters: use regex and allow arbitrary parameter names
-                        path: (path.indexOf('{') == -1 ? path : { $regex: path.replace(/{[^}]+}/g, '{[^}]+}') })
+                        path: (path.indexOf('{') == -1 ? path : { $regex: path.replace(/{[^}]*}/g, '{[^}]*}') })
                     }
                 }
             }
