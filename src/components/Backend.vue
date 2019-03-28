@@ -1,10 +1,13 @@
 <template>
 	<div class="backend">
+        <div class="invalidConfigurationWarning" v-if="clippedDataSupplied && !initiallyCollapsed"><strong>It is not allowed to supply clipped data but not initially collapse the component! This is because lazy-loading of the full data is coupled to the expanding mechanism.</strong></div>
+        <div class="invalidConfigurationWarning" v-if="clippedDataSupplied && isSearchResult"><strong>It is not allowed to supply clipped data when this data represents a search result! This is because lazy-loading of the full data is only possible for the "default" representation of a backend, not for search results.</strong></div>
+
         <a :href="webEditorUrl" target="_blank" class="open-in-web-editor">
             <button>Open in openEO Web Editor</button>
         </a>
         
-        <h3 @click="collapsed.root = !collapsed.root">
+        <h3 @click="expand">
             {{collapsed.root ? '▶' : '▼'}}
             <BackendName :data="backend"></BackendName>
         </h3>
@@ -72,10 +75,11 @@ import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
 import { SupportedFeatures, SupportedFileFormats, SupportedServiceTypes, BillingPlans } from '@openeo/vue-components';
 import CollectionWrapper from './CollectionWrapper.vue';
 import ProcessWrapper from './ProcessWrapper.vue';
+import axios from 'axios';
 
 export default {
 	name: 'Backend',
-	props: ['backend', 'initiallyCollapsed', 'isSearchResult'],
+	props: ['backendData', 'clippedDataSupplied', 'initiallyCollapsed', 'isSearchResult'],
 	components: {
         BackendName,
         SupportedFeatures,
@@ -146,7 +150,9 @@ export default {
 
 	data() {
 		return {
-			collapsed: {
+            backend: this.backendData,
+            dataComplete: this.clippedDataSupplied != true,
+            collapsed: {
                 root: this.initiallyCollapsed || false,
                 functionalities: false,
                 collections: true,
@@ -157,6 +163,19 @@ export default {
             },
             supportedFunctionalitiesCount: ''
 		};
+    },
+
+    methods: {
+        async expand() {
+            // lazy-load full data if necessary
+            if(!this.dataComplete) {
+                let fullData = await axios.get('/backends/' + encodeURIComponent(this.backend.backendUrl));
+                this.backend = fullData.data;
+                this.dataComplete = true;
+            }
+            // actual expanding
+            this.collapsed.root = !this.collapsed.root;
+        }
     }
 }
 </script>
@@ -174,5 +193,11 @@ ul.service-types {
 }
 .open-in-web-editor {
     float: right;
+}
+.invalidConfigurationWarning {
+    background-color: red;
+    font-size: 20pt;
+    padding: 10px;
+    margin-bottom: 10px;
 }
 </style>

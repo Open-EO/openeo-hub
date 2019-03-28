@@ -54,7 +54,7 @@ function aggregate(pipeline, collectionName) {
 // -------------------------------------------------------------------------------------
 
 // parameter `data` may be a Promise or not
-function prepare(data) {
+function prepare(data, additionalCallbacks = []) {
     function removeMongoDBID(item) {
         delete item._id;
         return item;
@@ -69,7 +69,7 @@ function prepare(data) {
         return item;
     }
 
-    let callbacks = [removeMongoDBID, addBackendTitle];
+    let callbacks = [removeMongoDBID, addBackendTitle].concat(additionalCallbacks);
     
     const apply = (dataResolved) => {
         if(Array.isArray(dataResolved)) {
@@ -99,11 +99,25 @@ server.get('/backends', function(req, res, next) {
         res.send(config.backends);
         next();
     } else {
+        const clip = b => {
+            if(b.collections) { b.collections = b.collections.map(e => ({name: e.name})); }
+            if(b.processes) { b.processes = b.processes.map(e => ({name: e.name})); }
+            return b;
+        };
+
         find({}, 'backends')
-            .then(prepare)
+            .then(data => prepare(data, (req.query.details == 'clipped' ? [clip] : [])))
             .then(data => { res.send(data); next(); })
             .catch(err => next(err));
     }
+});
+
+// return details of a single backend
+server.get('/backends/:backend', function(req, res, next) {
+    findOne({backend: req.params.backend}, 'backends')
+        .then(prepare)
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
 });
 
 // search backends via JSON document in POST body

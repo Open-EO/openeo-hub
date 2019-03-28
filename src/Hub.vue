@@ -19,7 +19,7 @@
 				<p>This is a list of all available openEO backends:</p>
 				<ul>
 					<li v-for="backend in allBackends" :key="backend.backendUrl">
-						<Backend :backend="backend" :initiallyCollapsed="true"></Backend>
+						<Backend :backendData="backend" :clippedDataSupplied="true" :initiallyCollapsed="true"></Backend>
 					</li>
 				</ul>
 			</section>
@@ -123,7 +123,7 @@ export default {
 		};
 	},
 	mounted() {
-		axios.get('/backends?details=true')
+		axios.get('/backends?details=clipped')
 			.then(response => {
 				this.allBackends = response.data;
 			})
