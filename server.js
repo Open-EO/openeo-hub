@@ -12,6 +12,12 @@ var server = restify.createServer();
 server.use(restify.plugins.queryParser({ mapParams: false }));
 server.use(restify.plugins.bodyParser({ mapParams: false }));
 
+
+// -------------------------------------------------------------------------------------
+// Wrappers for MongoDB functions
+// `getCollection` returns a Collection, every other function returns a Promise
+// -------------------------------------------------------------------------------------
+
 function getCollection(collectionName = 'raw') {
     return db.collection(collectionName);
 }
@@ -30,19 +36,31 @@ function find(findCriteria, collectionName) {
         return getCollection(collectionName)
             .find(findCriteria)
             .project({ fulltextSearchScore: {$meta:"textScore"} })
-            .sort({ fulltextSearchScore: {$meta:"textScore"} });
+            .sort({ fulltextSearchScore: {$meta:"textScore"} })
+            .toArray();
     } else {
         // don't sort anything if there's no fulltext search involved
-        return getCollection(collectionName).find(findCriteria);
+        return getCollection(collectionName).find(findCriteria).toArray();
     }
 }
 
 function aggregate(pipeline, collectionName) {
-    return getCollection(collectionName).aggregate(pipeline);
+    return getCollection(collectionName).aggregate(pipeline).toArray();
 }
 
+
+// -------------------------------------------------------------------------------------
+// Helper function for preparing the result before sending
+// -------------------------------------------------------------------------------------
+
+// parameter `data` may be a Promise or not
 function prepare(data) {
-    function addBackendTitles(item) {
+    function removeMongoDBID(item) {
+        delete item._id;
+        return item;
+    }
+
+    function addBackendTitle(item) {
         if(typeof item.backend == 'string') {
             item.backendUrl = item.backend;
             item.backendTitle = config.backends[item.backend];
@@ -50,33 +68,41 @@ function prepare(data) {
         }
         return item;
     }
+
+    let callbacks = [removeMongoDBID, addBackendTitle];
     
-    if(Array.isArray(data)) {
-        return data.map(addBackendTitles);
+    const apply = (dataResolved) => {
+        if(Array.isArray(dataResolved)) {
+            callbacks.forEach(cb => dataResolved = dataResolved.map(cb));
+            return dataResolved;
+        } else {
+            callbacks.forEach(cb => dataResolved = cb.call(this, dataResolved));
+            return dataResolved;
+        }
+    };
+
+    if(data instanceof Promise) {
+        return data.then(apply);
     } else {
-        return addBackendTitles(data);
+        return apply(data);
     }
 }
 
-async function send(data, res, next) {
-    const sendReally = (response) => { res.send(prepare(response || {})); next(); }
-    const handleError = (error) => { res.send(error); next(); }
-    if(data instanceof mongodb.Cursor || data instanceof mongodb.AggregationCursor) {
-        data = data.toArray().then(arr => arr.map(e => { delete e._id; return e; }));
-    }
-    if(data instanceof Promise) {
-        data.then(sendReally).catch(handleError);
-    } else {
-        sendReally(data);
-    }
-}   
+
+// -------------------------------------------------------------------------------------
+// Actual handlers for the endpoints
+// -------------------------------------------------------------------------------------
 
 // list backends
 server.get('/backends', function(req, res, next) {
     if(!req.query.details) {
-        send(config.backends, res, next);
+        res.send(config.backends);
+        next();
     } else {
-        send(find({}, 'backends'), res, next);
+        find({}, 'backends')
+            .then(prepare)
+            .then(data => { res.send(data); next(); })
+            .catch(err => next(err));
     }
 });
 
@@ -118,7 +144,7 @@ server.post('/backends/search', async function(req, res, next) {
     }
 
     // get all backends that match the criteria that are validated against the '/' document
-    var backendsWithCriteria = await (await find(criteria)).toArray();
+    var backendsWithCriteria = await find(criteria);
 
     // cleanup response object (add version and endpoints to root scope, remove all other unnecessary properties)
     backendsWithCriteria = backendsWithCriteria.map(b => {
@@ -185,7 +211,7 @@ server.post('/backends/search', async function(req, res, next) {
             "$and": req.body.collections.map(c => ({"content.collections.name": {$regex: c, $options: 'i'}}))
         };
         // get all backends that match the criteria that are validated against the '/collections' document
-        var backendsWithCollections = await (await find(collectionCriteria)).toArray();
+        var backendsWithCollections = await find(collectionCriteria);
         // only keep those that match both the previous and the '/collections' criteria
         backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithCollections.some(b2 => b1.backend == b2.backend));
         // add metadata of queried collections to response object
@@ -206,7 +232,7 @@ server.post('/backends/search', async function(req, res, next) {
             "$and": req.body.processes.map(p => ({"content.processes.name": {$regex: p, $options: 'i'}}))
         };
         // get all backends that match the criteria that are validated against the '/processes' document
-        var backendsWithProcesses = await (await find(processCriteria)).toArray();
+        var backendsWithProcesses = await find(processCriteria);
         // only keep those that match both the previous and the '/processes' criteria
         backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithProcesses.some(b2 => b1.backend == b2.backend));
         // add metadata of queried processes to response object
@@ -228,7 +254,7 @@ server.post('/backends/search', async function(req, res, next) {
         // output format identifiers aren't array items but object keys, so check for $exists
         req.body.outputFormats.forEach(of => outputFormatCriteria['content.formats.'+of] = {$exists: true});
         // get all backends that match the criteria that are validated against the '/output_formats' document
-        var backendsWithOutputFormats = await (await find(outputFormatCriteria)).toArray();
+        var backendsWithOutputFormats = await find(outputFormatCriteria);
         // only keep those that match both the previous and the '/output_formats' criteria
         backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithOutputFormats.some(b2 => b1.backend == b2.backend));
         // add metadata of queried output formats to response object
@@ -249,7 +275,7 @@ server.post('/backends/search', async function(req, res, next) {
         // output format identifiers aren't array items but object keys, so check for $exists
         req.body.serviceTypes.forEach(st => serviceTypeCriteria['content.'+st] = {$exists: true});
         // get all backends that match the criteria that are validated against the '/service_types' document
-        var backendsWithServiceTypes = await (await find(serviceTypeCriteria)).toArray();
+        var backendsWithServiceTypes = await find(serviceTypeCriteria);
         // only keep those that match both the previous and the '/output_formats' criteria
         backendsWithCriteria = backendsWithCriteria.filter(b1 => backendsWithServiceTypes.some(b2 => b1.backend == b2.backend));
         // add metadata of queried service types to response object
@@ -263,17 +289,23 @@ server.post('/backends/search', async function(req, res, next) {
     }
 
     // send end result
-    send(backendsWithCriteria, res, next);
+    res.send(prepare(backendsWithCriteria));
+    next();
 });
 
 // proxy backends
 server.get('/backends/:backend/*', function(req, res, next) {
-    send(findOne({backend: req.params.backend, path: '/'+req.params['*']}), res, next);
+    findOne({backend: req.params.backend, path: '/'+req.params['*']})
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
 });
 
 // list collections
 server.get('/collections', function(req, res, next) {
-    send(find({}, 'collections'), res, next);
+    find({}, 'collections')
+        .then(prepare)
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
 });
 
 // search collections via JSON document in POST body
@@ -341,12 +373,18 @@ server.post('/collections/search', async function(req, res, next) {
     }
     
     // send end result
-    send(find(criteria, 'collections'), res, next);
+    find(criteria, 'collections')
+        .then(prepare)
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
 });
 
 // list processes
 server.get('/processes', function(req, res, next) {
-    send(find({}, 'processes'), res, next);
+    find({}, 'processes')
+        .then(prepare)
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
 });
 
 // search processes via JSON document in POST body
@@ -391,15 +429,23 @@ server.post('/processes/search', async function(req, res, next) {
     }
 
     // send end result
-    send(find(criteria, 'processes'), res, next);
+    find(criteria, 'processes')
+        .then(prepare)
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
 });
 
 server.get('/process_graphs', function(req, res, next) {
-    send(find({}, 'process_graphs'), res, next);
+    find({}, 'process_graphs')
+        .then(prepare)
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
 });
 
 server.post('/process_graphs', function(req, res, next) {
-    send(insertOne(req.body, 'process_graphs'), res, next);
+    insertOne(req.body, 'process_graphs')
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
 });
 
 // serve website (UI)
@@ -407,6 +453,11 @@ server.get('/*', restify.plugins.serveStatic({
     directory: './dist',
     default: 'index.html'
 }));
+
+
+// -------------------------------------------------------------------------------------
+// Start server
+// -------------------------------------------------------------------------------------
 
 server.listen(9000, function() {
     console.log('%s listening at %s', server.name, server.url);
