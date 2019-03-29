@@ -497,6 +497,12 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 	top: 0;
 	right: 0;
 }
+.hasTooltip {  /* do NOT use `*[title]` as selector because not *all* elements that have tooltips should display the special cursor */
+	cursor: help;
+}
+.warningSign {
+	color: goldenrod;
+}
 .backendname {
 	margin: 10px 0;
 }

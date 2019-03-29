@@ -6,7 +6,7 @@
         <template v-if="data.version">
             | v{{data.version}}
         </template>
-        <span v-if="needsWarningSign" :title="warningText">️⚠</span>
+        <span v-if="needsWarningSign" :title="warningText" class="warningSign hasTooltip">️⚠</span>
     </div>
 </template>
 
