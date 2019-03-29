@@ -2,9 +2,9 @@
 	<Process :processData="processData" :initiallyCollapsed="initiallyCollapsed" :provideDownload="provideDownload">
 		<template slot="process-after-summary">
 			<BackendName :data="processData"></BackendName>
-			<UnsuccessfulCrawlNotice :unsuccessfulCrawls="processData.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
 		</template>
-		<template slot="process-after-details">
+		<template slot="process-before-details">
+			<UnsuccessfulCrawlNotice :unsuccessfulCrawls="processData.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
 			<DataRetrievedNotice :timestamp="processData.retrieved"></DataRetrievedNotice>
 		</template>
 	</Process>

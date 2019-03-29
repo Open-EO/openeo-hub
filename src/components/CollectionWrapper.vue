@@ -2,7 +2,10 @@
 	<Collection :collectionData="collectionData" :initiallyCollapsed="initiallyCollapsed">
 		<template slot="collection-after-summary">
 			<BackendName :data="collectionData"></BackendName>
+		</template>
+		<template slot="collection-before-details">
 			<UnsuccessfulCrawlNotice :unsuccessfulCrawls="collectionData.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
+			<DataRetrievedNotice :timestamp="collectionData.retrieved"></DataRetrievedNotice>
 		</template>
 
 		<template slot="collection-spatial-extent" slot-scope="props">
@@ -32,10 +35,6 @@
 				&ndash;
 				<FormattedTimestamp :timestamp="props.extent[1]"></FormattedTimestamp>
 			</div>
-		</template>
-
-		<template slot="collection-after-details">
-			<DataRetrievedNotice :timestamp="collectionData.retrieved"></DataRetrievedNotice>
 		</template>
 
 	</Collection>

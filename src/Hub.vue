@@ -503,10 +503,6 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 h3 .backendname {
 	display: inline;
 }
-.retrieved {
-	margin-top: 20px;
-	margin-bottom: 10px;
-}
 .signature .process-name,
 .signature .param-name {  /* mild syntax highlighting */
 	font-weight: bold;

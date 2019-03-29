@@ -17,6 +17,7 @@
         <small><code>{{backend.backendUrl}}</code></small>
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
+        <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
 
         <dl>
             <dt v-if="backend.endpoints" @click="collapsed.functionalities = !collapsed.functionalities">
@@ -61,8 +62,6 @@
                 <BillingPlans :billing="backend.billing"></BillingPlans>
             </dd>
         </dl>
-        
-        <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
 
         </div>
     </div>
