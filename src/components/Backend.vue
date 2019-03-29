@@ -3,7 +3,7 @@
         <div class="invalidConfigurationWarning" v-if="clippedDataSupplied && !initiallyCollapsed"><strong>It is not allowed to supply clipped data but not initially collapse the component! This is because lazy-loading of the full data is coupled to the expanding mechanism.</strong></div>
         <div class="invalidConfigurationWarning" v-if="clippedDataSupplied && isSearchResult"><strong>It is not allowed to supply clipped data when this data represents a search result! This is because lazy-loading of the full data is only possible for the "default" representation of a backend, not for search results.</strong></div>
 
-        <a :href="webEditorUrl" target="_blank" class="open-in-web-editor">
+        <a :href="webEditorUrl" target="_blank" class="open-in-web-editor" v-if="!collapsed.root">
             <button>Open in openEO Web Editor</button>
         </a>
         
