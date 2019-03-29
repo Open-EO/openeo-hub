@@ -69,7 +69,7 @@
 			</section>
 
 			<section id="share" :class="{hidden: view != 'share'}">
-				<ProcessGraphRepository></ProcessGraphRepository>
+				<ProcessGraphRepository :active="view == 'share'"></ProcessGraphRepository>
 			</section>
 
 			<section id="about" :class="{hidden: view != 'about'}">

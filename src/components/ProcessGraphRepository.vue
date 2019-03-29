@@ -30,8 +30,10 @@ import axios from 'axios';
 
 export default {
 	name: 'process-graph-repository',
+	props: ['active'],
 	data() {
 		return {
+			dataComplete: false,
 			allProcessGraphs: [],
 			newProcessGraph: {
 				title: '',
@@ -41,14 +43,19 @@ export default {
             expanded: {}
 		};
 	},
-	mounted() {
-		this.getProcessGraphs();
+	watch: {
+		active: function (newVal, oldVal) {
+			if(newVal == true && !this.dataComplete) {
+				this.getProcessGraphs();
+			}
+		}
 	},
 	methods: {
 		getProcessGraphs() {
 			axios.get('/process_graphs')
 				.then(response => {
 					this.allProcessGraphs = response.data;
+					this.dataComplete = true;
 				})
 				.catch(error => {
 					console.log(error);
