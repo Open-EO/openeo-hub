@@ -45,9 +45,28 @@ mongo.connect(async (err, client) => {
         listServiceTypes: '/service_types'
     };
 
-    for (var backendUrl in config.backends) {
+    let individualBackends = {};
+
+    for (var url in config.backends) {
+        if(url.substr(-19) == '/.well-known/openeo') {
+            await axios(url)
+            .then(response => {
+                response.data.versions.forEach(b => individualBackends[b.url] = config.backends[url] + ' v' + b.api_version);
+            })
+            .catch(error => {
+                console.log('An error occurred while getting or reading /.well-known/openeo document of ' + backendUrl+path);
+                if(verbose) {
+                    console.log(error);
+                }
+            });
+        } else {
+            individualBackends[url] = config.backends[url];
+        }
+    }
+    
+    for (var backendUrl in individualBackends) {
         try {
-            console.log('Gathering endpoint URLs for ' + config.backends[backendUrl] + ' at ' + backendUrl + ' ...');
+            console.log('Gathering endpoint URLs for ' + individualBackends[backendUrl] + ' at ' + backendUrl + ' ...');
             var paths = ['/'];
             const con = await openeo.connect(backendUrl);
             const caps = await con.capabilities();
