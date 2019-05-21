@@ -93,13 +93,15 @@ mongo.connect(async (err, client) => {
 
         for(var index in paths) {
             var path = paths[index];
-            console.log('Downloading ' + backendUrl+path + ' ...');
+            if(path.indexOf('/collections/') == -1 || verbose) {
+                console.log('Downloading ' + backendUrl+path + ' ...');
+            }
             await axios(backendUrl+path)
             .then(response => {
                 // save to database
                 var data = response.data;
                 collection.findOneAndUpdate(
-                    { backend: backendUrl, path: path },
+                    { backend: backendUrl, backendTitle: individualBackends[backendUrl], path: path },
                     { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: data } },
                     { upsert: true }
                 );

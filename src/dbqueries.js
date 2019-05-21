@@ -7,6 +7,7 @@ module.exports = {
         { $group: {
             _id: '$backend',
             backend: { $first: '$backend' },
+            backendTitle: { $first: '$backendTitle' },
             retrieved: { $max: '$retrieved' },
             unsuccessfulCrawls: { $first: '$unsuccessfulCrawls' },
             contents: { $push: '$content' },
@@ -33,6 +34,7 @@ module.exports = {
         } },
         { $project: {
             backend: 1,
+            backendTitle: 1,
             retrieved: 1,
             unsuccessfulCrawls: 1,
             version: '$root.version',
@@ -60,7 +62,7 @@ module.exports = {
     ],
     GET_ALL_COLLECTIONS_PIPELINE: [
         { $match: { path: '/collections' } },
-        { $addFields: { 'content.collections.backend': '$backend', 'content.collections.retrieved': '$retrieved', 'content.collections.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
+        { $addFields: { 'content.collections.backend': '$backend', 'content.collections.backendTitle': '$backendTitle', 'content.collections.retrieved': '$retrieved', 'content.collections.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'collection': '$content.collections' } },
         { $unwind: '$collection' },
         { $replaceRoot: { newRoot: '$collection' } }
@@ -68,7 +70,7 @@ module.exports = {
     GET_ALL_PROCESSES_PIPELINE: [
         // basically like for collections
         { $match: { path: '/processes' } },
-        { $addFields: { 'content.processes.backend': '$backend', 'content.processes.retrieved': '$retrieved', 'content.processes.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
+        { $addFields: { 'content.processes.backend': '$backend', 'content.processes.backendTitle': '$backendTitle', 'content.processes.retrieved': '$retrieved', 'content.processes.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'process': '$content.processes' } },
         { $unwind: '$process' },
         { $replaceRoot: {newRoot: '$process'} },

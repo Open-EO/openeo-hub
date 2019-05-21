@@ -63,7 +63,7 @@ function prepare(data, additionalCallbacks = []) {
     function addBackendTitle(item) {
         if(typeof item.backend == 'string') {
             item.backendUrl = item.backend;
-            item.backendTitle = config.backends[item.backend];
+            item.backendTitle = item.backendTitle;
             delete item.backend;
         }
         return item;
