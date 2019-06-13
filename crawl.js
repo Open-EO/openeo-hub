@@ -1,7 +1,8 @@
 const config = require('./config.json');
 const MongoClient = require('mongodb').MongoClient;
+
 const axios = require('axios');
-const { OpenEO } = require('@openeo/js-client');
+axios.defaults.timeout = 10*1000;   // 10s = 10000 ms
 
 const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true } );
 
@@ -39,12 +40,12 @@ mongo.connect(async (err, client) => {
     console.log('Set up database indexes.');
     console.log('');
 
-    const endpoints = {
-        listCollections: '/collections',
-        listProcesses: '/processes',
-        listFileTypes: '/output_formats',
-        listServiceTypes: '/service_types'
-    };
+    const endpoints = [
+        '/collections',
+        '/processes',
+        '/output_formats',
+        '/service_types'
+    ];
 
     let individualBackends = {};
 
@@ -74,21 +75,21 @@ mongo.connect(async (err, client) => {
         try {
             console.log('  - ' + backendUrl + ' ...');
             var paths = [];
-            const con = await OpenEO.connectDirect(backendUrl);
-            const caps = await con.capabilities();
+            const req = await axios(backendUrl+'/');
+            const caps = req.data.endpoints
+                .filter(e => e.methods.map(m => m.toLowerCase()).indexOf('get') != -1)  // only keep those that have a GET method
+                .map(e => e.path.replace(/{.*}/g,'{}'));    // replace parameter names with nothing to ease querying
+
+            const hasEndpoint = (path) => caps.indexOf(path) != -1;
 
             // add all standard endpoints that are supported
             paths.push('/');
-            for (var method in endpoints) {
-                if(caps.hasFeature(method)) {
-                    paths.push(endpoints[method]);
-                }
-            }
+            paths = paths.concat(endpoints.filter(hasEndpoint));
 
             // if `/collections/{name}` is supported: add the individual collections too
-            if(caps.hasFeature('listCollections') && caps.hasFeature('describeCollection')) {
-                const collections = await con.listCollections();
-                paths = paths.concat(collections.collections.map(c => '/collections/' + (c.name || c.id)));
+            if(hasEndpoint('/collections') && hasEndpoint('/collections/{}')) {
+                const collections = (await axios(backendUrl+'/collections')).data.collections;
+                paths = paths.concat(collections.map(c => '/collections/' + (c.name || c.id)));
             }
         }  
         catch(error) {
