@@ -70,13 +70,15 @@ mongo.connect(async (err, client) => {
     
     console.log('Gathering endpoint URLs...');
     for (var backendUrl in individualBackends) {
+        let backendTitle = individualBackends[backendUrl];
         try {
-            var paths = ['/'];
             console.log('  - ' + backendUrl + ' ...');
+            var paths = [];
             const con = await OpenEO.connectDirect(backendUrl);
             const caps = await con.capabilities();
 
             // add all standard endpoints that are supported
+            paths.push('/');
             for (var method in endpoints) {
                 if(caps.hasFeature(method)) {
                     paths.push(endpoints[method]);
@@ -103,10 +105,14 @@ mongo.connect(async (err, client) => {
             }
             await axios(backendUrl+path)
             .then(response => {
+                // extract backend title (if applicable)
+                if(path == '/') {
+                    backendTitle = response.data.title;
+                }
                 // save to database
                 var data = response.data;
                 collection.findOneAndUpdate(
-                    { backend: backendUrl, backendTitle: individualBackends[backendUrl], path: path },
+                    { backend: backendUrl, backendTitle: backendTitle, path: path },
                     { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: data } },
                     { upsert: true }
                 );
