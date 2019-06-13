@@ -1,10 +1,9 @@
 const config = require('./config.json');
 const MongoClient = require('mongodb').MongoClient;
 const axios = require('axios');
-const OpenEO = require('@openeo/js-client').OpenEO;
+const { OpenEO } = require('@openeo/js-client');
 
 const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true } );
-const openeo = new OpenEO();
 
 const dbqueries = require('./src/dbqueries.js');
 
@@ -73,8 +72,8 @@ mongo.connect(async (err, client) => {
     for (var backendUrl in individualBackends) {
         try {
             var paths = ['/'];
-            const con = await openeo.connect(backendUrl);
             console.log('  - ' + backendUrl + ' ...');
+            const con = await OpenEO.connectDirect(backendUrl);
             const caps = await con.capabilities();
 
             // add all standard endpoints that are supported

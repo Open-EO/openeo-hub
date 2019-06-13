@@ -27,10 +27,10 @@
     "start:dev": "vue-cli-service build --mode development && node server.js"
   },
   "dependencies": {
-    "@openeo/js-client": "0.3.2",
-    "@openeo/js-commons": "0.3.4",
-    "@openeo/vue-components": "0.3.3",
-    "axios": "^0.18.0",
+    "@openeo/js-client": "0.4.0-beta.2",
+    "@openeo/js-commons": "0.4.0-beta.2",
+    "@openeo/vue-components": "0.3.5",
+    "axios": "^0.19.0",
     "moment": "^2.22.2",
     "mongodb": "^3.1.10",
     "restify": "^7.2.3",
