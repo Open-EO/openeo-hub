@@ -30,6 +30,8 @@ mongo.connect(async (err, client) => {
     const db = client.db(config.dbName);
     const collection = db.collection('raw');
     console.log('Connected to database server.');
+    console.log('');
+
     console.log('Setting up database indexes...');
     db.collection('raw').createIndex({backend: 1, path: 1}, { name: 'backend-path_unique', unique: true });
     db.collection('backends').createIndex({backend: 1}, { name: 'backend_unique', unique: true });
@@ -47,7 +49,9 @@ mongo.connect(async (err, client) => {
 
     let individualBackends = {};
 
+    console.log('Gathering API URLs...');
     for (var url in config.backends) {
+        console.log('  - ' + url);
         if(url.substr(-19) == '/.well-known/openeo') {
             await axios(url)
             .then(response => {
@@ -63,12 +67,14 @@ mongo.connect(async (err, client) => {
             individualBackends[url] = config.backends[url];
         }
     }
+    console.log('');
     
+    console.log('Gathering endpoint URLs...');
     for (var backendUrl in individualBackends) {
         try {
-            console.log('Gathering endpoint URLs for ' + individualBackends[backendUrl] + ' at ' + backendUrl + ' ...');
             var paths = ['/'];
             const con = await openeo.connect(backendUrl);
+            console.log('  - ' + backendUrl + ' ...');
             const caps = await con.capabilities();
 
             // add all standard endpoints that are supported
@@ -94,7 +100,7 @@ mongo.connect(async (err, client) => {
         for(var index in paths) {
             var path = paths[index];
             if(path.indexOf('/collections/') == -1 || verbose) {
-                console.log('Downloading ' + backendUrl+path + ' ...');
+                console.log('      - Downloading ' + backendUrl+path + ' ...');
             }
             await axios(backendUrl+path)
             .then(response => {
