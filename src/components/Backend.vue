@@ -168,7 +168,7 @@ export default {
         async expand() {
             // lazy-load full data if necessary
             if(!this.dataComplete) {
-                let fullData = await axios.get('/backends/' + encodeURIComponent(this.backend.backendUrl));
+                let fullData = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl)));  // double-encode to avoid Apache problem (automatic decoding of slashes in URL parameter -> Apache looks for wrong directory -> 404 errors)
                 this.backend = fullData.data;
                 this.dataComplete = true;
             }

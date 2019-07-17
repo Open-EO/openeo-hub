@@ -114,7 +114,7 @@ server.get('/backends', function(req, res, next) {
 
 // return details of a single backend
 server.get('/backends/:backend', function(req, res, next) {
-    findOne({backend: req.params.backend}, 'backends')
+    findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
         .then(prepare)
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));
