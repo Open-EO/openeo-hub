@@ -107,7 +107,7 @@ mongo.connect(async (err, client) => {
             await axios(backendUrl+path)
             .then(response => {
                 // extract backend title (if applicable)
-                if(path == '/') {
+                if(path == '/' && response.data.title) {
                     backendTitle = response.data.title;
                 }
                 // save to database
