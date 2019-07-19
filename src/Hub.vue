@@ -126,6 +126,25 @@ export default {
 		axios.get('/backends?details=clipped')
 			.then(response => {
 				this.allBackends = response.data;
+				this.allBackends.sort((a, b) => {
+					var aVersion = (a.api_version || a.version || "0.0.0").split('.');
+					var bVersion = (b.api_version || b.version || "0.0.0").split('.');
+					if (aVersion[0] > bVersion[0]) {
+						return -1;
+					}
+					else if (aVersion[0] < bVersion[0]) {
+						return 1;
+					}
+					else if (aVersion[1] > bVersion[1]) {
+						return -1;
+					}
+					else if (aVersion[1] < bVersion[1]) {
+						return 1;
+					}
+					else {
+						return (a.backendTitle || "").localeCompare(b.backendTitle || "");
+					}
+				});
 			})
 			.catch(error => {
 				console.log(error);
