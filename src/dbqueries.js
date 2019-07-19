@@ -38,6 +38,7 @@ module.exports = {
             retrieved: 1,
             unsuccessfulCrawls: 1,
             version: '$root.version',
+            api_version: '$root.api_version',
             endpoints: {
                 $reduce: {
                     input: {

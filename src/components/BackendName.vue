@@ -3,8 +3,8 @@
         <em :title="data.backendUrl">
             {{data.backendTitle}}
         </em>
-        <template v-if="data.version">
-            | v{{data.version}}
+        <template v-if="version">
+            | v{{version}}
         </template>
         <span v-if="needsWarningSign" :title="warningText" class="warningSign hasTooltip">️⚠</span>
     </div>
@@ -17,6 +17,9 @@ export default {
     name: 'BackendName',
     props: ['data'],
     computed: {
+        version() {
+            return typeof this.data.api_version === 'string' ? this.data.api_version : this.data.version;
+        },
         recentlyUnavailable() {
             return this.data.unsuccessfulCrawls >= config.unsuccessfulCrawls.flagAfter;
         },
