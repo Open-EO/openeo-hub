@@ -7,7 +7,6 @@
         "http://saocompute.eurac.edu/openEO_0_3_0/openeo": "EURAC WCPS",
         "http://openeo.vgt.vito.be/openeo": "VITO GeoPySpark legacy",
         "http://openeo.vgt.vito.be/openeo/0.4.0": "VITO GeoPySpark",
-        "http://openeo.eodc.eu/api/v0.3": "EODC OpenShift  legacy",
         "https://openeo.eodc.eu": "EODC OpenShift",
         "https://openeo.mundialis.de/api/v0.3": "mundialis GRASS GIS (Actinia) legacy",
         "https://openeo.mundialis.de/api/v0.4": "mundialis GRASS GIS (Actinia)"
