@@ -96,10 +96,6 @@ export default {
 
             // normalizing of `processes` array entries (via `convertProcessToLatestSpec`) is done by the Process component
 
-            // the file types and service names are stored as the keys of the objects
-            original.outputFormats = original.outputFormats ? Object.keys(original.outputFormats) : null;
-            original.serviceTypes = original.serviceTypes ? Object.keys(original.serviceTypes) : null;
-
             // don't touch search result because order may be important
             // but when we get a long list for the discovery section having it sorted alphabetically is very handy
             if(!this.isSearchResult) {
@@ -108,8 +104,6 @@ export default {
                 // ternary operator check in case the property is `null`
                 original.collections = original.collections ? original.collections.sort(sortCallbackName) : null;
                 original.processes = original.processes ? original.processes.sort(sortCallbackName) : null;
-                original.outputFormats = original.outputFormats ? original.outputFormats.sort(sortCallback) : null;
-                original.serviceTypes = original.serviceTypes ? original.serviceTypes.sort(sortCallback) : null;
             }
 
             if(original.endpoints) {
@@ -183,13 +177,6 @@ export default {
 h3, h4 {
     cursor: pointer;
 }
-ul.functionalities {
-    list-style: none;
-}
-ul.output-formats,
-ul.service-types {
-    column-width: 10em;
-}
 .open-in-web-editor {
     float: right;
 }
@@ -198,5 +185,12 @@ ul.service-types {
     font-size: 20pt;
     padding: 10px;
     margin-bottom: 10px;
+}
+</style>
+
+<style>
+ul.file-formats,
+ul.service-types {
+    column-width: 10em;
 }
 </style>
