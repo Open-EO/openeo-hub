@@ -58,7 +58,7 @@ mongo.connect(async (err, client) => {
                 response.data.versions.forEach(b => individualBackends[b.url.replace(/\/$/, '')] = config.backends[url] + ' v' + b.api_version);
             })
             .catch(error => {
-                console.log('An error occurred while getting or reading /.well-known/openeo document of ' + backendUrl+path);
+                console.log('An error occurred while getting or reading ' + url);
                 if(verbose) {
                     console.log(error);
                 }
