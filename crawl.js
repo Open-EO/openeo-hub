@@ -71,6 +71,7 @@ mongo.connect(async (err, client) => {
     
     console.log('Gathering endpoint URLs...');
     for (var backendUrl in individualBackends) {
+        backendUrl = backendUrl.replace(/\/$/, ''); // Make sure there's no trailing slash
         let backendTitle = individualBackends[backendUrl];
         try {
             console.log('  - ' + backendUrl + ' ...');
