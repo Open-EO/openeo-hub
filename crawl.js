@@ -73,64 +73,64 @@ mongo.connect(async (err, client) => {
             individualBackends[name] = url.replace(/\/$/, '');
         }
 
-    for (var backendTitle in individualBackends) {
-        let backendUrl = individualBackends[backendTitle];
-        try {
-            console.log('      - ' + backendUrl + ' ...');
-            var paths = [];
-            const req = await axios(backendUrl+'/');
-            const caps = req.data.endpoints
-                .filter(e => e.methods.map(m => m.toLowerCase()).indexOf('get') != -1)  // only keep those that have a GET method
-                .map(e => e.path.replace(/{.*}/g,'{}'));    // replace parameter names with nothing to ease querying
+        for (var backendTitle in individualBackends) {
+            let backendUrl = individualBackends[backendTitle];
+            try {
+                console.log('      - ' + backendUrl + ' ...');
+                var paths = [];
+                const req = await axios(backendUrl+'/');
+                const caps = req.data.endpoints
+                    .filter(e => e.methods.map(m => m.toLowerCase()).indexOf('get') != -1)  // only keep those that have a GET method
+                    .map(e => e.path.replace(/{.*}/g,'{}'));    // replace parameter names with nothing to ease querying
 
-            const hasEndpoint = (path) => caps.indexOf(path) != -1;
+                const hasEndpoint = (path) => caps.indexOf(path) != -1;
 
-            // add all standard endpoints that are supported
-            paths.push('/');
-            paths = paths.concat(endpoints.filter(hasEndpoint));
+                // add all standard endpoints that are supported
+                paths.push('/');
+                paths = paths.concat(endpoints.filter(hasEndpoint));
 
-            // if `/collections/{name}` is supported: add the individual collections too
-            if(hasEndpoint('/collections') && hasEndpoint('/collections/{}')) {
-                const collections = (await axios(backendUrl+'/collections')).data.collections;
-                paths = paths.concat(collections.map(c => '/collections/' + (c.name || c.id)));
-            }
-        }  
-        catch(error) {
-            console.log('An error occurred while gathering endpoint URLs for ' + backendUrl);
-            if(verbose) {
-                console.log(error);
-            }
-        }
-
-        for(var index in paths) {
-            var path = paths[index];
-            if(path.indexOf('/collections/') == -1 || verbose) {
-                console.log('          - Downloading ' + backendUrl+path + ' ...');
-            }
-            await axios(backendUrl+path)
-            .then(response => {
-                // extract backend title (if applicable)
-                if(path == '/' && response.data.title) {
-                    backendTitle = response.data.title;
+                // if `/collections/{name}` is supported: add the individual collections too
+                if(hasEndpoint('/collections') && hasEndpoint('/collections/{}')) {
+                    const collections = (await axios(backendUrl+'/collections')).data.collections;
+                    paths = paths.concat(collections.map(c => '/collections/' + (c.name || c.id)));
                 }
-                // save to database
-                var data = response.data;
-                collection.findOneAndUpdate(
-                    { backend: backendUrl, backendTitle: backendTitle, path: path, group: name },
-                    { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: data } },
-                    { upsert: true }
-                );
-            })
-            .catch(error => {
-                console.log('An error occurred while downloading ' + backendUrl+path);
+            }  
+            catch(error) {
+                console.log('An error occurred while gathering endpoint URLs for ' + backendUrl);
                 if(verbose) {
                     console.log(error);
                 }
-            });
-        };
+            }
 
-        console.log('');
-    }
+            for(var index in paths) {
+                var path = paths[index];
+                if(path.indexOf('/collections/') == -1 || verbose) {
+                    console.log('          - Downloading ' + backendUrl+path + ' ...');
+                }
+                await axios(backendUrl+path)
+                .then(response => {
+                    // extract backend title (if applicable)
+                    if(path == '/' && response.data.title) {
+                        backendTitle = response.data.title;
+                    }
+                    // save to database
+                    var data = response.data;
+                    collection.findOneAndUpdate(
+                        { backend: backendUrl, backendTitle: backendTitle, path: path, group: name },
+                        { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: data } },
+                        { upsert: true }
+                    );
+                })
+                .catch(error => {
+                    console.log('An error occurred while downloading ' + backendUrl+path);
+                    if(verbose) {
+                        console.log(error);
+                    }
+                });
+            };
+
+            console.log('');
+        }
     }
 
     // once all requests have finished

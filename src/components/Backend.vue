@@ -87,38 +87,39 @@ export default {
         CollectionWrapper,
         ProcessWrapper
     },
+    
     created() {
-            var original = this.backend;
+        var original = this.backend;
 
-            // normalizing of `processes` array entries (via `convertProcessToLatestSpec`) is done by the Process component
+        // normalizing of `processes` array entries (via `convertProcessToLatestSpec`) is done by the Process component
 
-            // don't touch search result because order may be important
-            // but when we get a long list for the discovery section having it sorted alphabetically is very handy
-            if(!this.isSearchResult) {
-                const sortCallback = (e1, e2) => e1.toLowerCase() > e2.toLowerCase();
-                const sortCallbackName = (e1, e2) => (e1.id || e1.name).toLowerCase() > (e2.id || e2.name).toLowerCase();
-                // ternary operator check in case the property is `null`
-                original.collections = original.collections ? original.collections.sort(sortCallbackName) : null;
-                original.processes = original.processes ? original.processes.sort(sortCallbackName) : null;
-            }
+        // don't touch search result because order may be important
+        // but when we get a long list for the discovery section having it sorted alphabetically is very handy
+        if(!this.isSearchResult) {
+            const sortCallback = (e1, e2) => e1.toLowerCase() > e2.toLowerCase();
+            const sortCallbackName = (e1, e2) => (e1.id || e1.name).toLowerCase() > (e2.id || e2.name).toLowerCase();
+            // ternary operator check in case the property is `null`
+            original.collections = original.collections ? original.collections.sort(sortCallbackName) : null;
+            original.processes = original.processes ? original.processes.sort(sortCallbackName) : null;
+        }
 
-            if(original.endpoints) {
-                // convert `endpoints` array from `['METHOD path', 'METHOD2 path', ...]` format into `[{path:'path', methods:['METHOD','METHOD2']}, ...]` format
-                let inOtherFormat = [];
-                original.endpoints.forEach(e => {
-                    let splitted = e.split(' ');
-                    let index = inOtherFormat.findIndex(x => x.path == splitted[1]);
-                    if(index > -1) {
-                        inOtherFormat[index].methods.push(splitted[0]);
-                    } else {
-                        inOtherFormat.push({path: splitted[1], methods: [splitted[0]]});
-                    }
-                });
-                original.endpoints = inOtherFormat;
-            }
+        if(original.endpoints) {
+            // convert `endpoints` array from `['METHOD path', 'METHOD2 path', ...]` format into `[{path:'path', methods:['METHOD','METHOD2']}, ...]` format
+            let inOtherFormat = [];
+            original.endpoints.forEach(e => {
+                let splitted = e.split(' ');
+                let index = inOtherFormat.findIndex(x => x.path == splitted[1]);
+                if(index > -1) {
+                    inOtherFormat[index].methods.push(splitted[0]);
+                } else {
+                    inOtherFormat.push({path: splitted[1], methods: [splitted[0]]});
+                }
+            });
+            original.endpoints = inOtherFormat;
+        }
 
-            this.preparedBackend = original;
-        },
+        this.preparedBackend = original;
+    },
 
     computed: {
         webEditorUrl() {
