@@ -30,7 +30,10 @@ Should you ever want to hard-reset the database (i.e. drop all collections opene
 2. `npm install` -> wait...
 3. Edit `config.json`:
    - Specify the URL and name of your MongoDB server and database (required)
-   - Specify the list of backends to crawl (required; specify backend URLs without trailing slash!)
+   - Specify the backends to crawl (required; always with a display name as the key; URLs must not have a trailing slash!) There are three options for the value:
+     - a URL directly to a backend
+     - a URL to a `/.well-known/openeo` document
+     - an object that contains multiple 'direct' URLs to backends (the keys are treated as display name postfixes)
    - Optional: Change presets for thresholds that control how the crawler handles existing data that is not reachable on re-crawl
 4. `npm run crawl` -> wait until finished with output "DONE!" (see below if something doesn't look right or any line starts with "An error...")
 5. `npm start`

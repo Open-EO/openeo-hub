@@ -47,15 +47,20 @@ mongo.connect(async (err, client) => {
         '/service_types'
     ];
 
-    let individualBackends = {};
+    console.log('Crawling all backends...');
+    for (var name in config.backends) {
+        var url = config.backends[name];
 
-    console.log('Gathering API URLs...');
-    for (var url in config.backends) {
-        console.log('  - ' + url);
-        if(url.substr(-19) == '/.well-known/openeo') {
+        let individualBackends = {};
+
+        if(typeof url == 'object') {
+            console.log('  - ' + name + ' (group)');
+            individualBackends = url;
+        } else if(url.substr(-19) == '/.well-known/openeo') {
+            console.log('  - ' + name + ' (well-known document: ' + url + ')');
             await axios(url)
             .then(response => {
-                response.data.versions.forEach(b => individualBackends[b.url.replace(/\/$/, '')] = config.backends[url] + ' v' + b.api_version);
+                response.data.versions.forEach(b => individualBackends[name + ' v' + b.api_version] = b.url.replace(/\/$/, ''));
             })
             .catch(error => {
                 console.log('An error occurred while getting or reading ' + url);
@@ -64,16 +69,14 @@ mongo.connect(async (err, client) => {
                 }
             });
         } else {
-            individualBackends[url.replace(/\/$/, '')] = config.backends[url];
+            console.log('  - ' + name + ' (single)');
+            individualBackends[name] = url.replace(/\/$/, '');
         }
-    }
-    console.log('');
-    
-    console.log('Gathering endpoint URLs...');
-    for (var backendUrl in individualBackends) {
-        let backendTitle = individualBackends[backendUrl];
+
+    for (var backendTitle in individualBackends) {
+        let backendUrl = individualBackends[backendTitle];
         try {
-            console.log('  - ' + backendUrl + ' ...');
+            console.log('      - ' + backendUrl + ' ...');
             var paths = [];
             const req = await axios(backendUrl+'/');
             const caps = req.data.endpoints
@@ -102,7 +105,7 @@ mongo.connect(async (err, client) => {
         for(var index in paths) {
             var path = paths[index];
             if(path.indexOf('/collections/') == -1 || verbose) {
-                console.log('      - Downloading ' + backendUrl+path + ' ...');
+                console.log('          - Downloading ' + backendUrl+path + ' ...');
             }
             await axios(backendUrl+path)
             .then(response => {
@@ -113,7 +116,7 @@ mongo.connect(async (err, client) => {
                 // save to database
                 var data = response.data;
                 collection.findOneAndUpdate(
-                    { backend: backendUrl, backendTitle: backendTitle, path: path },
+                    { backend: backendUrl, backendTitle: backendTitle, path: path, group: name },
                     { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: data } },
                     { upsert: true }
                 );
@@ -127,6 +130,7 @@ mongo.connect(async (err, client) => {
         };
 
         console.log('');
+    }
     }
 
     // once all requests have finished

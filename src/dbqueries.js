@@ -8,6 +8,7 @@ module.exports = {
             _id: '$backend',
             backend: { $first: '$backend' },
             backendTitle: { $first: '$backendTitle' },
+            group: { $first: '$group' },
             retrieved: { $max: '$retrieved' },
             unsuccessfulCrawls: { $first: '$unsuccessfulCrawls' },
             contents: { $push: '$content' },
@@ -35,6 +36,7 @@ module.exports = {
         { $project: {
             backend: 1,
             backendTitle: 1,
+            group: 1,
             retrieved: 1,
             unsuccessfulCrawls: 1,
             version: '$root.version',
