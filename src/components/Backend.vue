@@ -24,14 +24,14 @@
                 <SupportedFeatures :endpoints="preparedBackend.endpoints" ref="supportedFeaturesComponent"></SupportedFeatures>
             </dd>
 
-            <dt v-if="backend.collections" @click="collapsed.collections = !collapsed.collections">
+            <dt v-if="backend.collections" @click="toggleCollections">
                 <h4>{{collapsed.collections ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} collections ({{backend.collections.length}})</h4>
             </dt>
             <dd v-if="backend.collections && !collapsed.collections">
                 <CollectionWrapper v-for="collection in preparedBackend.collections" :key="collection.name" :collectionData="collection" :initiallyCollapsed="true"></CollectionWrapper>
             </dd>
             
-            <dt v-if="backend.processes" @click="collapsed.processes = !collapsed.processes">
+            <dt v-if="backend.processes" @click="toggleProcesses">
                 <h4>{{collapsed.processes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
             </dt>
             <dd v-if="preparedBackend.processes && !collapsed.processes">
@@ -138,21 +138,6 @@ export default {
         }
     },
 
-    watch: {
-        'collapsed.collections': async function (newValue) {
-            if(newValue == false && Array.isArray(this.preparedBackend.collections) && Object.keys(this.preparedBackend.collections[0]).length == 1) {
-                let request = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections');
-                this.preparedBackend.collections = request.data;
-            }
-        },
-        'collapsed.processes': async function (newValue) {
-            if(newValue == false && Array.isArray(this.preparedBackend.processes) && Object.keys(this.preparedBackend.processes[0]).length == 1) {
-                let request = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/processes');
-                this.preparedBackend.processes = request.data;
-            }
-        }
-    },
-
 	data() {
 		return {
             backend: this.backendData,
@@ -168,6 +153,28 @@ export default {
             },
             supportedFunctionalitiesCount: ''
 		};
+    },
+
+    methods: {
+        async toggleCollections() {
+            if(this.collapsed.collections && Array.isArray(this.preparedBackend.collections) && this.preparedBackend.collections.length > 0 && Object.keys(this.preparedBackend.collections[0]).length == 1) {
+                document.body.classList.add('loading');
+                let request = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections');
+                this.preparedBackend.collections = request.data;
+                document.body.classList.remove('loading');
+            }
+            this.collapsed.collections = !this.collapsed.collections;
+        },
+
+        async toggleProcesses() {
+            if(this.collapsed.processes && Array.isArray(this.preparedBackend.processes) && this.preparedBackend.processes.length > 0 && Object.keys(this.preparedBackend.processes[0]).length == 1) {
+                document.body.classList.add('loading');
+                let request = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/processes');
+                this.preparedBackend.processes = request.data;
+                document.body.classList.remove('loading');
+            }
+            this.collapsed.processes = !this.collapsed.processes;
+        }
     }
 }
 </script>
@@ -175,6 +182,9 @@ export default {
 <style scoped>
 h3, h4 {
     cursor: pointer;
+}
+body.loading h3, body.loading h4 {
+    cursor: wait;
 }
 .open-in-web-editor {
     float: right;
