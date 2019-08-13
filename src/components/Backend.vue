@@ -1,13 +1,10 @@
 <template>
 	<div class="backend">
-        <div class="invalidConfigurationWarning" v-if="clippedDataSupplied && !initiallyCollapsed"><strong>It is not allowed to supply clipped data but not initially collapse the component! This is because lazy-loading of the full data is coupled to the expanding mechanism.</strong></div>
-        <div class="invalidConfigurationWarning" v-if="clippedDataSupplied && isSearchResult"><strong>It is not allowed to supply clipped data when this data represents a search result! This is because lazy-loading of the full data is only possible for the "default" representation of a backend, not for search results.</strong></div>
-
         <a :href="webEditorUrl" target="_blank" class="open-in-web-editor" v-if="!collapsed.root">
             <button>Open in openEO Web Editor</button>
         </a>
         
-        <h3 @click="expand">
+        <h3 @click="collapsed.root = !collapsed.root">
             {{collapsed.root ? '▶' : '▼'}}
             <BackendName :data="backend"></BackendName>
         </h3>
@@ -78,7 +75,7 @@ import axios from 'axios';
 
 export default {
 	name: 'Backend',
-	props: ['backendData', 'clippedDataSupplied', 'initiallyCollapsed', 'isSearchResult'],
+	props: ['backendData', 'initiallyCollapsed', 'isSearchResult'],
 	components: {
         BackendName,
         SupportedFeatures,
@@ -90,8 +87,7 @@ export default {
         CollectionWrapper,
         ProcessWrapper
     },
-    computed: {
-        preparedBackend() {
+    created() {
             var original = this.backend;
 
             // normalizing of `processes` array entries (via `convertProcessToLatestSpec`) is done by the Process component
@@ -121,9 +117,10 @@ export default {
                 original.endpoints = inOtherFormat;
             }
 
-            return original;
+            this.preparedBackend = original;
         },
 
+    computed: {
         webEditorUrl() {
             var protocol = 'https:';
             if (this.backend.backendUrl.toLowerCase().substr(0,5) === 'http:') {
@@ -141,10 +138,25 @@ export default {
         }
     },
 
+    watch: {
+        'collapsed.collections': async function (newValue) {
+            if(newValue == false && Array.isArray(this.preparedBackend.collections) && Object.keys(this.preparedBackend.collections[0]).length == 1) {
+                let request = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections');
+                this.preparedBackend.collections = request.data;
+            }
+        },
+        'collapsed.processes': async function (newValue) {
+            if(newValue == false && Array.isArray(this.preparedBackend.processes) && Object.keys(this.preparedBackend.processes[0]).length == 1) {
+                let request = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/processes');
+                this.preparedBackend.processes = request.data;
+            }
+        }
+    },
+
 	data() {
 		return {
             backend: this.backendData,
-            dataComplete: this.clippedDataSupplied != true,
+            preparedBackend: null,
             collapsed: {
                 root: this.initiallyCollapsed || false,
                 functionalities: false,
@@ -156,19 +168,6 @@ export default {
             },
             supportedFunctionalitiesCount: ''
 		};
-    },
-
-    methods: {
-        async expand() {
-            // lazy-load full data if necessary
-            if(!this.dataComplete) {
-                let fullData = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl)));  // double-encode to avoid Apache problem (automatic decoding of slashes in URL parameter -> Apache looks for wrong directory -> 404 errors)
-                this.backend = fullData.data;
-                this.dataComplete = true;
-            }
-            // actual expanding
-            this.collapsed.root = !this.collapsed.root;
-        }
     }
 }
 </script>
@@ -179,12 +178,6 @@ h3, h4 {
 }
 .open-in-web-editor {
     float: right;
-}
-.invalidConfigurationWarning {
-    background-color: red;
-    font-size: 20pt;
-    padding: 10px;
-    margin-bottom: 10px;
 }
 </style>
 

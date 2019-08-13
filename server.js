@@ -120,6 +120,22 @@ server.get('/backends/:backend', function(req, res, next) {
         .catch(err => next(err));
 });
 
+// return collection details of a single backend
+server.get('/backends/:backend/collections', function(req, res, next) {
+    findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
+        .then(prepare)
+        .then(data => { res.send(data.collections); next(); })
+        .catch(err => next(err));
+});
+
+// return process details of a single backend
+server.get('/backends/:backend/processes', function(req, res, next) {
+    findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
+        .then(prepare)
+        .then(data => { res.send(data.processes); next(); })
+        .catch(err => next(err));
+});
+
 // search backends via JSON document in POST body
 // supports all parameters, which are currently: version, endpoints, collections, processes, processGraph, outputFormats, processTypes, excludePaidOnly
 server.post('/backends/search', async function(req, res, next) {
