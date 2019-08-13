@@ -100,8 +100,8 @@ server.get('/backends', function(req, res, next) {
         next();
     } else {
         const clip = b => {
-            if(b.collections) { b.collections = b.collections.map(e => ({name: e.name})); }
-            if(b.processes) { b.processes = b.processes.map(e => ({name: e.name})); }
+            if(b.collections) { b.collections = b.collections.map(e => ({name: e.name || e.id})); }
+            if(b.processes) { b.processes = b.processes.map(e => ({name: e.name || e.id})); }
             return b;
         };
 
