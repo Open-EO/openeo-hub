@@ -105,10 +105,17 @@ server.get('/backends', function(req, res, next) {
             return b;
         };
 
-        find({}, 'backends')
-            .then(data => prepare(data, (req.query.details == 'clipped' ? [clip] : [])))
-            .then(data => { res.send(data); next(); })
-            .catch(err => next(err));
+        if(req.query.details == 'grouped') {
+            aggregate([{ $group: {_id: "$group", name: {$first: "$group"}, url: {$first: "$backend"}, backends: {$push: "$$ROOT"}}}], 'backends')
+                .then(data => data.map(g => { g.backends = g.backends.map(b => prepare(b, [clip])); return g; }))
+                .then(data => { res.send(data); next(); })
+                .catch(err => next(err));
+        } else {
+            find({}, 'backends')
+                .then(data => prepare(data, (req.query.details == 'clipped' ? [clip] : [])))
+                .then(data => { res.send(data); next(); })
+                .catch(err => next(err));
+        }
     }
 });
 

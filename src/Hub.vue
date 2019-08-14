@@ -18,8 +18,8 @@
 			<section id="discover" :class="{hidden: view != 'discover'}">
 				<p>This is a list of all available openEO backends:</p>
 				<ul>
-					<li v-for="backend in allBackends" :key="backend.backendUrl">
-						<Backend :backendData="backend" :initiallyCollapsed="true"></Backend>
+					<li v-for="group in allBackendGroups" :key="group.name">
+						<BackendGroup :groupName="group.name" :backends="group.backends"></BackendGroup>
 					</li>
 				</ul>
 			</section>
@@ -90,7 +90,7 @@
 <script>
 import Vue from 'vue';
 import axios from 'axios';
-import Backend from './components/Backend.vue';
+import BackendGroup from './components/BackendGroup.vue';
 import BackendSearch from './components/BackendSearch.vue';
 import BackendResults from './components/BackendResults.vue';
 import CollectionSearch from './components/CollectionSearch.vue';
@@ -102,7 +102,7 @@ import ProcessGraphRepository from './components/ProcessGraphRepository.vue';
 export default {
 	name: 'openeo-hub',
 	components: {
-		Backend,
+		BackendGroup,
 		BackendSearch,
 		BackendResults,
 		CollectionSearch,
@@ -114,7 +114,7 @@ export default {
 	data() {
 		return {
 			view: 'discover',
-			allBackends: [],
+			allBackendGroups: [],
 			searchPanel: 'backends',
 			resultPanel: 'backends',
 			matchedBackends: null,
@@ -123,28 +123,33 @@ export default {
 		};
 	},
 	mounted() {
-		axios.get('/backends?details=clipped')
+		axios.get('/backends?details=grouped')
 			.then(response => {
-				this.allBackends = response.data;
-				this.allBackends.sort((a, b) => {
+				this.allBackendGroups = response.data;
+				this.allBackendGroups.sort((a, b) => {
+					return a.name > b.name;  // ascending by name
+				}).map(e => e.backends.sort((a, b) => {
 					var aVersion = (a.api_version || a.version || "0.0.0").split('.');
 					var bVersion = (b.api_version || b.version || "0.0.0").split('.');
-					if (aVersion[0] > bVersion[0]) {
+					if (aVersion[0] > bVersion[0]) {  // descending by version, first look at major part
 						return -1;
 					}
 					else if (aVersion[0] < bVersion[0]) {
 						return 1;
 					}
-					else if (aVersion[1] > bVersion[1]) {
+					else if (aVersion[1] > bVersion[1]) {  // if equal: by minor part
 						return -1;
 					}
 					else if (aVersion[1] < bVersion[1]) {
 						return 1;
 					}
-					else {
-						return (a.backendTitle || "").localeCompare(b.backendTitle || "");
+					else if (aVersion[2] > bVersion[2]) {  // if still equal: by patch part
+						return -1;
 					}
-				});
+					else {
+						return 1;
+					}
+				}));
 			})
 			.catch(error => {
 				console.log(error);
