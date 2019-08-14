@@ -15,7 +15,8 @@
 		<main>
 			
 			<!-- Don't use `v-show` for `div`s that may contain Leaflet maps - it would cause the map to be initiated incorrectly. Setting `height:0` etc. (instead of v-show's `display:none`) solves the problem. -->
-			<section id="discover" :class="{hidden: view != 'discover'}">
+			<section :class="{hidden: view != 'discover', wrapper: 1}">
+			<section id="discover">
 				<p>This is a list of all available openEO backends:</p>
 				<ul>
 					<li v-for="group in allBackendGroups" :key="group.name">
@@ -23,8 +24,14 @@
 					</li>
 				</ul>
 			</section>
+
+			<section id="filter">	
+				<p>Filter here:</p>
+			</section>
+			</section>
 			
-			<section id="search" :class="{hidden: view != 'search'}">
+			<section :class="{hidden: view != 'search', wrapper: 1}">
+			<section id="search">
 				<nav>
 					<ul>
 						<li @click="searchPanel = 'backends'" :class="{active: searchPanel == 'backends'}">Backends</li>
@@ -46,7 +53,7 @@
 				</div>
 			</section>
 
-			<section id="results" :class="{hidden: view != 'search'}">
+			<section id="results">
 				<nav>
 					<ul>
 						<li @click="resultPanel = 'backends'" :class="{active: resultPanel == 'backends'}">Backends</li>
@@ -66,6 +73,7 @@
 				<div class="panelContainer" v-show="resultPanel == 'backends'">
 					<BackendResults :matchedBackends="matchedBackends" initialInstructionText='Use the "Backends" tab on the left side to compose a search.'></BackendResults>
 				</div>
+			</section>
 			</section>
 
 			<section id="share" :class="{hidden: view != 'share'}">
@@ -228,12 +236,17 @@ main {
 	display: flex;
 	overflow: hidden;
 }
-main > section {
+main > section,
+main > section > section {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
 	padding-top: 10px;
+}
+main > section.wrapper {
+	flex-direction: row;
+	padding-top: 0px;
 }
 section#search {
 	margin-right: 10px;
