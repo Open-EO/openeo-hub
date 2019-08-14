@@ -1,6 +1,6 @@
 <template>
-    <section>
-		<section id="search">
+    <section id="search">
+		<section id="search-forms">
 			<nav>
 				<ul>
 					<li @click="searchPanel = 'backends'" :class="{active: searchPanel == 'backends'}">Backends</li>
@@ -22,7 +22,7 @@
 			</div>
 		</section>
 
-		<section id="results">
+		<section id="search-results">
 			<nav>
 				<ul>
 					<li @click="resultPanel = 'backends'" :class="{active: resultPanel == 'backends'}">Backends</li>

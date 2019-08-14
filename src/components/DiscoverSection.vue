@@ -1,6 +1,6 @@
 <template>
-    <section>
-		<section id="discover">
+    <section id="discover">
+		<section id="discover-list">
 			<p>This is a list of all available openEO backends:</p>
 			<ul>
 				<li v-for="group in allBackendGroups" :key="group.name">
@@ -9,7 +9,7 @@
 			</ul>
 		</section>
 
-		<section id="filter">	
+		<section id="discover-filter">
 			<p>Filter here:</p>
 		</section>
     </section>

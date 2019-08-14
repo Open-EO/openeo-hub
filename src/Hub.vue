@@ -16,8 +16,8 @@
 			<!-- Don't use `v-show` for `div`s that may contain Leaflet maps - it would cause the map to be initiated incorrectly. Setting `height:0` etc. (instead of v-show's `display:none`) solves the problem. -->
 			<DiscoverSection :class="{hidden: view != 'discover', wrapper: 1}"></DiscoverSection>
 			<SearchSection :class="{hidden: view != 'search', wrapper: 1}"></SearchSection>
-			<ExchangeSection id="exchange" :class="{hidden: view != 'exchange'}" :active="view == 'exchange'"></ExchangeSection>
-			<AboutSection id="about" :class="{hidden: view != 'about'}"></AboutSection>
+			<ExchangeSection :class="{hidden: view != 'exchange'}" :active="view == 'exchange'"></ExchangeSection>
+			<AboutSection :class="{hidden: view != 'about'}"></AboutSection>
 		</main>
 
 		<footer>
@@ -96,13 +96,13 @@ main > section.wrapper {
 	flex-direction: row;
 	padding-top: 0px;
 }
-section#search {
+section#search-forms {
 	margin-right: 10px;
 }
-section#results {
+section#search-results {
 	margin-left: 10px;
 }
-section#discover,
+section#discover-list,
 section#exchange {
 	overflow-y: auto;
 }
@@ -230,29 +230,29 @@ main nav li.active {
 #about p {
 	margin: 10px 0;
 }
-#discover > p:first-child,
+#discover-list > p:first-child,
 #exchange > p:first-child,
 #about > p:first-child {
 	margin-top: 0;
 }
-#discover > p:last-of-type {
+#discover-list > p:last-of-type {
 	margin-bottom: 30px;
 }
 
 
 /* discover section */
-#discover > ul > li {
+#discover-list > ul > li {
 	list-style: none;
 	max-width: 50em;
 }
-#discover > ul > li + li {
+#discover-list > ul > li + li {
 	margin-top: 30px;
 	border-top: 1px solid black;
 	padding-top: 30px;
 }
 
 /* search section */
-#search h3 {
+#search-forms h3 {
 	margin-top: 10px;
 }
 #endpointchooser {
@@ -260,38 +260,38 @@ main nav li.active {
 	padding: 5px;
 	border: 1px solid #cecbc8;
 }
-#search textarea {
+#search-forms textarea {
 	width: 90%;
 	height: 100px;
 	padding: 5px;
 }
-#search input + em,
-#search em + input {
+#search-forms input + em,
+#search-forms em + input {
 	margin-left: 5px;
 }
-#search p {
+#search-forms p {
 	margin-top: 0;
 }
-#search .submitbutton {
+#search-forms .submitbutton {
 	float: right;
 }
 
 /* results section */
-#results h2,
-#results h3,
-#discover h3 {
+#search-results h2,
+#search-results h3,
+#discover-list h3 {
 	margin-bottom: 10px;
 }
-#results h3,
-#results h4, #discover h4,
-#results h5, #discover h5 {
+#search-results h3,
+#search-results h4, #discover-list h4,
+#search-results h5, #discover-list h5 {
 	font-size: 100%;
 	margin-top: 10px;
 }
 .process h4 code {  /* otherwise param names appear really small */
 	font-size: 125%;
 }
-#results .emptyNotice {
+#search-results .emptyNotice {
 	margin-left: 20px;
 }
 ol.searchresults > li { /* with "direct child" selectors so that it doesn't affect `li`s of other lists further down */
