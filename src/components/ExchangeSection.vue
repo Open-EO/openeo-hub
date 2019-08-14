@@ -29,7 +29,7 @@
 import axios from 'axios';
 
 export default {
-	name: 'process-graph-repository',
+	name: 'exchange-section',
 	props: ['active'],
 	data() {
 		return {

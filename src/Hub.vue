@@ -6,7 +6,7 @@
 				<ul>
 					<li @click="view = 'discover'" :class="{active: view == 'discover'}" title="Discover">Discover</li>
 					<li @click="view = 'search'" :class="{active: view == 'search'}" title="Search">Search</li>
-					<li @click="view = 'share'" :class="{active: view == 'share'}" title="Exchange">Exchange</li>
+					<li @click="view = 'exchange'" :class="{active: view == 'exchange'}" title="Exchange">Exchange</li>
 					<li @click="view = 'about'" :class="{active: view == 'about'}" title="About">About</li>
 				</ul>
 			</nav>
@@ -16,7 +16,7 @@
 			<!-- Don't use `v-show` for `div`s that may contain Leaflet maps - it would cause the map to be initiated incorrectly. Setting `height:0` etc. (instead of v-show's `display:none`) solves the problem. -->
 			<DiscoverSection :class="{hidden: view != 'discover', wrapper: 1}"></DiscoverSection>
 			<SearchSection :class="{hidden: view != 'search', wrapper: 1}"></SearchSection>
-			<ProcessGraphRepository id="share" :class="{hidden: view != 'share'}" :active="view == 'share'"></ProcessGraphRepository>
+			<ExchangeSection id="exchange" :class="{hidden: view != 'exchange'}" :active="view == 'exchange'"></ExchangeSection>
 			<AboutSection id="about" :class="{hidden: view != 'about'}"></AboutSection>
 		</main>
 
@@ -29,7 +29,7 @@
 <script>
 import AboutSection from './components/AboutSection.vue';
 import DiscoverSection from './components/DiscoverSection.vue';
-import ProcessGraphRepository from './components/ProcessGraphRepository.vue';
+import ExchangeSection from './components/ExchangeSection.vue';
 import SearchSection from './components/SearchSection.vue';
 
 export default {
@@ -37,7 +37,7 @@ export default {
 	components: {
 		AboutSection,
 		DiscoverSection,
-		ProcessGraphRepository,
+		ExchangeSection,
 		SearchSection
 	},
 	data() {
@@ -103,7 +103,7 @@ section#results {
 	margin-left: 10px;
 }
 section#discover,
-section#share {
+section#exchange {
 	overflow-y: auto;
 }
 div.panelContainer {
@@ -221,17 +221,17 @@ main nav li.active {
 
 /* sections without tab-style navigation */
 #discover,
-#share,
+#exchange,
 #about {
 	padding-left: 20px;
 }
 #discover p,
-#share p,
+#exchange p,
 #about p {
 	margin: 10px 0;
 }
 #discover > p:first-child,
-#share > p:first-child,
+#exchange > p:first-child,
 #about > p:first-child {
 	margin-top: 0;
 }
@@ -328,38 +328,38 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 	margin-top: 10px;
 }
 
-/* Share section */
-#share div {
+/* Exchange section */
+#exchange div {
 	display: flex;
 	flex-direction: column;
 }
-#share input {
+#exchange input {
 	max-width: 500px;
 }
-#share textarea {
+#exchange textarea {
 	max-width: 1000px;
 	min-height: 100px;
 }
-#share textarea ~ textarea {
+#exchange textarea ~ textarea {
 	min-height: 200px;
 }
-#share button {
+#exchange button {
 	max-width: 100px;
 }
-#share h3 {
+#exchange h3 {
 	margin-top: 20px;
 }
-#share li div {
+#exchange li div {
 	max-width: 1000px;
 	margin-bottom: 10px;
 }
-#share pre {
+#exchange pre {
 	background-color: #ececec;
 	border: 1px solid darkgray;
 	overflow: auto;
 	padding: 5px;
 }
-#share pre:not(.expanded) {
+#exchange pre:not(.expanded) {
 	max-height: 120px;
 }
 
