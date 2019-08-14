@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <section>
         <h2>Process Graph Repository</h2>
         
         <h3>Upload yours</h3>
@@ -22,7 +22,7 @@
                 </div>
             </li>
         </ol>
-    </div>
+    </section>
 </template>
 
 <script>

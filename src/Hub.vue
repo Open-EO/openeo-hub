@@ -13,80 +13,11 @@
 		</header>
 
 		<main>
-			
 			<!-- Don't use `v-show` for `div`s that may contain Leaflet maps - it would cause the map to be initiated incorrectly. Setting `height:0` etc. (instead of v-show's `display:none`) solves the problem. -->
-			<section :class="{hidden: view != 'discover', wrapper: 1}">
-			<section id="discover">
-				<p>This is a list of all available openEO backends:</p>
-				<ul>
-					<li v-for="group in allBackendGroups" :key="group.name">
-						<BackendGroup :groupName="group.name" :backends="group.backends"></BackendGroup>
-					</li>
-				</ul>
-			</section>
-
-			<section id="filter">	
-				<p>Filter here:</p>
-			</section>
-			</section>
-			
-			<section :class="{hidden: view != 'search', wrapper: 1}">
-			<section id="search">
-				<nav>
-					<ul>
-						<li @click="searchPanel = 'backends'" :class="{active: searchPanel == 'backends'}">Backends</li>
-						<li @click="searchPanel = 'collections'" :class="{active: searchPanel == 'collections'}">Collections</li>
-						<li @click="searchPanel = 'processes'" :class="{active: searchPanel == 'processes'}">Processes</li>
-					</ul>
-				</nav>
-
-				<div class="panelContainer" :class="{hidden: searchPanel != 'collections'} /* Don't use `v-show` for div that contains a Leaflet map - it would cause the map to be initiated incorrectly. Setting `height:0` (instead of v-show's `display:none`) solves the problem.*/">
-					<CollectionSearch @search-collections="queryCollections"></CollectionSearch>
-				</div>
-
-				<div class="panelContainer" v-show="searchPanel == 'processes'">
-					<ProcessSearch @search-processes="queryProcesses"></ProcessSearch>
-				</div>
-				
-				<div class="panelContainer" v-show="searchPanel == 'backends'">
-					<BackendSearch @search-backends="queryBackends"></BackendSearch>
-				</div>
-			</section>
-
-			<section id="results">
-				<nav>
-					<ul>
-						<li @click="resultPanel = 'backends'" :class="{active: resultPanel == 'backends'}">Backends</li>
-						<li @click="resultPanel = 'collections'" :class="{active: resultPanel == 'collections'}">Collections</li>
-						<li @click="resultPanel = 'processes'" :class="{active: resultPanel == 'processes'}">Processes</li>
-					</ul>
-				</nav>
-
-				<div class="panelContainer" v-show="resultPanel == 'collections'">
-					<CollectionResults :matchedCollections="matchedCollections" initialInstructionText='Use the "Collections" tab on the left side to compose a search.'></CollectionResults>
-				</div>
-
-				<div class="panelContainer" v-show="resultPanel == 'processes'">
-					<ProcessResults :matchedProcesses="matchedProcesses" initialInstructionText='Use the "Processes" tab on the left side to compose a search.'></ProcessResults>
-				</div>
-
-				<div class="panelContainer" v-show="resultPanel == 'backends'">
-					<BackendResults :matchedBackends="matchedBackends" initialInstructionText='Use the "Backends" tab on the left side to compose a search.'></BackendResults>
-				</div>
-			</section>
-			</section>
-
-			<section id="share" :class="{hidden: view != 'share'}">
-				<ProcessGraphRepository :active="view == 'share'"></ProcessGraphRepository>
-			</section>
-
-			<section id="about" :class="{hidden: view != 'about'}">
-				<p><strong>openEO hub</strong> is a tool to discover backends that support the openEO API. It is also an exchange platform to share process graphs among the openEO community.</p>
-				<p>The data is crawled from the backends and then cached, so may lag behind reality.</p>
-				<p>For more information on openEO, visit the project's homepage: <a href="http://openeo.org/">http://openeo.org/</a></p>
-				<p>The source code of this website is available <a href="https://github.com/Open-EO/openeo-hub">on GitHub</a>.</p>
-			</section>
-
+			<DiscoverSection :class="{hidden: view != 'discover', wrapper: 1}"></DiscoverSection>
+			<SearchSection :class="{hidden: view != 'search', wrapper: 1}"></SearchSection>
+			<ProcessGraphRepository id="share" :class="{hidden: view != 'share'}" :active="view == 'share'"></ProcessGraphRepository>
+			<AboutSection id="about" :class="{hidden: view != 'about'}"></AboutSection>
 		</main>
 
 		<footer>
@@ -96,106 +27,23 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import axios from 'axios';
-import BackendGroup from './components/BackendGroup.vue';
-import BackendSearch from './components/BackendSearch.vue';
-import BackendResults from './components/BackendResults.vue';
-import CollectionSearch from './components/CollectionSearch.vue';
-import CollectionResults from './components/CollectionResults.vue';
-import ProcessSearch from './components/ProcessSearch.vue';
-import ProcessResults from './components/ProcessResults.vue';
+import AboutSection from './components/AboutSection.vue';
+import DiscoverSection from './components/DiscoverSection.vue';
 import ProcessGraphRepository from './components/ProcessGraphRepository.vue';
+import SearchSection from './components/SearchSection.vue';
 
 export default {
 	name: 'openeo-hub',
 	components: {
-		BackendGroup,
-		BackendSearch,
-		BackendResults,
-		CollectionSearch,
-		CollectionResults,
-		ProcessSearch,
-		ProcessResults,
-		ProcessGraphRepository
+		AboutSection,
+		DiscoverSection,
+		ProcessGraphRepository,
+		SearchSection
 	},
 	data() {
 		return {
 			view: 'discover',
-			allBackendGroups: [],
-			searchPanel: 'backends',
-			resultPanel: 'backends',
-			matchedBackends: null,
-			matchedCollections: null,
-			matchedProcesses: null
 		};
-	},
-	mounted() {
-		axios.get('/backends?details=grouped')
-			.then(response => {
-				this.allBackendGroups = response.data;
-				this.allBackendGroups.sort((a, b) => {
-					return a.name > b.name;  // ascending by name
-				}).map(e => e.backends.sort((a, b) => {
-					var aVersion = (a.api_version || a.version || "0.0.0").split('.');
-					var bVersion = (b.api_version || b.version || "0.0.0").split('.');
-					if (aVersion[0] > bVersion[0]) {  // descending by version, first look at major part
-						return -1;
-					}
-					else if (aVersion[0] < bVersion[0]) {
-						return 1;
-					}
-					else if (aVersion[1] > bVersion[1]) {  // if equal: by minor part
-						return -1;
-					}
-					else if (aVersion[1] < bVersion[1]) {
-						return 1;
-					}
-					else if (aVersion[2] > bVersion[2]) {  // if still equal: by patch part
-						return -1;
-					}
-					else {
-						return 1;
-					}
-				}));
-			})
-			.catch(error => {
-				console.log(error);
-			});
-	},
-	methods: {
-		queryBackends(params) {
-			axios.post('/backends/search', params)
-				.then(response => {
-					this.matchedBackends = response.data;
-					this.resultPanel = 'backends';
-				})
-				.catch(error => {
-					console.log(error);
-				});
-		},
-
-		queryCollections(params) {
-			axios.post('/collections/search', params)
-				.then(response => {
-					this.matchedCollections = response.data;
-					this.resultPanel = 'collections';
-				})
-				.catch(error => {
-					console.log(error);
-				});
-		},
-
-		queryProcesses(params) {
-			axios.post('/processes/search', params)
-				.then(response => {
-					this.matchedProcesses = response.data;
-					this.resultPanel = 'processes';
-				})
-				.catch(error => {
-					console.log(error);
-				});
-		}
 	}
 }
 </script>
