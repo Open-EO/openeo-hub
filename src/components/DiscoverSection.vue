@@ -8,10 +8,6 @@
 				</li>
 			</ul>
 		</section>
-
-		<section id="discover-filter">
-			<p>Filter here:</p>
-		</section>
     </section>
 </template>
 
