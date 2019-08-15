@@ -6,9 +6,9 @@
         </h3>
 
         <div v-show="!collapsed">
-            <Tabs :id="groupName"> <!-- TODO: use pills instead of tabs -->
+            <Tabs :id="groupName" :pills="true">
                 <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="'v'+(backend.version || backend.api_version)" :selected="index == 0">
-                    <Backend :backendData="backend" :initiallyCollapsed="false"></Backend>
+                    <Backend :backendData="backend" :collapsible="false" :showVersion="false"></Backend>
                 </Tab>
             </Tabs>
         </div>
@@ -40,7 +40,13 @@ h3 {
     cursor: pointer;
 }
 
-.backendGroup div {   /* TODO: check styling */
-    padding-left: 20px;
+.backendGroup > div {
+    padding-left: 40px;
+}
+</style>
+
+<style>
+.tabsHeader {
+    margin-bottom: 10px;
 }
 </style>

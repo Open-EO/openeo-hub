@@ -1,7 +1,7 @@
 <template>
 	<Process :processData="processData" :initiallyCollapsed="initiallyCollapsed" :provideDownload="provideDownload">
 		<template slot="process-after-summary">
-			<BackendName :data="processData"></BackendName>
+			<BackendName :data="processData" showVersion="true"></BackendName>
 		</template>
 		<template slot="process-before-details">
 			<UnsuccessfulCrawlNotice :unsuccessfulCrawls="processData.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>

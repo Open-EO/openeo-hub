@@ -3,7 +3,7 @@
         <em :title="data.backendUrl">
             {{data.backendTitle}}
         </em>
-        <template v-if="version">
+        <template v-if="version && showVersion">
             | v{{version}}
         </template>
         <span v-if="needsWarningSign" :title="warningText" class="warningSign hasTooltip">️⚠</span>
@@ -15,7 +15,7 @@ import {default as config} from './../../config.json';
 
 export default {
     name: 'BackendName',
-    props: ['data'],
+    props: ['data', 'showVersion'],
     computed: {
         version() {
             return typeof this.data.api_version === 'string' ? this.data.api_version : this.data.version;

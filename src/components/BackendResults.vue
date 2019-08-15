@@ -5,7 +5,7 @@
         <em v-else-if="matchedBackends.length == 0" class="emptyNotice">No search results.</em>
         <ol class="searchresults">
             <li v-for="backend in matchedBackends" :key="backend.backendUrl" class="backendParent">
-                <Backend :backendData="backend" :initiallyCollapsed="true" :isSearchResult="true"></Backend>
+                <Backend :backendData="backend" :collapsible="true" :initiallyCollapsed="true" :isSearchResult="true" showVersion="true"></Backend>
             </li>
         </ol>
     </div>

@@ -1,7 +1,7 @@
 <template>
 	<Collection :collectionData="collectionData" :initiallyCollapsed="initiallyCollapsed">
 		<template slot="collection-after-summary">
-			<BackendName :data="collectionData"></BackendName>
+			<BackendName :data="collectionData" :showVersion="true"></BackendName>
 		</template>
 		<template slot="collection-before-details">
 			<UnsuccessfulCrawlNotice :unsuccessfulCrawls="collectionData.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>

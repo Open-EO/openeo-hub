@@ -1,12 +1,12 @@
 <template>
-	<div class="backend">
+	<div :class="{collapsible: collapsible, backend: 1}">
         <a :href="webEditorUrl" target="_blank" class="open-in-web-editor" v-if="!collapsed.root">
             <button>Open in openEO Web Editor</button>
         </a>
         
-        <h3 @click="collapsed.root = !collapsed.root">
-            {{collapsed.root ? '▶' : '▼'}}
-            <BackendName :data="backend"></BackendName>
+        <h3 @click="collapsed.root = collapsible && !collapsed.root">
+            <template v-if="collapsible">{{collapsed.root ? '▶' : '▼'}}</template>
+            <BackendName :data="backend" :showVersion="showVersion"></BackendName>
         </h3>
 
         <div v-if="!collapsed.root">
@@ -75,7 +75,7 @@ import axios from 'axios';
 
 export default {
 	name: 'Backend',
-	props: ['backendData', 'initiallyCollapsed', 'isSearchResult'],
+	props: ['backendData', 'collapsible', 'initiallyCollapsed', 'isSearchResult', 'showVersion'],
 	components: {
         BackendName,
         SupportedFeatures,
@@ -87,7 +87,7 @@ export default {
         CollectionWrapper,
         ProcessWrapper
     },
-    
+
     created() {
         var original = this.backend;
 
@@ -144,7 +144,7 @@ export default {
             backend: this.backendData,
             preparedBackend: null,
             collapsed: {
-                root: this.initiallyCollapsed || false,
+                root: (this.collapsible || false) && (this.initiallyCollapsed || false),
                 functionalities: false,
                 collections: true,
                 processes: true,
@@ -181,7 +181,10 @@ export default {
 </script>
 
 <style scoped>
-h3, h4 {
+.collapsible h3 {
+    cursor: pointer;
+}
+h4 {
     cursor: pointer;
 }
 body.loading h3, body.loading h4 {
