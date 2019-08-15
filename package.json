@@ -37,6 +37,7 @@
     "mongodb": "^3.1.10",
     "restify": "^7.2.3",
     "vue": "^2.6.0",
+    "vue-multiselect": "^2.1.6",
     "vue2-leaflet": "^1.2.3"
   },
   "devDependencies": {

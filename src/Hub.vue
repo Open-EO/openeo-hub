@@ -274,7 +274,10 @@ main > section:not(.tabbedContent) p:first-child {
 /* results section */
 #search-results h2,
 #search-results h3,
-#discover-list h3 {
+#discover h3 {
+	margin-bottom: 10px;
+}
+#discover-filters h4 {
 	margin-bottom: 10px;
 }
 #search-results h3,

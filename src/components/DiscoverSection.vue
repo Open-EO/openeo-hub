@@ -3,14 +3,18 @@
 		<section id="discover-list">
 			<p>This is a list of all available openEO backends:</p>
 			<ul>
-				<li v-for="group in allBackendGroups" :key="group.name">
+				<li v-for="group in allBackendGroups" :key="group.name" v-show="checkFilters(group.backends)" >
 					<BackendGroup :groupName="group.name" :backends="group.backends"></BackendGroup>
 				</li>
 			</ul>
 		</section>
 
-		<section id="discover-filter">
-			<p>Filter here:</p>
+		<section id="discover-filters">
+			<h3>Filters</h3>
+			<h4>Output formats</h4>
+			<Multiselect
+			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
+				:multiple="true" :hideSelected="true" :closeOnSelect="false"></Multiselect>
 		</section>
     </section>
 </template>
@@ -18,15 +22,21 @@
 <script>
 import axios from 'axios';
 import BackendGroup from './BackendGroup.vue';
+import Multiselect from 'vue-multiselect'
 
 export default {
 	name: 'discover-section',
 	components: {
-		BackendGroup
+		BackendGroup,
+		Multiselect
 	},
 	data() {
 		return {
 			allBackendGroups: [],
+			allOutputFormats: [],
+			filters: {
+				outputFormats: []
+			}
 		};
 	},
 	mounted() {
@@ -61,9 +71,21 @@ export default {
 			.catch(error => {
 				console.log(error);
 			});
+		
+		axios.get('/output_formats')
+			.then(response => this.allOutputFormats = response.data)
+			.catch(error => console.log(error));
+	},
+	methods: {
+		checkFilters(backends) {
+			return
+			    backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats).indexOf(of.format) != -1))
+		}
 	}
 }
 </script>
+
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style scoped>
 </style>

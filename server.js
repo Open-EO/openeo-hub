@@ -424,6 +424,14 @@ server.get('/processes', function(req, res, next) {
         .catch(err => next(err));
 });
 
+// list output formats
+server.get('/output_formats', function(req, res, next) {
+    aggregate(dbqueries.GET_ALL_OUTPUT_FORMATS_WITH_COUNT_PIPELINE, 'backends')
+        .then(data => prepare(data))
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
+});
+
 // search processes via JSON document in POST body
 // supports all parameters, which are currently: name, summary, description, fulltext, excludeDeprecated, parameterNames, parameterDescriptions
 server.post('/processes/search', async function(req, res, next) {
