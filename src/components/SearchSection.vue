@@ -1,5 +1,5 @@
 <template>
-    <section id="search">
+    <section id="search" class="tabbedContent">
 		<section id="search-forms">
 			<nav>
 				<ul>

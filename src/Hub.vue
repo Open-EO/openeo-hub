@@ -90,20 +90,25 @@ main > section > section {
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	padding-top: 10px;
+	padding: 10px;
+}
+main > section,
+main > section > section:first-of-type {
+	padding-left: 20px;
 }
 main > section.wrapper {
 	flex-direction: row;
-	padding-top: 0px;
+	padding: 0px;
 }
-section#search-forms {
-	margin-right: 10px;
+main > section.tabbedContent > section {
+	padding: 0px;
+	padding-top: 10px;
 }
-section#search-results {
-	margin-left: 10px;
+main > section.tabbedContent > section:not(:last-child) {
+	margin-right: 20px;
 }
-section#discover-list,
-section#exchange {
+main > section:not(.tabbedContent),
+main > section:not(.tabbedContent) > section {
 	overflow-y: auto;
 }
 div.panelContainer {
@@ -220,27 +225,17 @@ main nav li.active {
 }
 
 /* sections without tab-style navigation */
-#discover,
-#exchange,
-#about {
-	padding-left: 20px;
-}
-#discover p,
-#exchange p,
-#about p {
+main > section:not(.tabbedContent) p {
 	margin: 10px 0;
 }
-#discover-list > p:first-child,
-#exchange > p:first-child,
-#about > p:first-child {
+main > section:not(.tabbedContent) p:first-child {
 	margin-top: 0;
 }
+
+/* discover section */
 #discover-list > p:last-of-type {
 	margin-bottom: 30px;
 }
-
-
-/* discover section */
 #discover-list > ul > li {
 	list-style: none;
 	max-width: 50em;
