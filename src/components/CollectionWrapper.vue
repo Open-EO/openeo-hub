@@ -1,5 +1,5 @@
 <template>
-	<Collection :collectionData="collectionData" :initiallyCollapsed="initiallyCollapsed">
+	<Collection :collectionData="collectionData" :version="version" :initiallyCollapsed="initiallyCollapsed">
 		<template slot="collection-after-summary">
 			<BackendName :data="collectionData" :showVersion="true"></BackendName>
 		</template>
@@ -51,7 +51,7 @@ import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
 
 export default {
 	name: 'CollectionWrapper',
-	props: ['collectionData', 'initiallyCollapsed'],
+	props: ['collectionData', 'version', 'initiallyCollapsed'],
 	components: {
 		BackendName,
 		Collection,
