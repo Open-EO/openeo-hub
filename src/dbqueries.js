@@ -58,7 +58,7 @@ module.exports = {
             },
             collections: '$collections.collections',
             processes: '$processes.processes',
-            outputFormats: '$outputFormats.formats',
+            outputFormats: 1,
             serviceTypes: 1,
             billing: '$root.billing'
         } }
