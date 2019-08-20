@@ -39,10 +39,10 @@
             </dd>
 
             <dt v-if="backend.outputFormats" @click="collapsed.outputFormats = !collapsed.outputFormats">
-                <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{Object.keys(backend.outputFormats).length}})</h4>
+                <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{supportedOutputFormatsCount}})</h4>
             </dt>
-            <dd v-if="backend.outputFormats && !collapsed.outputFormats">
-                <SupportedFileFormats :formats="preparedBackend.outputFormats" :version="preparedBackend.version"></SupportedFileFormats>
+            <dd v-if="backend.outputFormats" v-show="!collapsed.outputFormats"> <!-- v-if to prevent errors when outputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
+                <SupportedFileFormats :formats="preparedBackend.outputFormats" :version="preparedBackend.version" ref="supportedFileFormatsComponent"></SupportedFileFormats>
             </dd>
 
             <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
@@ -132,11 +132,16 @@ export default {
     },
 
     mounted: function() {
-        if(this.$refs.features != undefined) {
+        if(this.$refs.supportedFeaturesComponent != undefined) {
             const supported = this.$refs.supportedFeaturesComponent.getSupportedFeatureCount();
             const total = this.$refs.supportedFeaturesComponent.getFeatureCount();
             this.supportedFunctionalitiesCount = '(' + supported + '/' + total + ')';
         }
+        this.$nextTick(() => {  // wrap in next tick because it accesses a computed property
+            if(this.$refs.supportedFileFormatsComponent != undefined) {
+                this.supportedOutputFormatsCount = Object.keys(this.$refs.supportedFileFormatsComponent.outputFormats).length;
+            }
+        });
     },
 
 	data() {
@@ -152,7 +157,8 @@ export default {
                 serviceTypes: true,
                 billing: true
             },
-            supportedFunctionalitiesCount: ''
+            supportedFunctionalitiesCount: '',
+            supportedOutputFormatsCount: undefined
 		};
     },
 
