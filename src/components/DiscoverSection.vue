@@ -78,8 +78,7 @@ export default {
 	},
 	methods: {
 		checkFilters(backends) {
-			return
-			    backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats).indexOf(of.format) != -1))
+			return backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats).indexOf(of.format) != -1));
 		}
 	}
 }
