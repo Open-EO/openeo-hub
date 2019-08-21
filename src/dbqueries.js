@@ -41,6 +41,7 @@ module.exports = {
             unsuccessfulCrawls: 1,
             version: '$root.version',
             api_version: '$root.api_version',
+            description: '$root.description',
             endpoints: {
                 $reduce: {
                     input: {

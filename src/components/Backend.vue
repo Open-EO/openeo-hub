@@ -13,6 +13,8 @@
 
         <div v-if="!collapsed.root">
 
+        <Description v-if="preparedBackend.description" :description="preparedBackend.description" :compact="true" class="scroll-if-too-long"></Description>
+
         <small><code>{{backend.backendUrl}}</code></small>
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
@@ -70,7 +72,7 @@
 import BackendName from './BackendName.vue';
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
-import { SupportedFeatures, SupportedFileFormats, SupportedServiceTypes, BillingPlans } from '@openeo/vue-components';
+import { SupportedFeatures, SupportedFileFormats, SupportedServiceTypes, BillingPlans, Description } from '@openeo/vue-components';
 import CollectionWrapper from './CollectionWrapper.vue';
 import ProcessWrapper from './ProcessWrapper.vue';
 import axios from 'axios';
@@ -80,6 +82,7 @@ export default {
 	props: ['backendData', 'collapsible', 'initiallyCollapsed', 'isSearchResult', 'showVersion'],
 	components: {
         BackendName,
+        Description,
         SupportedFeatures,
         SupportedFileFormats,
         SupportedServiceTypes,
@@ -208,6 +211,11 @@ body.loading h3, body.loading h4 {
 }
 .open-in-web-editor button:disabled {
     cursor: not-allowed;
+}
+
+.scroll-if-too-long {
+    max-height: 15em;
+    overflow-y: auto;
 }
 </style>
 
