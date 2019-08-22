@@ -26,7 +26,7 @@
 
         <h3>Process Graph</h3>
         <textarea v-model="backendSearch.processGraph" placeholder="Paste an openEO process graph"></textarea>
-        <p><em>A backend is considered to support a process graph if it offers all collections and processes used in that process graph. No further checks are carried out.</em></p>
+        <p><em><strong>Only process graphs according to openEO API v0.3.x are supported!</strong> A backend is considered to support a process graph if it offers all collections and processes used in that process graph. No further checks are carried out.</em></p>
 
         <h3>Output formats</h3>
         <textarea v-model="backendSearch.outputFormats" placeholder="Specify output formats, each on a new line"></textarea>
