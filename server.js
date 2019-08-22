@@ -12,7 +12,6 @@ var server = restify.createServer();
 server.use(restify.plugins.queryParser({ mapParams: false }));
 server.use(restify.plugins.bodyParser({ mapParams: false }));
 
-const HubProcessGraph = require('./hubprocessgraph');
 
 // -------------------------------------------------------------------------------------
 // Wrappers for MongoDB functions
@@ -145,7 +144,7 @@ server.get('/backends/:backend/processes', function(req, res, next) {
 });
 
 // search backends via JSON document in POST body
-// supports all parameters, which are currently: version, endpoints, collections, processes, processGraph, legacyProcessGraph, outputFormats, processTypes, excludePaidOnly
+// supports all parameters, which are currently: version, endpoints, collections, processes, processGraph, outputFormats, processTypes, excludePaidOnly
 server.post('/backends/search', async function(req, res, next) {
     // INIT
     var criteria = {path: '/'};
@@ -211,9 +210,9 @@ server.post('/backends/search', async function(req, res, next) {
             if(pgPart.process_id) {
                 pgProcesses.add(pgPart.process_id);
             }
-            // this works for the earthengine-driver, but I'm not sure whether this `get_collection` process is standardized
-            if(pgPart.process_id == 'get_collection' && pgPart.name) {
-                pgCollections.add(pgPart.name);
+            // get_collection + name for v0.3.x process graphs, load_collection + id for v0.4.x
+            if((pgPart.process_id == 'get_collection' && pgPart.name) || (pgPart.process_id == 'load_collection' && pgPart.arguments && pgPart.arguments.id)) {
+                pgCollections.add(pgPart.name || pgPart.arguments.id);
             }
             for(var pgSubPart in pgPart) {
                 if(typeof pgPart[pgSubPart] == 'object') {
@@ -221,14 +220,7 @@ server.post('/backends/search', async function(req, res, next) {
                 }
             }
         };
-        
-        if(req.body.legacyProcessGraph) {
-            recursivelyAddPgCollectionsAndProcesses(req.body.processGraph);   // code for v0.3.x
-        } else {
-            var hpg = new HubProcessGraph(req.body.processGraph);   // code for v0.4.x
-            pgCollections = new Set(await hpg.getAllCollections());
-            pgProcesses = new Set(await hpg.getAllProcesses());
-        }
+        recursivelyAddPgCollectionsAndProcesses(req.body.processGraph);
 
         // only touch req.body if we have to
         if(pgCollections.size > 0) {

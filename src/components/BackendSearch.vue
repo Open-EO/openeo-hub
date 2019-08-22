@@ -26,9 +26,6 @@
 
         <h3>Process Graph</h3>
         <textarea v-model="backendSearch.processGraph" placeholder="Paste an openEO process graph"></textarea>
-        Process graph according to openEO API version:
-        <input type="radio" value="0.3.x" v-model="backendSearch.processGraphVersion" id="v03x"><label for="v03x">0.3.x</label>
-        <input type="radio" value="0.4.x" v-model="backendSearch.processGraphVersion" id="v04x"><label for="v04x">0.4.x</label>
         <p><em>A backend is considered to support a process graph if it offers all collections and processes used in that process graph. No further checks are carried out.</em></p>
 
         <h3>Output formats</h3>
@@ -62,7 +59,6 @@ export default {
 				collections: '',
 				processes: '',
 				processGraph: '',
-				processGraphVersion: '0.4.x',
 				outputFormats: '',
 				serviceTypes: '',
 				excludePaidOnly: false
@@ -81,7 +77,6 @@ export default {
 				collections:     (this.backendSearch.collections == '' ? undefined : this.backendSearch.collections.split("\n")),
 				processes:         (this.backendSearch.processes == '' ? undefined : this.backendSearch.processes.split("\n")),
 				processGraph:   (this.backendSearch.processGraph == '' ? undefined : JSON.parse(this.backendSearch.processGraph)),
-				legacyProcessGraph: (this.backendSearch.processGraphVersion == '0.4.x' ? undefined : true),
 				outputFormats: (this.backendSearch.outputFormats == '' ? undefined : this.backendSearch.outputFormats.split("\n")),
 				serviceTypes:   (this.backendSearch.serviceTypes == '' ? undefined : this.backendSearch.serviceTypes.split("\n")),
 				excludePaidOnly:  (!this.backendSearch.excludePaidOnly ? undefined : true)
