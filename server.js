@@ -12,6 +12,7 @@ var server = restify.createServer();
 server.use(restify.plugins.queryParser({ mapParams: false }));
 server.use(restify.plugins.bodyParser({ mapParams: false }));
 
+const HubProcessGraph = require('./hubprocessgraph');
 
 // -------------------------------------------------------------------------------------
 // Wrappers for MongoDB functions
@@ -144,7 +145,7 @@ server.get('/backends/:backend/processes', function(req, res, next) {
 });
 
 // search backends via JSON document in POST body
-// supports all parameters, which are currently: version, endpoints, collections, processes, processGraph, outputFormats, processTypes, excludePaidOnly
+// supports all parameters, which are currently: version, endpoints, collections, processes, processGraph, legacyProcessGraph, outputFormats, processTypes, excludePaidOnly
 server.post('/backends/search', async function(req, res, next) {
     // INIT
     var criteria = {path: '/'};
@@ -220,7 +221,14 @@ server.post('/backends/search', async function(req, res, next) {
                 }
             }
         };
-        recursivelyAddPgCollectionsAndProcesses(req.body.processGraph);
+        
+        if(req.body.legacyProcessGraph) {
+            recursivelyAddPgCollectionsAndProcesses(req.body.processGraph);   // code for v0.3.x
+        } else {
+            var hpg = new HubProcessGraph(req.body.processGraph);   // code for v0.4.x
+            pgCollections = new Set(await hpg.getAllCollections());
+            pgProcesses = new Set(await hpg.getAllProcesses());
+        }
 
         // only touch req.body if we have to
         if(pgCollections.size > 0) {
