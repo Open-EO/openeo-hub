@@ -41,6 +41,7 @@ module.exports = {
             unsuccessfulCrawls: 1,
             version: '$root.version',
             api_version: '$root.api_version',
+            description: '$root.description',
             endpoints: {
                 $reduce: {
                     input: {
@@ -58,7 +59,7 @@ module.exports = {
             },
             collections: '$collections.collections',
             processes: '$processes.processes',
-            outputFormats: '$outputFormats.formats',
+            outputFormats: 1,
             serviceTypes: 1,
             billing: '$root.billing'
         } }

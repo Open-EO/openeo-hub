@@ -42,9 +42,9 @@ export default {
 	mounted() {
 		axios.get('/backends?details=grouped')
 			.then(response => {
-				this.allBackendGroups = response.data;
-				this.allBackendGroups.sort((a, b) => {
-					return a.name > b.name;  // ascending by name
+				var result = response.data;
+				result.sort((a, b) => {
+					return a.name.toLowerCase().localeCompare(b.name.toLowerCase());  // ascending by name
 				}).map(e => e.backends.sort((a, b) => {
 					var aVersion = (a.api_version || a.version || "0.0.0").split('.');
 					var bVersion = (b.api_version || b.version || "0.0.0").split('.');
@@ -67,6 +67,7 @@ export default {
 						return 1;
 					}
 				}));
+				this.allBackendGroups = result;
 			})
 			.catch(error => {
 				console.log(error);

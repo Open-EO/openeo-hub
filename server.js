@@ -151,7 +151,10 @@ server.post('/backends/search', async function(req, res, next) {
 
     // VERSION
     if(req.body.version) {
-        criteria["content.version"] = req.body.version;
+        criteria["$or"] = [  // in v0.3.x the property was called "version", in 0.4.x "api_version"
+            {"content.version": req.body.version},
+            {"content.api_version": req.body.version}
+        ];
     }
 
     // ENDPOINTS
@@ -207,9 +210,9 @@ server.post('/backends/search', async function(req, res, next) {
             if(pgPart.process_id) {
                 pgProcesses.add(pgPart.process_id);
             }
-            // this works for the earthengine-driver, but I'm not sure whether this `get_collection` process is standardized
-            if(pgPart.process_id == 'get_collection' && pgPart.name) {
-                pgCollections.add(pgPart.name);
+            // get_collection + name for v0.3.x process graphs, load_collection + id for v0.4.x
+            if((pgPart.process_id == 'get_collection' && pgPart.name) || (pgPart.process_id == 'load_collection' && pgPart.arguments && pgPart.arguments.id)) {
+                pgCollections.add(pgPart.name || pgPart.arguments.id);
             }
             for(var pgSubPart in pgPart) {
                 if(typeof pgPart[pgSubPart] == 'object') {
@@ -245,7 +248,12 @@ server.post('/backends/search', async function(req, res, next) {
     if(req.body.collections) {
         var collectionCriteria = {
             "path":"/collections",
-            "$and": req.body.collections.map(c => ({"content.collections.name": {$regex: c, $options: 'i'}}))
+            "$and": req.body.collections.map(c => ({
+                "$or": [
+                    {"content.collections.name": {$regex: c, $options: 'i'}},
+                    {"content.collections.id": {$regex: c, $options: 'i'}}   // `name` changed to `id` in API v0.4
+                ]
+            }))
         };
         // get all backends that match the criteria that are validated against the '/collections' document
         var backendsWithCollections = await find(collectionCriteria);
@@ -257,7 +265,7 @@ server.post('/backends/search', async function(req, res, next) {
                 .find(el => el.backend == b.backend)
                 .content
                 .collections
-                .filter(c => req.body.collections.some(s => c.name.match(new RegExp(s, 'i')) != null))
+                .filter(c => req.body.collections.some(s => (c.name || c.id).match(new RegExp(s, 'i')) != null))
             })
         );
     }
@@ -266,7 +274,12 @@ server.post('/backends/search', async function(req, res, next) {
     if(req.body.processes) {
         var processCriteria = {
             "path":"/processes",
-            "$and": req.body.processes.map(p => ({"content.processes.name": {$regex: p, $options: 'i'}}))
+            "$and": req.body.processes.map(p => ({
+                "$or": [
+                    {"content.processes.name": {$regex: p, $options: 'i'}},
+                    {"content.processes.id": {$regex: p, $options: 'i'}}  // `name` changed to `id` in API v0.4
+                ]
+            }))
         };
         // get all backends that match the criteria that are validated against the '/processes' document
         var backendsWithProcesses = await find(processCriteria);
@@ -278,7 +291,7 @@ server.post('/backends/search', async function(req, res, next) {
                 .find(el => el.backend == b.backend)
                 .content
                 .processes
-                .filter(p => req.body.processes.some(s => p.name.match(new RegExp(s, 'i')) != null))
+                .filter(p => req.body.processes.some(s => (p.name || p.id).match(new RegExp(s, 'i')) != null))
             })
         );
     }
@@ -288,8 +301,14 @@ server.post('/backends/search', async function(req, res, next) {
         var outputFormatCriteria = {
             "path":"/output_formats"
         };
-        // output format identifiers aren't array items but object keys, so check for $exists
-        req.body.outputFormats.forEach(of => outputFormatCriteria['content.formats.'+of] = {$exists: true});
+        outputFormatCriteria["$and"] = req.body.outputFormats.map(of => {
+            // difference between v0.3.x and v0.4.x: In the former, the formats were within a `formats` property - in the latter, they are in the root.
+            let v03 = {};
+            let v04 = {};
+            v03['content.formats.'+of] = {$exists: true};  // output format identifiers aren't array items but object keys, so check for $exists
+            v04['content.'+of] = {$exists: true};
+            return { $or: [v03, v04] };
+        });
         // get all backends that match the criteria that are validated against the '/output_formats' document
         var backendsWithOutputFormats = await find(outputFormatCriteria);
         // only keep those that match both the previous and the '/output_formats' criteria
@@ -297,9 +316,10 @@ server.post('/backends/search', async function(req, res, next) {
         // add metadata of queried output formats to response object
         backendsWithCriteria = backendsWithCriteria.map(b => {
             var result = Object.assign(b, { outputFormats: {} });
-            req.body.outputFormats.forEach(of => 
-                result.outputFormats[of] = backendsWithOutputFormats.find(el => el.backend == b.backend).content.formats[of]
-            );
+            req.body.outputFormats.forEach(of => {
+                const found = backendsWithOutputFormats.find(el => el.backend == b.backend);
+                result.outputFormats[of] = found.content[of] || found.content.formats[of];
+            });
             return b;
         });
     }
@@ -353,7 +373,10 @@ server.post('/collections/search', async function(req, res, next) {
     
     // NAME
     if(req.body.name) {
-        criteria['name'] = {$regex: req.body.name, $options: 'i'};
+        criteria['$or'] = [
+            {'name': {$regex: req.body.name, $options: 'i'}},
+            {'id': {$regex: req.body.name, $options: 'i'}}   // `name` changed to `id` in API v0.4
+        ];
     }
 
     // TITLE
@@ -440,7 +463,10 @@ server.post('/processes/search', async function(req, res, next) {
     
     // NAME
     if(req.body.name) {
-        criteria['name'] = {$regex: req.body.name, $options: 'i'};
+        criteria['$or'] = [
+            {'name': {$regex: req.body.name, $options: 'i'}},
+            {'id': {$regex: req.body.name, $options: 'i'}}   // `name` changed to `id` in API v0.4
+        ];
     }
 
     // SUMMARY

@@ -7,6 +7,9 @@
             <input type="radio" value="any"   v-model="backendSearch.version" id="vany"><label for="vany">any</label>
             <input type="radio" value="0.3.0" v-model="backendSearch.version" id="v030"><label for="v030">0.3.0</label>
             <input type="radio" value="0.3.1" v-model="backendSearch.version" id="v031"><label for="v031">0.3.1</label>
+			<input type="radio" value="0.4.0" v-model="backendSearch.version" id="v040"><label for="v040">0.4.0</label>
+			<input type="radio" value="0.4.1" v-model="backendSearch.version" id="v041"><label for="v041">0.4.1</label>
+			<input type="radio" value="0.4.2" v-model="backendSearch.version" id="v042"><label for="v042">0.4.2</label>
         </div>
 
         <h3>Functionalities</h3>

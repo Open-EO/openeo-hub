@@ -1,6 +1,6 @@
 {
   "name": "@openeo/hub",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "author": "openEO Consortium",
   "contributors": [
     {
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@openeo/js-commons": "0.4.4",
-    "@openeo/vue-components": "0.4.0",
+    "@openeo/vue-components": "0.4.1",
     "axios": "^0.19.0",
     "moment": "^2.22.2",
     "mongodb": "^3.1.10",

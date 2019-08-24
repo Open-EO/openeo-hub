@@ -1,5 +1,5 @@
 <template>
-	<Process :processData="processData" :initiallyCollapsed="initiallyCollapsed" :provideDownload="provideDownload">
+	<Process :processData="processData" :version="version" :initiallyCollapsed="initiallyCollapsed" :provideDownload="provideDownload">
 		<template slot="process-after-summary">
 			<BackendName :data="processData" showVersion="true"></BackendName>
 		</template>
@@ -18,7 +18,7 @@ import { Process } from '@openeo/vue-components';
 
 export default {
 	name: 'ProcessWrapper',
-	props: ['processData', 'initiallyCollapsed', 'provideDownload'],
+	props: ['processData', 'version', 'initiallyCollapsed', 'provideDownload'],
 	components: {
 		BackendName,
 		Process,
