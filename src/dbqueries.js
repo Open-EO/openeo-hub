@@ -88,5 +88,13 @@ module.exports = {
         { $unwind: "$outputFormats" },  // get one entry for each output format
         { $group: { _id: "$outputFormats", format: {$first: "$outputFormats"}, count: {$sum: 1} } },  // group by format name, at the same time calculate the sum
         { $sort: {count: -1, format: 1} }  // sort by count DESC, format name ASC
+    ],
+    GET_ALL_SERVICE_TYPES_WITH_COUNT_PIPELINE: [
+        { $match: { serviceTypes: {$exists: true} } },  // only consider backends that have service types
+        { $addFields: { 'serviceTypesAsArray' : {$objectToArray: '$serviceTypes' } } },  // service types are saved as object keys -> convert to array
+        { $project: {serviceTypes: { $map: {input: '$serviceTypesAsArray', as: 'st', in: "$$st.k"} } } },  // map values into top level of object (didn't work without this for some reason)
+        { $unwind: "$serviceTypes" },  // get one entry for each service type
+        { $group: { _id: "$serviceTypes", service: {$first: "$serviceTypes"}, count: {$sum: 1} } },  // group by service type name, at the same time calculate the sum
+        { $sort: {count: -1, service: 1} }  // sort by count DESC, service name ASC
     ]
 };

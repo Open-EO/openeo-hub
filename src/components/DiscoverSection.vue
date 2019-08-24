@@ -15,6 +15,10 @@
 			<Multiselect
 			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false"></Multiselect>
+			<h4>Service types</h4>
+			<Multiselect
+			    v-model="filters.serviceTypes" :options="allServiceTypes" trackBy="service" label="service"
+				:multiple="true" :hideSelected="true" :closeOnSelect="false"></Multiselect>
 		</section>
     </section>
 </template>
@@ -34,8 +38,10 @@ export default {
 		return {
 			allBackendGroups: [],
 			allOutputFormats: [],
+			allServiceTypes: [],
 			filters: {
-				outputFormats: []
+				outputFormats: [],
+				serviceTypes: []
 			}
 		};
 	},
@@ -76,10 +82,17 @@ export default {
 		axios.get('/output_formats')
 			.then(response => this.allOutputFormats = response.data)
 			.catch(error => console.log(error));
+
+		axios.get('/service_types')
+			.then(response => this.allServiceTypes = response.data)
+			.catch(error => console.log(error));
 	},
 	methods: {
 		checkFilters(backends) {
-			return backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1));
+			return [
+				backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1)),
+				backends.some(b => b.serviceTypes && this.filters.serviceTypes.every(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1))
+			].every(f => f == true);
 		}
 	}
 }

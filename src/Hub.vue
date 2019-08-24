@@ -280,6 +280,9 @@ main > section:not(.tabbedContent) p:first-child {
 #discover-filters h4 {
 	margin-bottom: 10px;
 }
+#discover-filters h4:not(:first-of-type) {
+	margin-top: 20px;
+}
 #search-results h3,
 #search-results h4, #discover-list h4,
 #search-results h5, #discover-list h5 {
