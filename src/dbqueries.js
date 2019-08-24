@@ -83,7 +83,7 @@ module.exports = {
     ],
     GET_ALL_OUTPUT_FORMATS_WITH_COUNT_PIPELINE: [
         { $match: { outputFormats: {$exists: true} } },  // only consider backends that have output formats
-        { $addFields: { 'outputFormatsAsArray' : {$objectToArray: '$outputFormats'} } },  // output formats are saved as object keys -> convert to array
+        { $addFields: { 'outputFormatsAsArray' : {$objectToArray: {$ifNull: ['$outputFormats.formats', '$outputFormats']} } } },  // output formats are saved as object keys -> convert to array
         { $project: {outputFormats: { $map: {input: '$outputFormatsAsArray', as: 'of', in: "$$of.k"} } } },  // map values into top level of object (didn't work without this for some reason)
         { $unwind: "$outputFormats" },  // get one entry for each output format
         { $group: { _id: "$outputFormats", format: {$first: "$outputFormats"}, count: {$sum: 1} } },  // group by format name, at the same time calculate the sum
