@@ -523,6 +523,24 @@ server.post('/process_graphs', function(req, res, next) {
         .catch(err => next(err));
 });
 
+// compliant to openEO API 0.4.2
+server.get('/process_graphs/:id', function(req, res, next) {
+    findOne(mongodb.ObjectId(req.params.id), 'process_graphs')
+        .then(pg => {
+            if(pg) {
+                pg.id = pg._id;
+                delete pg._id;
+                res.send(pg);
+                next();
+            } else {
+                res.statusCode = 404;
+                res.send({message: "Not Found"});
+                next();
+            }
+        })
+        .catch(err => next(err));
+});
+
 // serve website (UI)
 server.get('/*', restify.plugins.serveStatic({
     directory: './dist',
