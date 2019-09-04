@@ -176,7 +176,7 @@ export default {
         async toggleCollections() {
             if(this.collapsed.collections && Array.isArray(this.preparedBackend.collections) && this.preparedBackend.collections.length > 0 && Object.keys(this.preparedBackend.collections[0]).length == 1) {
                 document.body.classList.add('loading');
-                let request = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections');
+                let request = await axios.get('/api/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections');
                 this.preparedBackend.collections = request.data;
                 document.body.classList.remove('loading');
             }
@@ -186,7 +186,7 @@ export default {
         async toggleProcesses() {
             if(this.collapsed.processes && Array.isArray(this.preparedBackend.processes) && this.preparedBackend.processes.length > 0 && Object.keys(this.preparedBackend.processes[0]).length == 1) {
                 document.body.classList.add('loading');
-                let request = await axios.get('/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/processes');
+                let request = await axios.get('/api/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/processes');
                 this.preparedBackend.processes = request.data;
                 document.body.classList.remove('loading');
             }

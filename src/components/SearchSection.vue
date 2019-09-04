@@ -76,7 +76,7 @@ export default {
 	},
 	methods: {
 		queryBackends(params) {
-			axios.post('/backends/search', params)
+			axios.post('/api/backends/search', params)
 				.then(response => {
 					this.matchedBackends = response.data;
 					this.resultPanel = 'backends';
@@ -87,7 +87,7 @@ export default {
 		},
 
 		queryCollections(params) {
-			axios.post('/collections/search', params)
+			axios.post('/api/collections/search', params)
 				.then(response => {
 					this.matchedCollections = response.data;
 					this.resultPanel = 'collections';
@@ -98,7 +98,7 @@ export default {
 		},
 
 		queryProcesses(params) {
-			axios.post('/processes/search', params)
+			axios.post('/api/processes/search', params)
 				.then(response => {
 					this.matchedProcesses = response.data;
 					this.resultPanel = 'processes';

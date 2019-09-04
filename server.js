@@ -94,7 +94,7 @@ function prepare(data, additionalCallbacks = []) {
 // -------------------------------------------------------------------------------------
 
 // list backends
-server.get('/backends', function(req, res, next) {
+server.get('/api/backends', function(req, res, next) {
     if(!req.query.details) {
         res.send(config.backends);
         next();
@@ -120,7 +120,7 @@ server.get('/backends', function(req, res, next) {
 });
 
 // return details of a single backend
-server.get('/backends/:backend', function(req, res, next) {
+server.get('/api/backends/:backend', function(req, res, next) {
     findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
         .then(prepare)
         .then(data => { res.send(data); next(); })
@@ -128,7 +128,7 @@ server.get('/backends/:backend', function(req, res, next) {
 });
 
 // return collection details of a single backend
-server.get('/backends/:backend/collections', function(req, res, next) {
+server.get('/api/backends/:backend/collections', function(req, res, next) {
     findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
         .then(prepare)
         .then(data => { res.send(data.collections); next(); })
@@ -136,7 +136,7 @@ server.get('/backends/:backend/collections', function(req, res, next) {
 });
 
 // return process details of a single backend
-server.get('/backends/:backend/processes', function(req, res, next) {
+server.get('/api/backends/:backend/processes', function(req, res, next) {
     findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
         .then(prepare)
         .then(data => { res.send(data.processes); next(); })
@@ -145,7 +145,7 @@ server.get('/backends/:backend/processes', function(req, res, next) {
 
 // search backends via JSON document in POST body
 // supports all parameters, which are currently: version, endpoints, collections, processes, processGraph, outputFormats, processTypes, excludePaidOnly
-server.post('/backends/search', async function(req, res, next) {
+server.post('/api/backends/search', async function(req, res, next) {
     // INIT
     var criteria = {path: '/'};
 
@@ -351,14 +351,14 @@ server.post('/backends/search', async function(req, res, next) {
 });
 
 // proxy backends
-server.get('/backends/:backend/*', function(req, res, next) {
+server.get('/api/backends/:backend/*', function(req, res, next) {
     findOne({backend: req.params.backend, path: '/'+req.params['*']})
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));
 });
 
 // list collections
-server.get('/collections', function(req, res, next) {
+server.get('/api/collections', function(req, res, next) {
     find({}, 'collections')
         .then(prepare)
         .then(data => { res.send(data); next(); })
@@ -367,7 +367,7 @@ server.get('/collections', function(req, res, next) {
 
 // search collections via JSON document in POST body
 // supports all parameters, which are currently: name, title, description, fulltext, bbox (aka spatial extent), startdate and enddate (aka temporal extent)
-server.post('/collections/search', async function(req, res, next) {
+server.post('/api/collections/search', async function(req, res, next) {
     // INIT
     var criteria = {};
     
@@ -440,7 +440,7 @@ server.post('/collections/search', async function(req, res, next) {
 });
 
 // list processes
-server.get('/processes', function(req, res, next) {
+server.get('/api/processes', function(req, res, next) {
     find({}, 'processes')
         .then(prepare)
         .then(data => { res.send(data); next(); })
@@ -449,7 +449,7 @@ server.get('/processes', function(req, res, next) {
 
 // search processes via JSON document in POST body
 // supports all parameters, which are currently: name, summary, description, fulltext, excludeDeprecated, parameterNames, parameterDescriptions
-server.post('/processes/search', async function(req, res, next) {
+server.post('/api/processes/search', async function(req, res, next) {
     // INIT
     var criteria = {};
     
@@ -499,7 +499,7 @@ server.post('/processes/search', async function(req, res, next) {
 });
 
 // compliant to openEO API 0.4.2
-server.get('/process_graphs', function(req, res, next) {
+server.get('/api/process_graphs', function(req, res, next) {
     find({}, 'process_graphs')
         .then(data => { data.forEach(e => e.id = e._id); return data; })
         .then(prepare)
@@ -508,7 +508,7 @@ server.get('/process_graphs', function(req, res, next) {
 });
 
 // compliant to openEO API 0.4.2
-server.post('/process_graphs', function(req, res, next) {
+server.post('/api/process_graphs', function(req, res, next) {
     insertOne(req.body, 'process_graphs')
         .then(mongoreply => {
             if(mongoreply.result.ok == 1 && mongoreply.result.n == 1) {
@@ -524,7 +524,7 @@ server.post('/process_graphs', function(req, res, next) {
 });
 
 // compliant to openEO API 0.4.2
-server.get('/process_graphs/:id', function(req, res, next) {
+server.get('/api/process_graphs/:id', function(req, res, next) {
     findOne(mongodb.ObjectId(req.params.id), 'process_graphs')
         .then(pg => {
             if(pg) {

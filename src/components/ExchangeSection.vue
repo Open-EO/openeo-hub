@@ -52,7 +52,7 @@ export default {
 	},
 	methods: {
 		getProcessGraphs() {
-			axios.get('/process_graphs')
+			axios.get('/api/process_graphs')
 				.then(response => {
 					this.allProcessGraphs = response.data;
 					this.dataComplete = true;
@@ -63,7 +63,7 @@ export default {
 		},
 
 		uploadProcessGraph() {
-			axios.post('process_graphs', this.newProcessGraph)
+			axios.post('/api/process_graphs', this.newProcessGraph)
 				.then(response => {
 					this.getProcessGraphs();
 					this.newProcessGraph = {

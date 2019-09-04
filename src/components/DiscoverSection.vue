@@ -26,7 +26,7 @@ export default {
 		};
 	},
 	mounted() {
-		axios.get('/backends?details=grouped')
+		axios.get('/api/backends?details=grouped')
 			.then(response => {
 				var result = response.data;
 				result.sort((a, b) => {
