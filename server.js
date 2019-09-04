@@ -1,3 +1,4 @@
+const PACKAGEJSON = require('./package.json');
 const config = require('./config.json');
 
 const dbqueries = require('./src/dbqueries.js');
@@ -539,6 +540,20 @@ server.get('/api/process_graphs/:id', function(req, res, next) {
             }
         })
         .catch(err => next(err));
+});
+
+server.get('/api', function(req, res, next) {
+    res.send({
+        api_version: '0.4.2',
+        backend_version: PACKAGEJSON.version,
+        title: 'openEO Hub',
+        description: PACKAGEJSON.description,
+        endpoints: [
+            { path: '/backends', methods: ['GET'] },
+            { path: '/process_graphs', methods: ['GET', 'POST'] },
+            { path: '/process_graphs/{process_graph_id}', methods: ['GET'] }
+        ]
+    });
 });
 
 // serve website (UI)
