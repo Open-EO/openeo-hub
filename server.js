@@ -498,16 +498,28 @@ server.post('/processes/search', async function(req, res, next) {
         .catch(err => next(err));
 });
 
+// compliant to openEO API 0.4.2
 server.get('/process_graphs', function(req, res, next) {
     find({}, 'process_graphs')
+        .then(data => { data.forEach(e => e.id = e._id); return data; })
         .then(prepare)
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));
 });
 
+// compliant to openEO API 0.4.2
 server.post('/process_graphs', function(req, res, next) {
     insertOne(req.body, 'process_graphs')
-        .then(data => { res.send(data); next(); })
+        .then(mongoreply => {
+            if(mongoreply.result.ok == 1 && mongoreply.result.n == 1) {
+                res.statusCode = 201;
+                res.header('OpenEO-Identifier', mongoreply.insertedId);
+                res.header('Location', '/process_graphs/'+mongoreply.insertedId);
+                res.send();
+            } else {
+                res.send(mongoreply); next();
+            }
+        })
         .catch(err => next(err));
 });
 
