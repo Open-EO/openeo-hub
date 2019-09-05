@@ -15,7 +15,7 @@
         <ol v-if="allProcessGraphs.length > 0">
             <li v-for="(pg, i) in allProcessGraphs" :key="pg.process_graph_id">
                 <h4>{{pg.title || 'Untitled'}}</h4>
-                <Description v-if="pg.description" :description="pg.description"></Description>
+                <Description v-if="pg.description" :description="pg.description" :compact="true"></Description>
                 <div>
                     <pre :class="{expanded: expanded[i]}">{{pg.process_graph}}</pre>
                     <button @click="$set(expanded, i, !expanded[i])">{{expanded[i] ? '▼' : '◀'}}</button>

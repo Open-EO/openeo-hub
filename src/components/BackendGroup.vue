@@ -49,4 +49,7 @@ h3 {
 .tabsHeader {
     margin-bottom: 10px;
 }
+.tabs .tabsBody {
+    overflow: visible;
+}
 </style>

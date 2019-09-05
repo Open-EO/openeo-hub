@@ -340,6 +340,7 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 }
 #exchange button {
 	max-width: 100px;
+	flex-shrink: 0;
 }
 #exchange h3 {
 	margin-top: 20px;
