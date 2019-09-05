@@ -67,6 +67,10 @@ export default {
 		},
 
 		uploadProcessGraph() {
+			if(this.newProcessGraph.process_graph == '') {
+				alert('Please enter a process graph!');
+				return;
+			}
 			axios.post('/api/process_graphs', this.newProcessGraph)
 				.then(response => {
 					this.getProcessGraphs();
@@ -78,6 +82,8 @@ export default {
 				})
 				.catch(error => {
 					console.log(error);
+					console.log(error.response);
+					alert(error.response.data.message);
 				});
 		}
 	}

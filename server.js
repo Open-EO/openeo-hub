@@ -510,18 +510,31 @@ server.get('/api/process_graphs', function(req, res, next) {
 
 // compliant to openEO API 0.4.2
 server.post('/api/process_graphs', function(req, res, next) {
-    insertOne(req.body, 'process_graphs')
+    if(req.getContentType() != 'application/json') {
+        res.statusCode = 415;
+        res.send({message: "Only JSON allowed"});
+        next();
+    } else if(typeof req.body.process_graph != 'string' || req.body.process_graph == '') {
+        res.statusCode = 422;
+        res.send({message: "JSON must contain a process_graph property that holds a non-empty string"});
+        next();
+    // invalid JSON is handled automatically
+    } else {
+        insertOne(req.body, 'process_graphs')
         .then(mongoreply => {
             if(mongoreply.result.ok == 1 && mongoreply.result.n == 1) {
                 res.statusCode = 201;
                 res.header('OpenEO-Identifier', mongoreply.insertedId);
                 res.header('Location', '/process_graphs/'+mongoreply.insertedId);
                 res.send();
+                next();
             } else {
-                res.send(mongoreply); next();
+                res.send(mongoreply);
+                next();
             }
         })
         .catch(err => next(err));
+    }
 });
 
 // compliant to openEO API 0.4.2
