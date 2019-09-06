@@ -89,6 +89,12 @@ function prepare(data, additionalCallbacks = []) {
     }
 }
 
+function enableCORS(req, res) {
+    res.header('Vary', 'Origin');
+    if(req.headers.origin) {
+        res.header('Access-Control-Allow-Origin', req.headers.origin);
+    }
+}
 
 // -------------------------------------------------------------------------------------
 // Actual handlers for the endpoints
@@ -96,6 +102,7 @@ function prepare(data, additionalCallbacks = []) {
 
 // list backends
 server.get('/api/backends', function(req, res, next) {
+    enableCORS(req, res);
     if(!req.query.details) {
         res.send(config.backends);
         next();
@@ -499,8 +506,17 @@ server.post('/api/processes/search', async function(req, res, next) {
         .catch(err => next(err));
 });
 
+// handle CORS preflight for POSTing
+server.opts('/api/process_graphs', function(req, res, next) {
+    enableCORS(req, res);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.send();
+});
+
 // compliant to openEO API 0.4.2
 server.get('/api/process_graphs', function(req, res, next) {
+    enableCORS(req, res);
     find({}, 'process_graphs')
         .then(data => { data.forEach(e => e.id = e._id); return data; })
         .then(prepare)
@@ -510,6 +526,7 @@ server.get('/api/process_graphs', function(req, res, next) {
 
 // compliant to openEO API 0.4.2
 server.post('/api/process_graphs', function(req, res, next) {
+    enableCORS(req, res);
     if(req.getContentType() != 'application/json') {
         res.statusCode = 415;
         res.send({message: "Only JSON allowed"});
@@ -539,6 +556,7 @@ server.post('/api/process_graphs', function(req, res, next) {
 
 // compliant to openEO API 0.4.2
 server.get('/api/process_graphs/:id', function(req, res, next) {
+    enableCORS(req, res);
     findOne(mongodb.ObjectId(req.params.id), 'process_graphs')
         .then(pg => {
             if(pg) {
