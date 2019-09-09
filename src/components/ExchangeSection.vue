@@ -15,7 +15,7 @@
         <ol v-if="allProcessGraphs.length > 0">
             <li v-for="(pg, i) in allProcessGraphs" :key="pg.process_graph_id">
                 <h4>{{pg.title || 'Untitled'}}</h4>
-                <p v-if="pg.description">{{pg.description}}</p>
+                <Description v-if="pg.description" :description="pg.description" :compact="true"></Description>
                 <div>
                     <pre :class="{expanded: expanded[i]}">{{pg.process_graph}}</pre>
                     <button @click="$set(expanded, i, !expanded[i])">{{expanded[i] ? '▼' : '◀'}}</button>
@@ -27,10 +27,14 @@
 
 <script>
 import axios from 'axios';
+import { Description } from '@openeo/vue-components';
 
 export default {
 	name: 'exchange-section',
 	props: ['active'],
+	components: {
+		Description
+	},
 	data() {
 		return {
 			dataComplete: false,
@@ -52,7 +56,7 @@ export default {
 	},
 	methods: {
 		getProcessGraphs() {
-			axios.get('/process_graphs')
+			axios.get('/api/process_graphs')
 				.then(response => {
 					this.allProcessGraphs = response.data;
 					this.dataComplete = true;
@@ -63,7 +67,11 @@ export default {
 		},
 
 		uploadProcessGraph() {
-			axios.post('process_graphs', this.newProcessGraph)
+			if(this.newProcessGraph.process_graph == '') {
+				alert('Please enter a process graph!');
+				return;
+			}
+			axios.post('/api/process_graphs', this.newProcessGraph)
 				.then(response => {
 					this.getProcessGraphs();
 					this.newProcessGraph = {
@@ -74,6 +82,8 @@ export default {
 				})
 				.catch(error => {
 					console.log(error);
+					console.log(error.response);
+					alert(error.response.data.message);
 				});
 		}
 	}

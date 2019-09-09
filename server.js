@@ -1,3 +1,4 @@
+const PACKAGEJSON = require('./package.json');
 const config = require('./config.json');
 
 const dbqueries = require('./src/dbqueries.js');
@@ -88,13 +89,20 @@ function prepare(data, additionalCallbacks = []) {
     }
 }
 
+function enableCORS(req, res) {
+    res.header('Vary', 'Origin');
+    if(req.headers.origin) {
+        res.header('Access-Control-Allow-Origin', req.headers.origin);
+    }
+}
 
 // -------------------------------------------------------------------------------------
 // Actual handlers for the endpoints
 // -------------------------------------------------------------------------------------
 
 // list backends
-server.get('/backends', function(req, res, next) {
+server.get('/api/backends', function(req, res, next) {
+    enableCORS(req, res);
     if(!req.query.details) {
         res.send(config.backends);
         next();
@@ -120,7 +128,7 @@ server.get('/backends', function(req, res, next) {
 });
 
 // return details of a single backend
-server.get('/backends/:backend', function(req, res, next) {
+server.get('/api/backends/:backend', function(req, res, next) {
     findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
         .then(prepare)
         .then(data => { res.send(data); next(); })
@@ -128,7 +136,7 @@ server.get('/backends/:backend', function(req, res, next) {
 });
 
 // return collection details of a single backend
-server.get('/backends/:backend/collections', function(req, res, next) {
+server.get('/api/backends/:backend/collections', function(req, res, next) {
     findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
         .then(prepare)
         .then(data => { res.send(data.collections); next(); })
@@ -136,7 +144,7 @@ server.get('/backends/:backend/collections', function(req, res, next) {
 });
 
 // return process details of a single backend
-server.get('/backends/:backend/processes', function(req, res, next) {
+server.get('/api/backends/:backend/processes', function(req, res, next) {
     findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
         .then(prepare)
         .then(data => { res.send(data.processes); next(); })
@@ -145,7 +153,7 @@ server.get('/backends/:backend/processes', function(req, res, next) {
 
 // search backends via JSON document in POST body
 // supports all parameters, which are currently: version, endpoints, collections, processes, processGraph, outputFormats, processTypes, excludePaidOnly
-server.post('/backends/search', async function(req, res, next) {
+server.post('/api/backends/search', async function(req, res, next) {
     // INIT
     var criteria = {path: '/'};
 
@@ -351,14 +359,14 @@ server.post('/backends/search', async function(req, res, next) {
 });
 
 // proxy backends
-server.get('/backends/:backend/*', function(req, res, next) {
+server.get('/api/backends/:backend/*', function(req, res, next) {
     findOne({backend: req.params.backend, path: '/'+req.params['*']})
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));
 });
 
 // list collections
-server.get('/collections', function(req, res, next) {
+server.get('/api/collections', function(req, res, next) {
     find({}, 'collections')
         .then(prepare)
         .then(data => { res.send(data); next(); })
@@ -367,7 +375,7 @@ server.get('/collections', function(req, res, next) {
 
 // search collections via JSON document in POST body
 // supports all parameters, which are currently: name, title, description, fulltext, bbox (aka spatial extent), startdate and enddate (aka temporal extent)
-server.post('/collections/search', async function(req, res, next) {
+server.post('/api/collections/search', async function(req, res, next) {
     // INIT
     var criteria = {};
     
@@ -440,7 +448,7 @@ server.post('/collections/search', async function(req, res, next) {
 });
 
 // list processes
-server.get('/processes', function(req, res, next) {
+server.get('/api/processes', function(req, res, next) {
     find({}, 'processes')
         .then(prepare)
         .then(data => { res.send(data); next(); })
@@ -465,7 +473,7 @@ server.get('/service_types', function(req, res, next) {
 
 // search processes via JSON document in POST body
 // supports all parameters, which are currently: name, summary, description, fulltext, excludeDeprecated, parameterNames, parameterDescriptions
-server.post('/processes/search', async function(req, res, next) {
+server.post('/api/processes/search', async function(req, res, next) {
     // INIT
     var criteria = {};
     
@@ -514,17 +522,85 @@ server.post('/processes/search', async function(req, res, next) {
         .catch(err => next(err));
 });
 
-server.get('/process_graphs', function(req, res, next) {
+// handle CORS preflight for POSTing
+server.opts('/api/process_graphs', function(req, res, next) {
+    enableCORS(req, res);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.send();
+});
+
+// compliant to openEO API 0.4.2
+server.get('/api/process_graphs', function(req, res, next) {
+    enableCORS(req, res);
     find({}, 'process_graphs')
+        .then(data => { data.forEach(e => e.id = e._id); return data; })
         .then(prepare)
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));
 });
 
-server.post('/process_graphs', function(req, res, next) {
-    insertOne(req.body, 'process_graphs')
-        .then(data => { res.send(data); next(); })
+// compliant to openEO API 0.4.2
+server.post('/api/process_graphs', function(req, res, next) {
+    enableCORS(req, res);
+    if(req.getContentType() != 'application/json') {
+        res.statusCode = 415;
+        res.send({message: "Only JSON allowed"});
+        next();
+    } else if(typeof req.body.process_graph != 'string' || req.body.process_graph == '') {
+        res.statusCode = 422;
+        res.send({message: "JSON must contain a process_graph property that holds a non-empty string"});
+        next();
+    // invalid JSON is handled automatically
+    } else {
+        insertOne(req.body, 'process_graphs')
+        .then(mongoreply => {
+            if(mongoreply.result.ok == 1 && mongoreply.result.n == 1) {
+                res.statusCode = 201;
+                res.header('OpenEO-Identifier', mongoreply.insertedId);
+                res.header('Location', '/process_graphs/'+mongoreply.insertedId);
+                res.send();
+                next();
+            } else {
+                res.send(mongoreply);
+                next();
+            }
+        })
         .catch(err => next(err));
+    }
+});
+
+// compliant to openEO API 0.4.2
+server.get('/api/process_graphs/:id', function(req, res, next) {
+    enableCORS(req, res);
+    findOne(mongodb.ObjectId(req.params.id), 'process_graphs')
+        .then(pg => {
+            if(pg) {
+                pg.id = pg._id;
+                delete pg._id;
+                res.send(pg);
+                next();
+            } else {
+                res.statusCode = 404;
+                res.send({message: "Not Found"});
+                next();
+            }
+        })
+        .catch(err => next(err));
+});
+
+server.get('/api', function(req, res, next) {
+    res.send({
+        api_version: '0.4.2',
+        backend_version: PACKAGEJSON.version,
+        title: 'openEO Hub',
+        description: PACKAGEJSON.description,
+        endpoints: [
+            { path: '/backends', methods: ['GET'] },
+            { path: '/process_graphs', methods: ['GET', 'POST'] },
+            { path: '/process_graphs/{process_graph_id}', methods: ['GET'] }
+        ]
+    });
 });
 
 // serve website (UI)

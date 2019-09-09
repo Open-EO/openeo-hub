@@ -13,6 +13,22 @@ openEO Hub tries to implement some ambitious ideas. It is aimed to be a platform
 * explore publicly available pre-defined proceses graphs
 * explore publicly available containers to run UDFs
 
+## Public API endpoints
+The Hub provides its data via a RESTful API under http://hub.openeo.org/api. The following endpoints are intended to be used by the public:
+
+* Metadata about the API
+  * `GET /api` -- capabilities document compliant to openEO API v0.4.2.
+* Available openEO backends
+  * `GET /api/backends` -- the list of *backend provider URLs* that the Hub is configured to crawl (i.e. links to `.well-known` documents where available, otherwise a link directly to the backend OR an object with several links to backends of the same provider).
+  * `GET /api/backends?details=full` -- the list of *actual, individual backends* within the Hub's database, including **ALL** their details (i.e. **all** collection descriptions etc.) *This reply can easily be several dozen MBs big.*
+  * `GET /api/backends?details=clipped` -- Like `full`, but for collections and processes only the names are returned. *This reduces the size **a lot**.*
+  * `GET /api/backends?details=grouped` -- Like `clipped`, but the individual backends are grouped by providers.
+* Process graphs within the Hub's *Process Graph Repository* (the "Exchange" panel)
+  * These endpoints work like the endpoints of a normal openEO backend (compliant to openEO API v0.4.2).
+  * `GET /process_graphs` -- lists all process graphs that were submitted to the Hub's repository
+  * `GET /process_graphs/{process_graph_id}` -- return the full information for a single process graph
+  * `POST /process_graphs` -- add a new process graph to the Hub's repository (note that there's NO update or delete functionality!)
+
 ## Getting started
 This app is deployed at http://hub.openeo.org/.
 
