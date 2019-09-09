@@ -21,7 +21,6 @@ import "leaflet/dist/leaflet.css";
 
 export default {
 	name: 'BboxChooser',
-	props: ['calledOnChange'],
 	components: {
 		LMap,
 		LTileLayer,
@@ -44,7 +43,7 @@ export default {
 			this.$refs.map.mapObject.invalidateSize();
 		},
 		returnState() {
-			this.calledOnChange([this.west, this.south, this.east, this.north]);
+			this.$emit('input', [this.west, this.south, this.east, this.north]);
 		},
 		mapClickToBbox(event) {
 			if(this.lastClickWasNorthWest) {

@@ -22,7 +22,7 @@
         <h3>Extent</h3>
         <h4>Spatial</h4>
         <em>Specify a bounding box in decimal WGS84 coordinates (e.g. 12.345) or click on the map below.</em>
-        <BboxChooser :calledOnChange="setSpatialExtent"></BboxChooser>
+        <BboxChooser @input="collectionSearch.bbox = $event"></BboxChooser>
         <h4>Temporal</h4>
 		<DateRangeChooser v-model="collectionSearch.daterange"></DateRangeChooser>
 		<input type="checkbox" v-model="collectionSearch.openEndOnly" id="openEndOnly"><label for="openEndOnly">Only show "open end" collections</label>
@@ -53,10 +53,6 @@ export default {
 		};
 	},
 	methods: {
-		setSpatialExtent(input) {
-			this.collectionSearch.bbox = input;
-		},
-
 		queryCollections() {
 			var params = {};
 			

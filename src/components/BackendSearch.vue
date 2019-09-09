@@ -13,7 +13,7 @@
         </div>
 
         <h3>Functionalities</h3>
-        <EndpointChooser :categorizedEndpoints="endpointsByFunctionality" :calledOnChange="setSelectedEndpoints"></EndpointChooser>
+        <EndpointChooser :categorizedEndpoints="endpointsByFunctionality" @input="backendSearch.endpoints = $event"></EndpointChooser>
         <p><em>Tick all functionalities that the backend must support</em></p>
 
         <h3>Collections</h3>
@@ -66,10 +66,6 @@ export default {
 		};
 	},
 	methods: {
-		setSelectedEndpoints(input) {
-			this.backendSearch.endpoints = input;
-		},
-
 		queryBackends() {
 			const params = {
 				version:          (this.backendSearch.version == 'any' ? undefined : this.backendSearch.version),

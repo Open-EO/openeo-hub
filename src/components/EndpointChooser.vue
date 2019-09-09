@@ -18,7 +18,7 @@
 <script>
 export default {
 	name: 'EndpointChooser',
-	props: ['endpoints', 'categorizedEndpoints', 'calledOnChange'],
+	props: ['endpoints', 'categorizedEndpoints'],
 	data() {
 		return {
 			selectedEndpoints: []
@@ -37,7 +37,7 @@ export default {
 			this.returnState();
 		},
 		returnState() {
-			this.calledOnChange(this.selectedEndpoints);
+			this.$emit('input', this.selectedEndpoints);
 		}
 	}
 }
