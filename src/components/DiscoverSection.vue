@@ -16,6 +16,9 @@
 			<input type="checkbox" v-model="filters.apiVersions" value="0.3" id="zerodot3"><label for="zerodot3">v0.3.x</label>
 			<input type="checkbox" v-model="filters.apiVersions" value="0.4" id="zerodot4"><label for="zerodot4">v0.4.x</label>
 
+			<h4>Functionalities</h4>
+			<EndpointChooser :categorizedEndpoints="allEndpointsCategorized" @input="filters.endpoints = $event"></EndpointChooser>
+
 			<h4>Output formats</h4>
 			<Multiselect
 			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
@@ -32,21 +35,26 @@
 <script>
 import axios from 'axios';
 import BackendGroup from './BackendGroup.vue';
-import Multiselect from 'vue-multiselect'
+import Multiselect from 'vue-multiselect';
+import { FeatureList } from '@openeo/js-commons';
+import EndpointChooser from './EndpointChooser.vue';
 
 export default {
 	name: 'discover-section',
 	components: {
 		BackendGroup,
+		EndpointChooser,
 		Multiselect
 	},
 	data() {
 		return {
 			allBackendGroups: [],
+			allEndpointsCategorized: FeatureList.features,
 			allOutputFormats: [],
 			allServiceTypes: [],
 			filters: {
 				apiVersions: [],
+				endpoints: [],
 				outputFormats: [],
 				serviceTypes: []
 			}
@@ -101,6 +109,9 @@ export default {
 				this.filters.apiVersions.every(v => backends.some(b => b.api_version && b.api_version.substr(0,3) == v)),
 				// connect versions with OR:
 				// backends.some(b => b.api_version && this.filters.apiVersions.some(v => (b.api_version).substr(0,3) == v)),
+				backends.some(b => b.endpoints && this.filters.endpoints.every(e1 => b.endpoints.some(e2 =>
+				    e2.methods.map(m => m.toLowerCase()).indexOf(e1.split(' ')[0]) != -1 && e2.path.toLowerCase().replace(/{[^}]*}/g, '{}') == e1.split(' ')[1]
+				))),
 				backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1)),
 				backends.some(b => b.serviceTypes && this.filters.serviceTypes.every(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1))
 			].every(f => f == true);
