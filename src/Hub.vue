@@ -92,6 +92,9 @@ main > section > section {
 	overflow: hidden;
 	padding: 10px;
 }
+section#discover-filters {
+	display: block;
+}
 main > section,
 main > section > section:first-of-type {
 	padding-left: 20px;

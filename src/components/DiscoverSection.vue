@@ -11,10 +11,16 @@
 
 		<section id="discover-filters">
 			<h3>Filters</h3>
+
+			<h4>openEO API versions</h4>
+			<input type="checkbox" v-model="filters.apiVersions" value="0.3" id="zerodot3"><label for="zerodot3">v0.3.x</label>
+			<input type="checkbox" v-model="filters.apiVersions" value="0.4" id="zerodot4"><label for="zerodot4">v0.4.x</label>
+
 			<h4>Output formats</h4>
 			<Multiselect
 			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false"></Multiselect>
+
 			<h4>Service types</h4>
 			<Multiselect
 			    v-model="filters.serviceTypes" :options="allServiceTypes" trackBy="service" label="service"
@@ -40,6 +46,7 @@ export default {
 			allOutputFormats: [],
 			allServiceTypes: [],
 			filters: {
+				apiVersions: [],
 				outputFormats: [],
 				serviceTypes: []
 			}
@@ -90,6 +97,10 @@ export default {
 	methods: {
 		checkFilters(backends) {
 			return [
+				// connect versions with AND:
+				this.filters.apiVersions.every(v => backends.some(b => b.api_version && b.api_version.substr(0,3) == v)),
+				// connect versions with OR:
+				// backends.some(b => b.api_version && this.filters.apiVersions.some(v => (b.api_version).substr(0,3) == v)),
 				backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1)),
 				backends.some(b => b.serviceTypes && this.filters.serviceTypes.every(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1))
 			].every(f => f == true);
