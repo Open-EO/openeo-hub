@@ -28,6 +28,9 @@
 			<Multiselect
 			    v-model="filters.serviceTypes" :options="allServiceTypes" trackBy="service" label="service"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false"></Multiselect>
+		
+		    <h4>Billing</h4>
+			<input type="checkbox" v-model="filters.excludeIfNoFreePlan" id="excludeIfNoFreePlan"><label for="excludeIfNoFreePlan">Exclude backends without a free plan</label>
 		</section>
     </section>
 </template>
@@ -54,6 +57,7 @@ export default {
 			allServiceTypes: [],
 			filters: {
 				apiVersions: [],
+				excludeIfNoFreePlan: false,
 				endpoints: [],
 				outputFormats: [],
 				serviceTypes: []
@@ -105,14 +109,27 @@ export default {
 	methods: {
 		checkFilters(backends) {
 			return [
+				// APIVERSIONS
 				// connect versions with AND:
 				this.filters.apiVersions.every(v => backends.some(b => b.api_version && b.api_version.substr(0,3) == v)),
 				// connect versions with OR:
 				// backends.some(b => b.api_version && this.filters.apiVersions.some(v => (b.api_version).substr(0,3) == v)),
+				
+				// EXCLUDEIFNOFREEPLAN
+				// exclude if *every* plan of *every* backend of the group is set to "paid=true" (more appropriate IMO)
+				!this.filters.excludeIfNoFreePlan || !backends.every(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.every(p => p.paid == true)),
+				// include if at least one plan of the group *has* billing information and in there has a plan with "paid=false"
+				// !this.filters.excludeIfNoFreePlan || backends.some(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.some(p => p.paid == false || p.name == 'free')),
+				
+				// ENDPOINTS
 				backends.some(b => b.endpoints && this.filters.endpoints.every(e1 => b.endpoints.some(e2 =>
 				    e2.methods.map(m => m.toLowerCase()).indexOf(e1.split(' ')[0]) != -1 && e2.path.toLowerCase().replace(/{[^}]*}/g, '{}') == e1.split(' ')[1]
 				))),
+				
+				// OUTPUTFORMATS
 				backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1)),
+				
+				// SERVICETYPES
 				backends.some(b => b.serviceTypes && this.filters.serviceTypes.every(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1))
 			].every(f => f == true);
 		}
