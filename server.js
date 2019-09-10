@@ -456,7 +456,7 @@ server.get('/api/processes', function(req, res, next) {
 });
 
 // list output formats
-server.get('/output_formats', function(req, res, next) {
+server.get('/api/output_formats', function(req, res, next) {
     aggregate(dbqueries.GET_ALL_OUTPUT_FORMATS_WITH_COUNT_PIPELINE, 'backends')
         .then(data => prepare(data))
         .then(data => { res.send(data); next(); })
@@ -464,7 +464,7 @@ server.get('/output_formats', function(req, res, next) {
 });
 
 // list service types
-server.get('/service_types', function(req, res, next) {
+server.get('/api/service_types', function(req, res, next) {
     aggregate(dbqueries.GET_ALL_SERVICE_TYPES_WITH_COUNT_PIPELINE, 'backends')
         .then(data => prepare(data))
         .then(data => { res.send(data); next(); })

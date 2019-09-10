@@ -98,11 +98,11 @@ export default {
 				console.log(error);
 			});
 		
-		axios.get('/output_formats')
+		axios.get('/api/output_formats')
 			.then(response => this.allOutputFormats = response.data)
 			.catch(error => console.log(error));
 
-		axios.get('/service_types')
+		axios.get('/api/service_types')
 			.then(response => this.allServiceTypes = response.data)
 			.catch(error => console.log(error));
 	},
