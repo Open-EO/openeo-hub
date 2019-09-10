@@ -1,5 +1,5 @@
 <template>
-	<div id="endpointchooser">
+	<div class="endpointchooser">
 		<ul v-if="categorizedEndpoints">
 			<li v-for="(endpoints, category, index) in categorizedEndpoints" :key="category">
 				<input type="checkbox" @change="toggleEndpoints(endpoints)" :id="'category'+index">

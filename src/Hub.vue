@@ -253,10 +253,14 @@ main > section:not(.tabbedContent) p:first-child {
 #search-forms h3 {
 	margin-top: 10px;
 }
-#endpointchooser {
+.endpointchooser {
 	width: 90%;
 	padding: 5px;
 	border: 1px solid #cecbc8;
+}
+.endpointchooser.compact {
+	max-height: 5em;
+	overflow: auto;
 }
 #search-forms textarea {
 	width: 90%;

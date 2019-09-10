@@ -17,7 +17,7 @@
 			<input type="checkbox" v-model="filters.apiVersions" value="0.4" id="zerodot4"><label for="zerodot4">v0.4.x</label>
 
 			<h4>Functionalities</h4>
-			<EndpointChooser :categorizedEndpoints="allEndpointsCategorized" @input="filters.endpoints = $event"></EndpointChooser>
+			<EndpointChooser class="compact" :categorizedEndpoints="allEndpointsCategorized" @input="filters.endpoints = $event"></EndpointChooser>
 
 			<h4>Output formats</h4>
 			<Multiselect
