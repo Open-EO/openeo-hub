@@ -19,6 +19,18 @@
 			<h4>Functionalities</h4>
 			<EndpointChooser class="compact" :categorizedEndpoints="allEndpointsCategorized" @input="filters.endpoints = $event"></EndpointChooser>
 
+			<h4>Collections</h4>
+			<Multiselect    
+				v-model="filters.collections" :options="searchedCollections" trackBy="id" :customLabel="option => (option.id || option.name)"
+				:internalSearch="false" @search-change="searchCollections" :option-height="66"
+				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" open-direction="below">
+				<template slot="option" slot-scope="props">
+					<strong>{{props.option.id || props.option.name}}</strong>
+					<p v-if="props.option.title" style="margin-bottom:0">{{props.option.title}}</p>
+					<p v-else style="margin-bottom:0"><em>No one-line description available</em></p>
+				</template>	
+			</Multiselect>
+
 			<h4>Output formats</h4>
 			<Multiselect
 			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
@@ -52,6 +64,8 @@ export default {
 	data() {
 		return {
 			allBackendGroups: [],
+			allCollections: [],
+			searchedCollections: [],
 			allEndpointsCategorized: FeatureList.features,
 			allOutputFormats: [],
 			allServiceTypes: [],
@@ -98,6 +112,10 @@ export default {
 				console.log(error);
 			});
 		
+		axios.get('/api/collections')
+			.then(response => { this.allCollections = response.data; this.searchedCollections = response.data; })
+			.catch(error => console.log(error));
+		
 		axios.get('/api/output_formats')
 			.then(response => this.allOutputFormats = response.data)
 			.catch(error => console.log(error));
@@ -107,6 +125,14 @@ export default {
 			.catch(error => console.log(error));
 	},
 	methods: {
+		searchCollections(query) {
+			const queries = query.trim().toLowerCase().split(' ');
+			this.searchedCollections = this.allCollections.filter(c => {
+				const textToSearch = ((c.name || c.id) + (c.title ? ' ' + c.title : '')).toLowerCase();
+				return queries.every(q => textToSearch.indexOf(q) != -1);
+			});
+		},
+
 		checkFilters(backends) {
 			return [
 				// APIVERSIONS
@@ -125,6 +151,9 @@ export default {
 				this.filters.endpoints.length == 0 || backends.some(b => b.endpoints && this.filters.endpoints.every(e1 => b.endpoints.some(e2 =>
 				    e2.methods.map(m => m.toLowerCase()).indexOf(e1.split(' ')[0]) != -1 && e2.path.toLowerCase().replace(/{[^}]*}/g, '{}') == e1.split(' ')[1]
 				))),
+
+				// COLLECTIONS
+				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.every(c1 => b.collections.some(c2 => (c1.id || c1.name) == (c2.id || c2.name)))),
 				
 				// OUTPUTFORMATS
 				this.filters.outputFormats.length == 0 || backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1)),
