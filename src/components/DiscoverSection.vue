@@ -22,24 +22,24 @@
 			<h4>Collections</h4>
 			<Multiselect    
 				v-model="filters.collections" :options="searchedCollections" trackBy="id" :customLabel="option => (option.id || option.name)"
-				:internalSearch="false" @search-change="searchCollections" :option-height="66"
-				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" open-direction="below">
+				:internalSearch="false" @search-change="searchCollections" :option-height="66" :clearOnSelect="false"
+				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
 				<template slot="option" slot-scope="props">
 					<strong>{{props.option.id || props.option.name}}</strong>
 					<p v-if="props.option.title" style="margin-bottom:0">{{props.option.title}}</p>
-					<p v-else style="margin-bottom:0"><em>No one-line description available</em></p>
+					<p v-else style="margin-bottom:0">&nbsp;</p>
 				</template>	
 			</Multiselect>
 
 			<h4>Output formats</h4>
 			<Multiselect
 			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
-				:multiple="true" :hideSelected="true" :closeOnSelect="false"></Multiselect>
+				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below"></Multiselect>
 
 			<h4>Service types</h4>
 			<Multiselect
 			    v-model="filters.serviceTypes" :options="allServiceTypes" trackBy="service" label="service"
-				:multiple="true" :hideSelected="true" :closeOnSelect="false"></Multiselect>
+				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below"></Multiselect>
 		
 		    <h4>Billing</h4>
 			<input type="checkbox" v-model="filters.excludeIfNoFreePlan" id="excludeIfNoFreePlan"><label for="excludeIfNoFreePlan">Exclude backends without a free plan</label>
@@ -136,11 +136,8 @@ export default {
 
 		checkFilters(backends) {
 			return [
-				// APIVERSIONS
-				// connect versions with AND:
-				this.filters.apiVersions.length == 0 || this.filters.apiVersions.every(v => backends.some(b => b.api_version && b.api_version.substr(0,3) == v)),
-				// connect versions with OR:
-				// backends.some(b => b.api_version && this.filters.apiVersions.some(v => (b.api_version).substr(0,3) == v)),
+				// APIVERSIONS (OR)
+				this.filters.apiVersions.length == 0 || backends.some(b => b.api_version && this.filters.apiVersions.some(v => (b.api_version).substr(0,3) == v)),
 				
 				// EXCLUDEIFNOFREEPLAN
 				// exclude if *every* plan of *every* backend of the group is set to "paid=true" (more appropriate IMO)
@@ -148,19 +145,19 @@ export default {
 				// include if at least one plan of the group *has* billing information and in there has a plan with "paid=false"
 				// !this.filters.excludeIfNoFreePlan || backends.some(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.some(p => p.paid == false || p.name == 'free')),
 				
-				// ENDPOINTS
+				// ENDPOINTS (AND)
 				this.filters.endpoints.length == 0 || backends.some(b => b.endpoints && this.filters.endpoints.every(e1 => b.endpoints.some(e2 =>
 				    e2.methods.map(m => m.toLowerCase()).indexOf(e1.split(' ')[0]) != -1 && e2.path.toLowerCase().replace(/{[^}]*}/g, '{}') == e1.split(' ')[1]
 				))),
 
-				// COLLECTIONS
-				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.every(c1 => b.collections.some(c2 => (c1.id || c1.name) == (c2.id || c2.name)))),
+				// COLLECTIONS (OR)
+				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.some(c1 => b.collections.some(c2 => (c1.id || c1.name) == (c2.id || c2.name)))),
 				
-				// OUTPUTFORMATS
-				this.filters.outputFormats.length == 0 || backends.some(b => b.outputFormats && this.filters.outputFormats.every(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1)),
+				// OUTPUTFORMATS (OR)
+				this.filters.outputFormats.length == 0 || backends.some(b => b.outputFormats && this.filters.outputFormats.some(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1)),
 				
-				// SERVICETYPES
-				this.filters.serviceTypes.length == 0 || backends.some(b => b.serviceTypes && this.filters.serviceTypes.every(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1))
+				// SERVICETYPES (OR)
+				this.filters.serviceTypes.length == 0 || backends.some(b => b.serviceTypes && this.filters.serviceTypes.some(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1))
 			].every(f => f == true);
 		}
 	}
