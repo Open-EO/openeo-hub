@@ -20,12 +20,13 @@
 			<EndpointChooser class="compact" :categorizedEndpoints="allEndpointsCategorized" @input="filters.endpoints = $event"></EndpointChooser>
 
 			<h4>Collections</h4>
-			<Multiselect    
-				v-model="filters.collections" :options="searchedCollections" trackBy="id" :customLabel="option => (option.id || option.name)"
+			<Multiselect
+				v-model="filters.collections" :options="optionCollections" trackBy="id" label="id"
 				:internalSearch="false" @search-change="searchCollections" :option-height="66" :clearOnSelect="false"
+				:taggable="true" @tag="addCollectionSearchTerm" @remove="potentiallyRemoveCollectionSearchTerm"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
-				<template slot="option" slot-scope="props">
-					<strong>{{props.option.id || props.option.name}}</strong>
+				<template slot="option" slot-scope="props" style="width: 100%">
+					<strong>{{props.option.id || props.search}}</strong>
 					<p v-if="props.option.title" style="margin-bottom:0">{{props.option.title}}</p>
 					<p v-else style="margin-bottom:0">&nbsp;</p>
 				</template>	
@@ -66,6 +67,7 @@ export default {
 			allBackendGroups: [],
 			allCollections: [],
 			searchedCollections: [],
+			taggedCollections: [],
 			allEndpointsCategorized: FeatureList.features,
 			allOutputFormats: [],
 			allServiceTypes: [],
@@ -78,6 +80,11 @@ export default {
 				serviceTypes: []
 			}
 		};
+	},
+	computed: {
+		optionCollections: function() {
+			return this.searchedCollections.concat(this.taggedCollections);
+		}
 	},
 	mounted() {
 		axios.get('/api/backends?details=grouped')
@@ -114,7 +121,7 @@ export default {
 			});
 		
 		axios.get('/api/collections')
-			.then(response => { this.allCollections = response.data; this.searchedCollections = response.data; })
+			.then(response => this.allCollections = response.data)
 			.catch(error => console.log(error));
 		
 		axios.get('/api/output_formats')
@@ -129,9 +136,27 @@ export default {
 		searchCollections(query) {
 			const queries = query.trim().toLowerCase().split(' ');
 			this.searchedCollections = this.allCollections.filter(c => {
-				const textToSearch = ((c.name || c.id) + (c.title ? ' ' + c.title : '')).toLowerCase();
+				const textToSearch = (c.id + (c.title ? ' ' + c.title : '')).toLowerCase();
 				return queries.every(q => textToSearch.indexOf(q) != -1);
 			});
+		},
+
+		addCollectionSearchTerm(searchterm, id) {
+			const newItem = {
+				id: '"' + searchterm + '"',
+				isSearchterm: true,  // using "isTag" as the name (for some strange reason...) breaks the labeling of the tags!
+				matches: this.searchedCollections.map(c => c.id)
+			};
+			// add to BOTH value array and options array
+			this.filters.collections.push(newItem);
+			this.taggedCollections.push(newItem);
+		},
+
+		potentiallyRemoveCollectionSearchTerm(removedOption) {
+			if(removedOption.isSearchterm) {
+				this.taggedCollections.splice(this.taggedCollections.findIndex(e => e.id == removedOption.id), 1);
+				// removing from value array (this.filters.collections) works automatically
+			}
 		},
 
 		checkFilters(backends) {
@@ -151,7 +176,9 @@ export default {
 				))),
 
 				// COLLECTIONS (OR)
-				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.some(c1 => b.collections.some(c2 => (c1.id || c1.name) == (c2.id || c2.name)))),
+				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.some(c1 => b.collections.some(c2 => 
+					c1.isSearchterm ? c1.matches.indexOf(c2.id) != -1 : c1.id == c2.id
+				))),
 				
 				// OUTPUTFORMATS (OR)
 				this.filters.outputFormats.length == 0 || backends.some(b => b.outputFormats && this.filters.outputFormats.some(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1)),
