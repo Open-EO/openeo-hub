@@ -31,6 +31,18 @@
 				</template>	
 			</Multiselect>
 
+			<h4>Processes</h4>
+			<Multiselect
+				v-model="filters.processes" :options="optionProcesses" trackBy="id" label="id"
+				:internalSearch="false" @search-change="searchProcesses" :option-height="66" :clearOnSelect="false"
+				:taggable="true" @tag="addProcessSearchTerm" @remove="potentiallyRemoveProcessSearchTerm"
+				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
+				<template slot="option" slot-scope="props" style="width: 100%">
+					<strong>{{props.option.id || '"'+props.search+'"'}}</strong>
+					<p style="margin-bottom:0">{{props.option.summary || "&nbsp;"}}</p>
+				</template>	
+			</Multiselect>
+
 			<h4>Output formats</h4>
 			<Multiselect
 			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
@@ -67,6 +79,9 @@ export default {
 			allCollections: [],
 			searchedCollections: [],
 			taggedCollections: [],
+			allProcesses: [],
+			searchedProcesses: [],
+			taggedProcesses: [],
 			allEndpointsCategorized: FeatureList.features,
 			allOutputFormats: [],
 			allServiceTypes: [],
@@ -76,6 +91,7 @@ export default {
 				excludeIfNoFreePlan: false,
 				endpoints: [],
 				outputFormats: [],
+				processes: [],
 				serviceTypes: []
 			}
 		};
@@ -83,6 +99,9 @@ export default {
 	computed: {
 		optionCollections: function() {
 			return this.searchedCollections.concat(this.taggedCollections);
+		},
+		optionProcesses: function() {
+			return this.searchedProcesses.concat(this.taggedProcesses);
 		}
 	},
 	mounted() {
@@ -122,6 +141,10 @@ export default {
 		axios.get('/api/collections')
 			.then(response => this.allCollections = response.data)
 			.catch(error => console.log(error));
+
+		axios.get('/api/processes')
+			.then(response => this.allProcesses = response.data)
+			.catch(error => console.log(error));
 		
 		axios.get('/api/output_formats')
 			.then(response => this.allOutputFormats = response.data)
@@ -158,6 +181,32 @@ export default {
 			}
 		},
 
+		searchProcesses(query) {
+			const queries = query.trim().toLowerCase().split(' ');
+			this.searchedProcesses = this.allProcesses.filter(p => {
+				const textToSearch = (p.id + (p.summary ? ' ' + p.summary : '')).toLowerCase();
+				return queries.every(q => textToSearch.indexOf(q) != -1);
+			});
+		},
+
+		addProcessSearchTerm(searchterm, id) {
+			const newItem = {
+				id: '"' + searchterm + '"',
+				isSearchterm: true,  // using "isTag" as the name (for some strange reason...) breaks the labeling of the tags!
+				matches: this.searchedProcesses.map(p => p.id)
+			};
+			// add to BOTH value array and options array
+			this.filters.processes.push(newItem);
+			this.taggedProcesses.push(newItem);
+		},
+
+		potentiallyRemoveProcessSearchTerm(removedOption) {
+			if(removedOption.isSearchterm) {
+				this.taggedProcesses.splice(this.taggedProcesses.findIndex(e => e.id == removedOption.id), 1);
+				// removing from value array (this.filters.processes) works automatically
+			}
+		},
+
 		checkFilters(backends) {
 			return [
 				// APIVERSIONS (OR)
@@ -177,6 +226,11 @@ export default {
 				// COLLECTIONS (OR)
 				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.some(c1 => b.collections.some(c2 => 
 					c1.isSearchterm ? c1.matches.indexOf(c2.id) != -1 : c1.id == c2.id
+				))),
+				
+				// PROCESSES (AND)
+				this.filters.processes.length == 0 || backends.some(b => b.processes && this.filters.processes.every(p1 => b.processes.some(p2 => 
+					p1.isSearchterm ? p1.matches.indexOf(p2.id) != -1 : p1.id == p2.id
 				))),
 				
 				// OUTPUTFORMATS (OR)
