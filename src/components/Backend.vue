@@ -32,14 +32,14 @@
                 <h4>{{collapsed.collections ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} collections ({{backend.collections.length}})</h4>
             </dt>
             <dd v-if="backend.collections && !collapsed.collections">
-                <CollectionWrapper v-for="collection in preparedBackend.collections" :key="collection.name" :collectionData="collection" :version="preparedBackend.api_version" :initiallyCollapsed="true"></CollectionWrapper>
+                <CollectionWrapper v-for="collection in preparedBackend.collections" :key="collection.id" :collectionData="collection" :version="preparedBackend.api_version" :initiallyCollapsed="true"></CollectionWrapper>
             </dd>
             
             <dt v-if="backend.processes" @click="toggleProcesses">
                 <h4>{{collapsed.processes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
             </dt>
             <dd v-if="preparedBackend.processes && !collapsed.processes">
-                <ProcessWrapper v-for="process in backend.processes" :key="process.name || process.id" :processData="process" :version="preparedBackend.api_version" :initiallyCollapsed="true" :provideDownload="false"></ProcessWrapper>
+                <ProcessWrapper v-for="process in backend.processes" :key="process.id" :processData="process" :version="preparedBackend.api_version" :initiallyCollapsed="true" :provideDownload="false"></ProcessWrapper>
             </dd>
 
             <dt v-if="backend.outputFormats" @click="collapsed.outputFormats = !collapsed.outputFormats">

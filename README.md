@@ -21,7 +21,7 @@ The Hub provides its data via a RESTful API under http://hub.openeo.org/api. The
 * Available openEO backends
   * `GET /api/backends` -- the list of *backend provider URLs* that the Hub is configured to crawl (i.e. links to `.well-known` documents where available, otherwise a link directly to the backend OR an object with several links to backends of the same provider).
   * `GET /api/backends?details=full` -- the list of *actual, individual backends* within the Hub's database, including **ALL** their details (i.e. **all** collection descriptions etc.) *This reply can easily be several dozen MBs big.*
-  * `GET /api/backends?details=clipped` -- Like `full`, but for collections and processes only the names are returned. *This reduces the size **a lot**.*
+  * `GET /api/backends?details=clipped` -- Like `full`, but for collections and processes only the `id`s and `title`s/`summary`s are returned. *This reduces the size **a lot**.*
   * `GET /api/backends?details=grouped` -- Like `clipped`, but the individual backends are grouped by providers.
 * Process graphs within the Hub's *Process Graph Repository* (the "Exchange" panel)
   * These endpoints work like the endpoints of a normal openEO backend (compliant to openEO API v0.4.2).

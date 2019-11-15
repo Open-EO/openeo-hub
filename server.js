@@ -108,8 +108,8 @@ server.get('/api/backends', function(req, res, next) {
         next();
     } else {
         const clip = b => {
-            if(b.collections) { b.collections = b.collections.map(e => ({name: e.name || e.id})); }
-            if(b.processes) { b.processes = b.processes.map(e => ({name: e.name || e.id})); }
+            if(b.collections) { b.collections = b.collections.map(e => ({id: e.name || e.id})); }
+            if(b.processes) { b.processes = b.processes.map(e => ({id: e.name || e.id})); }
             return b;
         };
 
@@ -367,7 +367,7 @@ server.get('/api/backends/:backend/*', function(req, res, next) {
 
 // list collections
 server.get('/api/collections', function(req, res, next) {
-    find({}, 'collections')
+    aggregate([{$project: {id: {$ifNull: ["$id", "$name"]}, title: 1}}], 'collections')
         .then(prepare)
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));
@@ -449,7 +449,7 @@ server.post('/api/collections/search', async function(req, res, next) {
 
 // list processes
 server.get('/api/processes', function(req, res, next) {
-    find({}, 'processes')
+    aggregate([{$project: {id: {$ifNull: ["$id", "$name"]}, summary: 1}}], 'processes')
         .then(prepare)
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));

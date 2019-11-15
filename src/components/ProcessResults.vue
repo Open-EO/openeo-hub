@@ -4,7 +4,7 @@
         <em v-if="matchedProcesses == null" class="emptyNotice">{{initialInstructionText}}</em>
         <em v-else-if="matchedProcesses.length == 0" class="emptyNotice">No search results.</em>
         <ol>
-            <li v-for="process in matchedProcesses" :key="process.backendUrl+'/'+(process.id||process.name)" class="processParent">
+            <li v-for="process in matchedProcesses" :key="process.backendUrl+'/'+process.id" class="processParent">
                 <ProcessWrapper :processData="process" :initiallyCollapsed="true" :provideDownload="false"></ProcessWrapper>
             </li>
         </ol>
