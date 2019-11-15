@@ -26,9 +26,8 @@
 				:taggable="true" @tag="addCollectionSearchTerm" @remove="potentiallyRemoveCollectionSearchTerm"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
 				<template slot="option" slot-scope="props" style="width: 100%">
-					<strong>{{props.option.id || props.search}}</strong>
-					<p v-if="props.option.title" style="margin-bottom:0">{{props.option.title}}</p>
-					<p v-else style="margin-bottom:0">&nbsp;</p>
+					<strong>{{props.option.id || '"'+props.search+'"'}}</strong>
+					<p style="margin-bottom:0">{{props.option.title || "&nbsp;"}}</p>
 				</template>	
 			</Multiselect>
 
