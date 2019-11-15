@@ -225,12 +225,12 @@ export default {
 
 				// COLLECTIONS (OR)
 				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.some(c1 => b.collections.some(c2 => 
-					c1.isSearchterm ? c1.matches.indexOf(c2.id) != -1 : c1.id == c2.id
+					c1.isSearchterm ? c1.matches.indexOf(c2.id || c2.name) != -1 : (c1.id || c1.name) == (c2.id || c2.name)
 				))),
 				
 				// PROCESSES (AND)
 				this.filters.processes.length == 0 || backends.some(b => b.processes && this.filters.processes.every(p1 => b.processes.some(p2 => 
-					p1.isSearchterm ? p1.matches.indexOf(p2.id) != -1 : p1.id == p2.id
+					p1.isSearchterm ? p1.matches.indexOf(p2.id || p2.name) != -1 : (p1.id || p1.name) == (p2.id || p2.name)
 				))),
 				
 				// OUTPUTFORMATS (OR)
