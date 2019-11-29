@@ -125,7 +125,13 @@ mongo.connect(async (err, client) => {
                     var data = response.data;
                     collection.findOneAndUpdate(
                         { backend: backendUrl, path: path },
-                        { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: data } },
+                        { $set: {
+                            backendTitle: backendTitle,
+                            group: name,
+                            content: data,
+                            retrieved: new Date().toJSON(),
+                            unsuccessfulCrawls: 0
+                        }},
                         { upsert: true }
                     )
                     .catch(error => {
