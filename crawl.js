@@ -90,9 +90,17 @@ mongo.connect(async (err, client) => {
                 paths = paths.concat(endpoints.filter(hasEndpoint));
 
                 // if `/collections/{name}` is supported: add the individual collections too
-                if(hasEndpoint('/collections') && hasEndpoint('/collections/{}')) {
-                    const collections = (await axios(backendUrl+'/collections')).data.collections;
-                    paths = paths.concat(collections.map(c => '/collections/' + (c.name || c.id)));
+                try {
+                    if(hasEndpoint('/collections') && hasEndpoint('/collections/{}')) {
+                        const collections = (await axios(backendUrl+'/collections')).data.collections;
+                        paths = paths.concat(collections.map(c => '/collections/' + (c.name || c.id)));
+                    }
+                }
+                catch(error) {
+                    console.log('An error occurred while gathering collection detail URLs for ' + backendUrl);
+                    if(verbose) {
+                        console.log(error);
+                    }
                 }
             }  
             catch(error) {
@@ -116,10 +124,16 @@ mongo.connect(async (err, client) => {
                     // save to database
                     var data = response.data;
                     collection.findOneAndUpdate(
-                        { backend: backendUrl, backendTitle: backendTitle, path: path, group: name },
+                        { backend: backendUrl, path: path },
                         { $set: { retrieved: new Date().toJSON(), unsuccessfulCrawls: 0, content: data } },
                         { upsert: true }
-                    );
+                    )
+                    .catch(error => {
+                        console.log('An error occurred while writing to the database.');
+                        if(verbose) {
+                            console.log(error);
+                        }
+                    });
                 })
                 .catch(error => {
                     console.log('An error occurred while downloading ' + backendUrl+path);
