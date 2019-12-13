@@ -22,6 +22,7 @@
 			<h4>Collections</h4>
 			<Multiselect
 				v-model="filters.collections" :options="optionCollections" trackBy="id" label="id"
+				placeholder="Select from list, or type to search through IDs and titles"
 				:internalSearch="false" @search-change="searchCollections" :option-height="66" :clearOnSelect="false"
 				:taggable="true" @tag="addCollectionSearchTerm" @remove="potentiallyRemoveCollectionSearchTerm"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
@@ -34,6 +35,7 @@
 			<h4>Processes</h4>
 			<Multiselect
 				v-model="filters.processes" :options="optionProcesses" trackBy="id" label="id"
+				placeholder="Select from list, or type to search through IDs and summaries"
 				:internalSearch="false" @search-change="searchProcesses" :option-height="66" :clearOnSelect="false"
 				:taggable="true" @tag="addProcessSearchTerm" @remove="potentiallyRemoveProcessSearchTerm"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
@@ -46,11 +48,13 @@
 			<h4>Output formats</h4>
 			<Multiselect
 			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
+				placeholder="Select from list, or type to search"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below"></Multiselect>
 
 			<h4>Service types</h4>
 			<Multiselect
 			    v-model="filters.serviceTypes" :options="allServiceTypes" trackBy="service" label="service"
+				placeholder="Select from list, or type to search"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below"></Multiselect>
 		
 		    <h4>Billing</h4>
