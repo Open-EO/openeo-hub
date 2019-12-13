@@ -139,11 +139,11 @@ export default {
 			});
 		
 		axios.get('/api/collections')
-			.then(response => this.allCollections = response.data)
+			.then(response => { this.allCollections = response.data; this.searchCollections(""); })
 			.catch(error => console.log(error));
 
 		axios.get('/api/processes')
-			.then(response => this.allProcesses = response.data)
+			.then(response => { this.allProcesses = response.data; this.searchProcesses(""); })
 			.catch(error => console.log(error));
 		
 		axios.get('/api/output_formats')
