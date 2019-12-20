@@ -28,7 +28,6 @@
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
 				<template slot="option" slot-scope="props" style="width: 100%">
 					<strong>{{props.option.id || '"'+props.search+'"'}}</strong>
-					<span v-if="props.option.count">&nbsp;({{props.option.count}})</span>
 					<p style="margin-bottom:0">{{props.option.title || "&nbsp;"}}</p>
 				</template>	
 			</Multiselect>

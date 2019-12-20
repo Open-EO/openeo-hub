@@ -65,7 +65,7 @@ module.exports = {
         } }
     ],
     GET_ALL_COLLECTIONS_PIPELINE: [
-        { $match: { path: '/collections' } },
+        { $match: { path: '/collections', 'content.collections': {$exists: true} } },
         { $addFields: { 'content.collections.backend': '$backend', 'content.collections.backendTitle': '$backendTitle', 'content.collections.retrieved': '$retrieved', 'content.collections.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'collection': '$content.collections' } },
         { $unwind: '$collection' },
@@ -73,7 +73,7 @@ module.exports = {
     ],
     GET_ALL_PROCESSES_PIPELINE: [
         // basically like for collections
-        { $match: { path: '/processes' } },
+        { $match: { path: '/processes', 'content.processes': {$exists: true} } },
         { $addFields: { 'content.processes.backend': '$backend', 'content.processes.backendTitle': '$backendTitle', 'content.processes.retrieved': '$retrieved', 'content.processes.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'process': '$content.processes' } },
         { $unwind: '$process' },
@@ -81,15 +81,14 @@ module.exports = {
         // convert `parameters` object to array because otherwise we can't search for parameter descriptions (MongoDB doesn't support wildcards for object keys)
         { $addFields: { 'parametersAsArray' : { $objectToArray: '$parameters' } } }
     ],
-    GET_DISTINCT_COLLECTIONS_WITH_COUNT_PIPELINE: [
+    GET_DISTINCT_COLLECTIONS_PIPELINE: [
         { $project: {id: {$ifNull: ["$id", "$name"]}, title: 1} },   // allow both id (v0.4) and name (v0.3)
         { $group: {     // group by collection id, at the same time calculate the sum, and maintain title
             _id: {$toLower: "$id"},
             id: {$first: "$id"},
             title: {$first: "$title"},  // if a collection *does* appear twice, the title is usually the same, so just using the first occurrence is enough
-            count: {$sum: 1}
         } },
-        { $sort: {count: -1, id: 1} }  // sort by count DESC, id ASC
+        { $sort: {id: 1} }  // sort by id ASC
     ],
     GET_DISTINCT_PROCESSES_WITH_COUNT_PIPELINE: [
         { $project: {id: {$ifNull: ["$id", "$name"]}, summary: 1} },   // allow both id (v0.4) and name (v0.3)

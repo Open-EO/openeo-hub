@@ -367,7 +367,7 @@ server.get('/api/backends/:backend/*', function(req, res, next) {
 
 // list collections
 server.get('/api/collections', function(req, res, next) {
-    aggregate(dbqueries.GET_DISTINCT_COLLECTIONS_WITH_COUNT_PIPELINE, 'collections')
+    aggregate(dbqueries.GET_DISTINCT_COLLECTIONS_PIPELINE, 'collections')
         .then(prepare)
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));
