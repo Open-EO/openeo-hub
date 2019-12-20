@@ -367,7 +367,7 @@ server.get('/api/backends/:backend/*', function(req, res, next) {
 
 // list collections
 server.get('/api/collections', function(req, res, next) {
-    aggregate([{$project: {id: {$ifNull: ["$id", "$name"]}, title: 1}}], 'collections')
+    aggregate(dbqueries.GET_DISTINCT_COLLECTIONS_WITH_COUNT_PIPELINE, 'collections')
         .then(prepare)
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));
@@ -449,7 +449,7 @@ server.post('/api/collections/search', async function(req, res, next) {
 
 // list processes
 server.get('/api/processes', function(req, res, next) {
-    aggregate([{$project: {id: {$ifNull: ["$id", "$name"]}, summary: 1}}], 'processes')
+    aggregate(dbqueries.GET_DISTINCT_PROCESSES_WITH_COUNT_PIPELINE, 'processes')
         .then(prepare)
         .then(data => { res.send(data); next(); })
         .catch(err => next(err));

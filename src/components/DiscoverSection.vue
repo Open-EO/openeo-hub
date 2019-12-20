@@ -188,7 +188,7 @@ export default {
 		searchProcesses(query) {
 			const queries = query.trim().toLowerCase().split(' ');
 			this.searchedProcesses = this.allProcesses.filter(p => {
-				const textToSearch = (p.id + (p.summary ? ' ' + p.summary : '')).toLowerCase();
+				const textToSearch = (p.id + (p.allSummaries ? ' ' + p.allSummaries.join(' / ') : '')).toLowerCase();
 				return queries.every(q => textToSearch.indexOf(q) != -1);
 			});
 		},

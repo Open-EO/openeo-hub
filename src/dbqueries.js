@@ -81,6 +81,27 @@ module.exports = {
         // convert `parameters` object to array because otherwise we can't search for parameter descriptions (MongoDB doesn't support wildcards for object keys)
         { $addFields: { 'parametersAsArray' : { $objectToArray: '$parameters' } } }
     ],
+    GET_DISTINCT_COLLECTIONS_WITH_COUNT_PIPELINE: [
+        { $project: {id: {$ifNull: ["$id", "$name"]}, title: 1} },   // allow both id (v0.4) and name (v0.3)
+        { $group: {     // group by collection id, at the same time calculate the sum, and maintain title
+            _id: {$toLower: "$id"},
+            id: {$first: "$id"},
+            title: {$first: "$title"},  // if a collection *does* appear twice, the title is usually the same, so just using the first occurrence is enough
+            count: {$sum: 1}
+        } },
+        { $sort: {count: -1, id: 1} }  // sort by count DESC, id ASC
+    ],
+    GET_DISTINCT_PROCESSES_WITH_COUNT_PIPELINE: [
+        { $project: {id: {$ifNull: ["$id", "$name"]}, summary: 1} },   // allow both id (v0.4) and name (v0.3)
+        { $group: {     // group by process id, at the same time calculate the sum, and maintain summary/allSummaries
+            _id: {$toLower: "$id"},
+            id: {$first: "$id"},
+            summary: {$first: "$summary"},   // simply the first occurrence for easy displaying
+            allSummaries: {$addToSet: "$summary"},  // processes can appear many times with quite different summaries, so it's better to return them all
+            count: {$sum: 1}
+        } },
+        { $sort: {count: -1, id: 1} }  // sort by count DESC, id ASC
+    ],
     GET_ALL_OUTPUT_FORMATS_WITH_COUNT_PIPELINE: [
         { $match: { outputFormats: {$exists: true} } },  // only consider backends that have output formats
         { $addFields: { 'outputFormatsAsArray' : {$objectToArray: {$ifNull: ['$outputFormats.formats', '$outputFormats']} } } },  // output formats are saved as object keys -> convert to array
