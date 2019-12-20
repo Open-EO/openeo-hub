@@ -28,6 +28,7 @@
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
 				<template slot="option" slot-scope="props" style="width: 100%">
 					<strong>{{props.option.id || '"'+props.search+'"'}}</strong>
+					<span v-if="props.option.count">&nbsp;({{props.option.count}})</span>
 					<p style="margin-bottom:0">{{props.option.title || "&nbsp;"}}</p>
 				</template>	
 			</Multiselect>
@@ -41,6 +42,7 @@
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
 				<template slot="option" slot-scope="props" style="width: 100%">
 					<strong>{{props.option.id || '"'+props.search+'"'}}</strong>
+					<span v-if="props.option.count">&nbsp;({{props.option.count}})</span>
 					<p style="margin-bottom:0">{{props.option.summary || "&nbsp;"}}</p>
 				</template>	
 			</Multiselect>
@@ -49,13 +51,21 @@
 			<Multiselect
 			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
 				placeholder="Select from list, or type to search"
-				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below"></Multiselect>
+				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
+				<template slot="option" slot-scope="props">
+					{{props.option.format}} <span v-if="props.option.count">({{props.option.count}})</span>
+				</template>
+			</Multiselect>
 
 			<h4>Service types</h4>
 			<Multiselect
 			    v-model="filters.serviceTypes" :options="allServiceTypes" trackBy="service" label="service"
 				placeholder="Select from list, or type to search"
-				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below"></Multiselect>
+				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
+				<template slot="option" slot-scope="props">
+					{{props.option.service}} <span v-if="props.option.count">({{props.option.count}})</span>
+				</template>
+			</Multiselect>
 		
 		    <h4>Billing</h4>
 			<input type="checkbox" v-model="filters.excludeIfNoFreePlan" id="excludeIfNoFreePlan"><label for="excludeIfNoFreePlan">Exclude backends without a free plan</label>
