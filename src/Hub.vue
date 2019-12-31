@@ -5,7 +5,6 @@
 			<nav>
 				<ul>
 					<li @click="view = 'discover'" :class="{active: view == 'discover'}" title="Discover">Discover</li>
-					<li @click="view = 'search'" :class="{active: view == 'search'}" title="Search">Search</li>
 					<li @click="view = 'exchange'" :class="{active: view == 'exchange'}" title="Exchange">Exchange</li>
 					<li @click="view = 'about'" :class="{active: view == 'about'}" title="About">About</li>
 				</ul>
@@ -15,7 +14,6 @@
 		<main>
 			<!-- Don't use `v-show` for `div`s that may contain Leaflet maps - it would cause the map to be initiated incorrectly. Setting `height:0` etc. (instead of v-show's `display:none`) solves the problem. -->
 			<DiscoverSection :class="{hidden: view != 'discover', wrapper: 1}"></DiscoverSection>
-			<SearchSection :class="{hidden: view != 'search', wrapper: 1}"></SearchSection>
 			<ExchangeSection :class="{hidden: view != 'exchange'}" :active="view == 'exchange'"></ExchangeSection>
 			<AboutSection :class="{hidden: view != 'about'}"></AboutSection>
 		</main>
@@ -30,15 +28,13 @@
 import AboutSection from './components/AboutSection.vue';
 import DiscoverSection from './components/DiscoverSection.vue';
 import ExchangeSection from './components/ExchangeSection.vue';
-import SearchSection from './components/SearchSection.vue';
 
 export default {
 	name: 'openeo-hub',
 	components: {
 		AboutSection,
 		DiscoverSection,
-		ExchangeSection,
-		SearchSection
+		ExchangeSection
 	},
 	data() {
 		return {
@@ -201,32 +197,6 @@ header nav li::after {
     visibility: hidden;
 }
 
-/* tab-style navigation in search+results panels */
-main nav {
-	border-bottom: 1px solid black;
-	padding-left: 20px;
-}
-main nav ul {
-	margin: 0;
-	padding: 0;
-}
-main nav li {
-	display: inline-block;
-	list-style: none;
-	font-size: 120%;
-	font-weight: bold;
-	border: 1px solid black;
-	padding: 5px 10px;
-	margin-left: -1px;
-	margin-bottom: -1px;
-	cursor: pointer;
-	background-color: #e8e5e2;
-}
-main nav li.active {
-	border-bottom: 1px solid white;
-	background-color: white;
-}
-
 /* sections without tab-style navigation */
 main > section:not(.tabbedContent) p {
 	margin: 10px 0;
@@ -249,10 +219,7 @@ main > section:not(.tabbedContent) p:first-child {
 	padding-top: 30px;
 }
 
-/* search section */
-#search-forms h3 {
-	margin-top: 10px;
-}
+/* endpoint chooser */
 .endpointchooser {
 	width: 90%;
 	padding: 5px;
@@ -262,25 +229,8 @@ main > section:not(.tabbedContent) p:first-child {
 	max-height: 5em;
 	overflow: auto;
 }
-#search-forms textarea {
-	width: 90%;
-	height: 100px;
-	padding: 5px;
-}
-#search-forms input + em,
-#search-forms em + input {
-	margin-left: 5px;
-}
-#search-forms p {
-	margin-top: 0;
-}
-#search-forms .submitbutton {
-	float: right;
-}
 
-/* results section */
-#search-results h2,
-#search-results h3,
+/* discover section cont. */
 #discover h3 {
 	margin-bottom: 10px;
 }
@@ -290,27 +240,19 @@ main > section:not(.tabbedContent) p:first-child {
 #discover-filters h4:not(:first-of-type) {
 	margin-top: 20px;
 }
-#search-results h3,
-#search-results h4, #discover-list h4,
-#search-results h5, #discover-list h5 {
+#discover-list h4,
+#discover-list h5 {
 	font-size: 100%;
 	margin-top: 10px;
 }
+/* overriding CSS of external components */
 .process h4 code {  /* otherwise param names appear really small */
 	font-size: 125%;
 }
-#search-results .emptyNotice {
-	margin-left: 20px;
-}
-ol.searchresults > li { /* with "direct child" selectors so that it doesn't affect `li`s of other lists further down */
-	margin-bottom: 20px;
-}
-.backend dd,
-.collection dd {
+.backend dd {
 	margin-bottom: 10px;
 }
-.backend dd > ul,
-.collection dd > ul {
+.backend dd > ul {
 	padding-left: 15px;
 }
 .process {
@@ -325,9 +267,7 @@ ol.searchresults > li { /* with "direct child" selectors so that it doesn't affe
 	margin-top: 10px;
 }
 .collection + .collection,
-.collectionParent + .collectionParent,
-.process + .process,
-.processParent + .processParent {
+.process + .process {
 	/* margin between neighbouring panels */
 	margin-top: 30px;
 }
