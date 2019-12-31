@@ -99,30 +99,15 @@ main > section.wrapper {
 	flex-direction: row;
 	padding: 0px;
 }
-main > section.tabbedContent > section {
-	padding: 0px;
-	padding-top: 10px;
-}
-main > section.tabbedContent > section:not(:last-child) {
-	margin-right: 20px;
-}
-main > section:not(.tabbedContent),
-main > section:not(.tabbedContent) > section {
+main > section,
+main > section > section {
 	overflow-y: auto;
-}
-div.panelContainer {
-	overflow: auto;
-	padding: 10px;
-	padding-top: 0;
 }
 .hidden {
 	height: 0 !important;
 	max-width: 0 !important;
 	padding: 0 !important;
 	margin: 0 !important;
-}
-div.panelContainer > div {
-	padding-bottom: 20px;
 }
 footer {
 	border-top: 1px dotted #cecbc8;
@@ -197,11 +182,11 @@ header nav li::after {
     visibility: hidden;
 }
 
-/* sections without tab-style navigation */
-main > section:not(.tabbedContent) p {
+/* sections */
+main > section p {
 	margin: 10px 0;
 }
-main > section:not(.tabbedContent) p:first-child {
+main > section p:first-child {
 	margin-top: 0;
 }
 
@@ -218,19 +203,6 @@ main > section:not(.tabbedContent) p:first-child {
 	border-top: 1px solid black;
 	padding-top: 30px;
 }
-
-/* endpoint chooser */
-.endpointchooser {
-	width: 90%;
-	padding: 5px;
-	border: 1px solid #cecbc8;
-}
-.endpointchooser.compact {
-	max-height: 5em;
-	overflow: auto;
-}
-
-/* discover section cont. */
 #discover h3 {
 	margin-bottom: 10px;
 }
@@ -245,15 +217,21 @@ main > section:not(.tabbedContent) p:first-child {
 	font-size: 100%;
 	margin-top: 10px;
 }
+
+/* endpoint chooser */
+.endpointchooser {
+	width: 90%;
+	padding: 5px;
+	border: 1px solid #cecbc8;
+}
+.endpointchooser.compact {
+	max-height: 5em;
+	overflow: auto;
+}
+
 /* overriding CSS of external components */
 .process h4 code {  /* otherwise param names appear really small */
 	font-size: 125%;
-}
-.backend dd {
-	margin-bottom: 10px;
-}
-.backend dd > ul {
-	padding-left: 15px;
 }
 .process {
 	margin: 0;
@@ -270,10 +248,6 @@ main > section:not(.tabbedContent) p:first-child {
 .process + .process {
 	/* margin between neighbouring panels */
 	margin-top: 30px;
-}
-
-.billing p {
-	margin-top: 10px;
 }
 
 /* Exchange section */
@@ -312,17 +286,7 @@ main > section:not(.tabbedContent) p:first-child {
 	max-height: 120px;
 }
 
-/* Panels */
-.panelContainer > div > h2 { /* headings of the tabs */
-	position: sticky;
-	top: 0;
-	z-index: 2000; /* would lie under Leaflet map (500), attribution layer (800) or corner boxes (1000) if less */
-	background-color: white;
-	margin-top: 0;
-	padding-top: 10px;
-	padding-bottom: 10px;
-	border-bottom: 1px dotted #cecbc8;
-}
+/* Various */
 .collection,
 .process {
 	/* set `position` because... */

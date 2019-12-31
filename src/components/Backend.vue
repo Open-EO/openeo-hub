@@ -217,6 +217,13 @@ body.loading h3, body.loading h4 {
     max-height: 15em;
     overflow-y: auto;
 }
+
+dd {
+	margin-bottom: 10px;
+}
+dd > ul {
+	padding-left: 15px;
+}
 </style>
 
 <style>
