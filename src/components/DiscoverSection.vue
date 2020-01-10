@@ -2,7 +2,7 @@
     <section id="discover">
 		<section id="discover-list">
 			<p>This is a list of all available openEO backends:</p>
-			<ul>
+			<ul class="backendlist">
 				<li v-for="group in allBackendGroups" :key="group.name" v-show="checkFilters(group.backends)" >
 					<BackendGroup :groupName="group.name" :backends="group.backends"></BackendGroup>
 				</li>
@@ -264,4 +264,7 @@ export default {
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style scoped>
+ul.backendlist {
+	padding: 0;
+}
 </style>
