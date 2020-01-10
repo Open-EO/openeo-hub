@@ -89,7 +89,8 @@ main > section > section {
 	padding: 10px;
 }
 section#discover-filters {
-	display: block;
+	display: flex;
+	flex-direction: column;
 }
 main > section,
 main > section > section:first-of-type {
@@ -220,12 +221,12 @@ main > section p:first-child {
 
 /* endpoint chooser */
 .endpointchooser {
-	width: 90%;
 	padding: 5px;
 	border: 1px solid #cecbc8;
 }
 .endpointchooser.compact {
-	max-height: 5em;
+	flex-shrink: 1;
+	min-height: 3em;
 	overflow: auto;
 }
 

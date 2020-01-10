@@ -13,8 +13,10 @@
 			<h3>Filters</h3>
 
 			<h4>openEO API versions</h4>
-			<input type="checkbox" v-model="filters.apiVersions" value="0.3" id="zerodot3"><label for="zerodot3">0.3.x</label>
-			<input type="checkbox" v-model="filters.apiVersions" value="0.4" id="zerodot4"><label for="zerodot4">0.4.x</label>
+			<div>
+				<input type="checkbox" v-model="filters.apiVersions" value="0.3" id="zerodot3"><label for="zerodot3">0.3.x</label>
+				<input type="checkbox" v-model="filters.apiVersions" value="0.4" id="zerodot4"><label for="zerodot4">0.4.x</label>
+			</div>
 
 			<h4>Functionalities</h4>
 			<EndpointChooser class="compact" :categorizedEndpoints="allEndpointsCategorized" @input="filters.endpoints = $event"></EndpointChooser>
@@ -67,7 +69,9 @@
 			</Multiselect>
 		
 		    <h4>Billing</h4>
-			<input type="checkbox" v-model="filters.excludeIfNoFreePlan" id="excludeIfNoFreePlan"><label for="excludeIfNoFreePlan">Exclude backends without a free plan</label>
+			<div>
+				<input type="checkbox" v-model="filters.excludeIfNoFreePlan" id="excludeIfNoFreePlan"><label for="excludeIfNoFreePlan">Exclude backends without a free plan</label>
+			</div>
 		</section>
     </section>
 </template>
