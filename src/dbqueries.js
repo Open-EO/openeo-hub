@@ -9,7 +9,7 @@ module.exports = {
             backend: { $first: '$backend' },
             backendTitle: { $first: '$backendTitle' },
             group: { $first: '$group' },
-            retrieved: { $max: '$retrieved' },
+            retrieved: { $min: '$retrieved' },   // use `min` to get the earliest (-> "worst") of the timestamps
             unsuccessfulCrawls: { $first: '$unsuccessfulCrawls' },
             contents: { $push: '$content' },
             paths: {$push: '$path'}

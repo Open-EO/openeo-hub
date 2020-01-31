@@ -137,17 +137,17 @@ server.get('/api/backends/:backend', function(req, res, next) {
 
 // return collection details of a single backend
 server.get('/api/backends/:backend/collections', function(req, res, next) {
-    findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
+    find({backend: decodeURIComponent(req.params.backend)}, 'collections')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
         .then(prepare)
-        .then(data => { res.send(data.collections); next(); })
+        .then(data => { res.send(data); next(); })
         .catch(err => next(err));
 });
 
 // return process details of a single backend
 server.get('/api/backends/:backend/processes', function(req, res, next) {
-    findOne({backend: decodeURIComponent(req.params.backend)}, 'backends')  // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
+    find({backend: decodeURIComponent(req.params.backend)}, 'processes') // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)
         .then(prepare)
-        .then(data => { res.send(data.processes); next(); })
+        .then(data => { res.send(data); next(); })
         .catch(err => next(err));
 });
 
