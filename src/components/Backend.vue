@@ -8,14 +8,21 @@
         
         <h3 @click="collapsed.root = collapsible && !collapsed.root">
             <template v-if="collapsible">{{collapsed.root ? '▶' : '▼'}}</template>
-            <BackendName :data="backend" :showVersion="showVersion"></BackendName>
+            <div class="backendname" v-if="backend.backendTitle">
+                <em :title="backend.backendUrl">
+                    {{backend.backendTitle}}
+                </em>
+                <template v-if="showVersion">
+                    | v{{typeof backend.api_version === 'string' ? backend.api_version : backend.version}}
+                </template>
+            </div>
         </h3>
 
         <div v-if="!collapsed.root">
 
         <Description v-if="preparedBackend.description" :description="preparedBackend.description" :compact="true" class="scroll-if-too-long"></Description>
 
-        <small><code>{{backend.backendUrl}}</code></small>
+        <p><small>URL: <code>{{backend.backendUrl}}</code></small></p>
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
         <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
@@ -69,7 +76,6 @@
 </template>
 
 <script>
-import BackendName from './BackendName.vue';
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
 import { SupportedFeatures, SupportedFileFormats, SupportedServiceTypes, BillingPlans, Description } from '@openeo/vue-components';
@@ -81,7 +87,6 @@ export default {
 	name: 'Backend',
 	props: ['backendData', 'collapsible', 'initiallyCollapsed', 'isSearchResult', 'showVersion'],
 	components: {
-        BackendName,
         Description,
         SupportedFeatures,
         SupportedFileFormats,
