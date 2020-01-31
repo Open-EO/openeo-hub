@@ -7,7 +7,7 @@
 
         <div v-show="!collapsed">
             <Tabs :id="groupName" :pills="true">
-                <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="'v'+(backend.version || backend.api_version)" :selected="index == 0">
+                <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="tabTitle(backend)" :selected="index == 0">
                     <Backend :backendData="backend" :collapsible="false" :showVersion="false"></Backend>
                 </Tab>
             </Tabs>
@@ -18,6 +18,7 @@
 <script>
 import Backend from './Backend.vue';
 import { Tab, Tabs } from '@openeo/vue-components';
+import {default as config} from './../../config.json';
 
 export default {
     name: 'BackendGroup',
@@ -31,6 +32,23 @@ export default {
 		return {
             collapsed: true
 		};
+    },
+    methods: {
+        tabTitle(backend) {
+            return 'v'+this.version(backend) + (this.needsWarningSign(backend) ? ' ⚠':'');
+        },
+        version(backend) {
+            return typeof backend.api_version === 'string' ? backend.api_version : backend.version;
+        },
+        recentlyUnavailable(backend) {
+            return backend.unsuccessfulCrawls >= config.unsuccessfulCrawls.flagAfter;
+        },
+        oldData(backend) {
+            return (new Date() - new Date(backend.retrieved)) >= config.flagWhenOlderThanXHours * 60 * 60 * 1000;
+        },
+        needsWarningSign(backend) {
+            return this.recentlyUnavailable(backend) || this.oldData(backend);
+        }
     }
 }
 </script>

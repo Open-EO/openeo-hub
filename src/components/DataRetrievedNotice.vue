@@ -1,6 +1,6 @@
 <template>
     <div class="retrievedNotice" v-if="timestamp != undefined && needsNotice()">
-        This data was cached at <FormattedTimestamp :timestamp="timestamp"></FormattedTimestamp>.
+        ⚠ This data was cached at <FormattedTimestamp :timestamp="timestamp"></FormattedTimestamp>.
     </div>
 </template>
 

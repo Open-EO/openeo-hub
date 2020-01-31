@@ -41,6 +41,7 @@
 import { Collection } from '@openeo/vue-components';
 import { LMap, LTileLayer, LRectangle } from 'vue2-leaflet';
 import "leaflet/dist/leaflet.css";
+// The notices can still be of use in CollectionWrapper because `/collections/{id}` is a separate openEO API endpoint that has to be crawled separately (this is not the case for the ProcessWrapper)
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import FormattedTimestamp from './FormattedTimestamp.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
