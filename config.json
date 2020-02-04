@@ -14,8 +14,8 @@
         "Sentinel Hub": "https://openeo.sentinel-hub.com/production/.well-known/openeo"
     },
     "unsuccessfulCrawls": {
-        "flagAfter": 8,
-        "deleteAfter": 56
+        "flagAfter": 2,
+        "deleteAfter": 14
     },
     "flagWhenOlderThanXHours": 24
 }
