@@ -56,16 +56,16 @@ mongo.connect(async (error, client) => {
             individualBackends = url;
         } else if(url.substr(-19) == '/.well-known/openeo') {
             console.log('  - ' + name + ' (well-known document: ' + url + ')');
-            await axios(url)
-            .then(response => {
+            try {
+                var response = await axios(url);
                 response.data.versions.forEach(b => individualBackends[name + ' v' + b.api_version] = b.url.replace(/\/$/, ''));
-            })
-            .catch(error => {
+            }
+            catch(error) {
                 console.log('An error occurred while getting or reading ' + url + ' (' + error.name + ': ' + error.message + ')');
                 if(verbose) {
                     console.log(error);
                 }
-            });
+            }
         } else {
             console.log('  - ' + name + ' (single)');
             individualBackends[name] = url.replace(/\/$/, '');
@@ -114,38 +114,40 @@ mongo.connect(async (error, client) => {
                 if(path.indexOf('/collections/') == -1 || verbose) {
                     console.log('          - Downloading ' + backendUrl+path + ' ...');
                 }
-                await axios(backendUrl+path)
-                .then(response => {
+                try {
+                    var response = await axios(backendUrl+path);
                     // extract backend title (if applicable)
                     if(path == '/' && response.data.title) {
                         backendTitle = response.data.title;
                     }
                     // save to database
                     var data = response.data;
-                    await collection.findOneAndUpdate(
-                        { backend: backendUrl, path: path },
-                        { $set: {
-                            backendTitle: backendTitle,
-                            group: name,
-                            content: data,
-                            retrieved: new Date().toJSON(),
-                            unsuccessfulCrawls: 0
-                        }},
-                        { upsert: true }
-                    )
-                    .catch(error => {
+                    try {
+                        await collection.findOneAndUpdate(
+                            { backend: backendUrl, path: path },
+                            { $set: {
+                                backendTitle: backendTitle,
+                                group: name,
+                                content: data,
+                                retrieved: new Date().toJSON(),
+                                unsuccessfulCrawls: 0
+                            }},
+                            { upsert: true }
+                        )
+                    }
+                    catch(error) {
                         console.log('An error occurred while writing to the database (' + error.name + ': ' + error.message + ')');
                         if(verbose) {
                             console.log(error);
                         }
-                    });
-                })
-                .catch(error => {
+                    }
+                }
+                catch(error) {
                     console.log('An error occurred while downloading ' + backendUrl+path + ' (' + error.name + ': ' + error.message + ')');
                     if(verbose) {
                         console.log(error);
                     }
-                });
+                }
             };
 
             console.log('');
@@ -186,12 +188,6 @@ mongo.connect(async (error, client) => {
         
         console.log('Finished processing data.');
         console.log('');
-
-        console.log('Closing database connection...');
-        mongo.close();
-        console.log('Closed database connection.')
-        console.log('');
-        console.log('DONE!');
     }
     catch(error) {
         console.log('An error occurred while finalising the crawl process (' + error.name + ': ' + error.message + ')');
@@ -199,5 +195,12 @@ mongo.connect(async (error, client) => {
             console.log(error);
         }
         console.log('');
+    }
+    finally {
+        console.log('Closing database connection...');
+        await mongo.close();
+        console.log('Closed database connection.')
+        console.log('');
+        console.log('DONE!');
     }
 });
