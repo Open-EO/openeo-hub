@@ -13,14 +13,12 @@ const starttimestamp = new Date().toJSON();
 const verbose = process.argv[2] == '--verbose';
 
 console.log('Connecting to database server...');
-mongo.connect(async (err, client) => {
-    if(err != null) {
+mongo.connect(async (error, client) => {
+    if(error != null) {
         console.log();
-        console.log('An error occurred while connecting to the database server: ' + err.name);
-        console.log('Error message: ' + err.message);
+        console.log('An error occurred while connecting to the database server (' + error.name + ': ' + error.message + ')');
         if(verbose) {
-            console.log('Stack:');
-            console.log(err.stack);
+            console.log(error);
         }
         console.log();
         console.log('CRAWLING ABORTED!')
@@ -63,7 +61,7 @@ mongo.connect(async (err, client) => {
                 response.data.versions.forEach(b => individualBackends[name + ' v' + b.api_version] = b.url.replace(/\/$/, ''));
             })
             .catch(error => {
-                console.log('An error occurred while getting or reading ' + url);
+                console.log('An error occurred while getting or reading ' + url + ' (' + error.name + ': ' + error.message + ')');
                 if(verbose) {
                     console.log(error);
                 }
@@ -72,6 +70,7 @@ mongo.connect(async (err, client) => {
             console.log('  - ' + name + ' (single)');
             individualBackends[name] = url.replace(/\/$/, '');
         }
+        console.log('');
 
         for (var backendTitle in individualBackends) {
             let backendUrl = individualBackends[backendTitle];
@@ -97,14 +96,14 @@ mongo.connect(async (err, client) => {
                     }
                 }
                 catch(error) {
-                    console.log('An error occurred while gathering collection detail URLs for ' + backendUrl);
+                    console.log('An error occurred while gathering collection detail URLs for ' + backendUrl + ' (' + error.name + ': ' + error.message + ')');
                     if(verbose) {
                         console.log(error);
                     }
                 }
             }  
             catch(error) {
-                console.log('An error occurred while gathering endpoint URLs for ' + backendUrl);
+                console.log('An error occurred while gathering endpoint URLs for ' + backendUrl + ' (' + error.name + ': ' + error.message + ')');
                 if(verbose) {
                     console.log(error);
                 }
@@ -135,14 +134,14 @@ mongo.connect(async (err, client) => {
                         { upsert: true }
                     )
                     .catch(error => {
-                        console.log('An error occurred while writing to the database.');
+                        console.log('An error occurred while writing to the database (' + error.name + ': ' + error.message + ')');
                         if(verbose) {
                             console.log(error);
                         }
                     });
                 })
                 .catch(error => {
-                    console.log('An error occurred while downloading ' + backendUrl+path);
+                    console.log('An error occurred while downloading ' + backendUrl+path + ' (' + error.name + ': ' + error.message + ')');
                     if(verbose) {
                         console.log(error);
                     }
@@ -151,6 +150,7 @@ mongo.connect(async (err, client) => {
 
             console.log('');
         }
+        console.log('');
     }
 
     // once all requests have finished
@@ -194,9 +194,10 @@ mongo.connect(async (err, client) => {
         console.log('DONE!');
     }
     catch(error) {
-        console.log('An error occurred while finalising the crawl process.');
+        console.log('An error occurred while finalising the crawl process (' + error.name + ': ' + error.message + ')');
         if(verbose) {
             console.log(error);
         }
+        console.log('');
     }
 });
