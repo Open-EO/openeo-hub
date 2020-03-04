@@ -122,7 +122,7 @@ mongo.connect(async (error, client) => {
                     }
                     // save to database
                     var data = response.data;
-                    collection.findOneAndUpdate(
+                    await collection.findOneAndUpdate(
                         { backend: backendUrl, path: path },
                         { $set: {
                             backendTitle: backendTitle,
@@ -162,7 +162,7 @@ mongo.connect(async (error, client) => {
         console.log('Processing data...');
 
         // Increase `unsucessfulCrawls` counter of items that were not updated in this run
-        collection.updateMany({retrieved: {$lt: starttimestamp}}, {$inc: {unsuccessfulCrawls: 1}});
+        await collection.updateMany({retrieved: {$lt: starttimestamp}}, {$inc: {unsuccessfulCrawls: 1}});
         
         // Delete `/collection/{id}` documents that are no longer referenced from their main `/collections` document
         candidates = await collection.find({unsuccessfulCrawls: {$gte: 1}, path: {$regex: /^\/collections\/.+$/}}).toArray();  // `unsuccessfulCrawls` of legit candidates *should* always be ==1 (not ==0 because then they would still be in the main collection document, not >1 because then they would already have been removed during the previous crawl, but use >=1 anyway)
@@ -171,18 +171,18 @@ mongo.connect(async (error, client) => {
             whitelist.find(w => w.backend == c.backend)   // use the correct backend for the check
             .content.collections.some(c2 => (c2.name||c2.id) == (c.content.name||c.content.id)) == false  // keep candidate for deletion if it's not found in its backend's main `/collections` document
         );
-        collection.deleteMany({_id: {$in: todelete.map(e => e._id)}});   // actually delete remaining candidates
+        await collection.deleteMany({_id: {$in: todelete.map(e => e._id)}});   // actually delete remaining candidates
         // Similar (not identical!) query (relies solely on `unsuccessfulCrawls` and DOES NOT check the actual ground truth)
         // collection.deleteMany({unsuccessfulCrawls: {$gte: 1}, path: {$regex: /^\/collections\/.+$/}});
         
         // Delete documents that have reached the configured threshold of maximum unsuccessful crawls
-        collection.deleteMany({unsuccessfulCrawls: {$gte: config.unsuccessfulCrawls.deleteAfter}});
+        await collection.deleteMany({unsuccessfulCrawls: {$gte: config.unsuccessfulCrawls.deleteAfter}});
 
         // Get all collections as usual, but in the end remove `id` from result to avoid "duplicate key" errors and output.
         // Call `hasNext` because as long as there's no I/O request the Mongo Node driver doesn't actually execute the pipeline.
-        collection.aggregate(dbqueries.GET_ALL_BACKENDS_PIPELINE   .concat([{$project: {_id: 0}}, {$out: 'backends'}]))   .hasNext();
-        collection.aggregate(dbqueries.GET_ALL_COLLECTIONS_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'collections'}])).hasNext();
-        collection.aggregate(dbqueries.GET_ALL_PROCESSES_PIPELINE  .concat([{$project: {_id: 0}}, {$out: 'processes'}]))  .hasNext();
+        await collection.aggregate(dbqueries.GET_ALL_BACKENDS_PIPELINE   .concat([{$project: {_id: 0}}, {$out: 'backends'}]))   .hasNext();
+        await collection.aggregate(dbqueries.GET_ALL_COLLECTIONS_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'collections'}])).hasNext();
+        await collection.aggregate(dbqueries.GET_ALL_PROCESSES_PIPELINE  .concat([{$project: {_id: 0}}, {$out: 'processes'}]))  .hasNext();
         
         console.log('Finished processing data.');
         console.log('');
