@@ -31,11 +31,19 @@ mongo.connect(async (error, client) => {
     console.log('');
 
     console.log('Setting up database indexes...');
-    db.collection('raw').createIndex({backend: 1, path: 1}, { name: 'backend-path_unique', unique: true });
-    db.collection('backends').createIndex({backend: 1}, { name: 'backend_unique', unique: true });
-    db.collection('collections').createIndex({name: "text", title: "text", description: "text"}, { name: 'name-title-description_text' });
-    db.collection('processes').createIndex({name: "text", summary: "text", description: "text", "returns.description": "text", "parametersAsArray.k": "text", "parametersAsArray.v.description": "text"}, {name: 'name-summary-description-paramname-paramdescription_text'});
-    console.log('Set up database indexes.');
+    try {
+        await db.collection('raw').createIndex({backend: 1, path: 1}, { name: 'backend-path_unique', unique: true });
+        await db.collection('backends').createIndex({backend: 1}, { name: 'backend_unique', unique: true });
+        await db.collection('collections').createIndex({name: "text", title: "text", description: "text"}, { name: 'name-title-description_text' });
+        await db.collection('processes').createIndex({name: "text", summary: "text", description: "text", "returns.description": "text", "parametersAsArray.k": "text", "parametersAsArray.v.description": "text"}, {name: 'name-summary-description-paramname-paramdescription_text'});
+        console.log('Set up database indexes.');
+    }
+    catch(error) {
+        console.log('An error occurred while setting up database indexes (' + error.name + ': ' + error.message + ')');
+        if(verbose) {
+            console.log(error);
+        }
+    }
     console.log('');
 
     const endpoints = [
@@ -198,8 +206,16 @@ mongo.connect(async (error, client) => {
     }
     finally {
         console.log('Closing database connection...');
-        await mongo.close();
-        console.log('Closed database connection.')
+        try {
+            await mongo.close();
+            console.log('Closed database connection.')
+        }
+        catch(error) {
+            console.log('An error occurred while closing the database connection (' + error.name + ': ' + error.message + ')');
+            if(verbose) {
+                console.log(error);
+            }
+        }
         console.log('');
         console.log('DONE!');
     }
