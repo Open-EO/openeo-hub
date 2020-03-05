@@ -6,7 +6,19 @@ const dbqueries = require('./src/dbqueries.js');
 const mongodb = require('mongodb');
 const mongo = new mongodb.MongoClient(config.dbUrl, { useNewUrlParser: true } );
 var db;
-mongo.connect().then(client => db = client.db(config.dbName));
+console.log('Connecting to the database...');
+mongo.connect()
+.then(client => {
+    db = client.db(config.dbName);
+    console.log('Connected.');
+})
+.catch(error => {
+    console.error('An error occurred while connecting to the database server!');
+    console.error('Did you configure the dbUrl correctly in the config.json and is that server running and reachable?');
+    console.error('The error was: ' + error.name + ': ' + error.message + ')');
+    console.error('EXITING because a database connection is crucial for the Hub.');
+    process.exit(1);
+});
 
 var restify = require('restify');
 var server = restify.createServer();
