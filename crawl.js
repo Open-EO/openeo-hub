@@ -4,7 +4,7 @@ const MongoClient = require('mongodb').MongoClient;
 const axios = require('axios');
 axios.defaults.timeout = 10*1000;   // 10s = 10000 ms
 
-const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true } );
+const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } );
 
 const dbqueries = require('./src/dbqueries.js');
 

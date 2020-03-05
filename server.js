@@ -4,7 +4,7 @@ const config = require('./config.json');
 const dbqueries = require('./src/dbqueries.js');
 
 const mongodb = require('mongodb');
-const mongo = new mongodb.MongoClient(config.dbUrl, { useNewUrlParser: true } );
+const mongo = new mongodb.MongoClient(config.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } );
 var db;
 console.log('Connecting to the database...');
 mongo.connect()

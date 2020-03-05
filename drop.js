@@ -1,7 +1,7 @@
 const config = require('./config.json');
 const assert = require('assert');
 const MongoClient = require('mongodb').MongoClient;
-const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true } );
+const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } );
 console.log('Connecting to database server...');
 mongo.connect((error, client) => {
     if(error != null) {
