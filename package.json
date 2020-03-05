@@ -19,6 +19,9 @@
     "type": "git",
     "url": "https://github.com/Open-EO/openeo-hub.git"
   },
+  "engines": {
+    "node" : ">=10.0.0"
+  },
   "scripts": {
     "crawl": "node crawl.js",
     "crawl:verbose": "node crawl.js --verbose",

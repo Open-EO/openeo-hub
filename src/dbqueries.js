@@ -10,7 +10,7 @@ module.exports = {
             backendTitle: { $first: '$backendTitle' },
             group: { $first: '$group' },
             retrieved: { $min: '$retrieved' },   // use `min` to get the earliest (-> "worst") of the timestamps
-            unsuccessfulCrawls: { $first: '$unsuccessfulCrawls' },
+            unsuccessfulCrawls: { $max: '$unsuccessfulCrawls' },   // use `max` to get the largest (-> "worst") number
             contents: { $push: '$content' },
             paths: {$push: '$path'}
         } },
@@ -79,7 +79,7 @@ module.exports = {
         { $unwind: '$process' },
         { $replaceRoot: {newRoot: '$process'} },
         // convert `parameters` object to array because otherwise we can't search for parameter descriptions (MongoDB doesn't support wildcards for object keys)
-        { $addFields: { 'parametersAsArray' : { $objectToArray: '$parameters' } } }
+        { $addFields: { 'parametersAsArray' : { $cond: { if: {$eq: ["array", {$type: '$parameters'}]}, then: '$parameters', else: { $objectToArray: '$parameters' } } } } }
     ],
     GET_DISTINCT_COLLECTIONS_PIPELINE: [
         { $project: {id: {$ifNull: ["$id", "$name"]}, title: 1} },   // allow both id (v0.4) and name (v0.3)
