@@ -3,13 +3,9 @@
     "dbName": "openeohub",
     "backends": {
         "Google Earth Engine": "https://earthengine.openeo.org/.well-known/openeo",
-        "R Demo Server": "https://r-server.openeo.org",
         "EURAC WCPS": "https://openeo.eurac.edu/.well-known/openeo",
-        "VITO GeoPySpark": {
-            "current": "http://openeo.vgt.vito.be/openeo/0.4.0",
-            "legacy": "http://openeo.vgt.vito.be/openeo"
-        },
-        "EODC OpenShift": "https://openeo.eodc.eu",
+        "VITO GeoPySpark": "http://openeo.vgt.vito.be/.well-known/openeo",
+        "EODC OpenShift": "https://openeo.eodc.eu/.well-known/openeo",
         "mundialis GRASS GIS (Actinia)": "https://openeo.mundialis.de/.well-known/openeo",
         "Sentinel Hub": "https://openeo.sentinel-hub.com/production/.well-known/openeo"
     },
