@@ -56,27 +56,20 @@ mongo.connect(async (error, client) => {
     console.log('Crawling all backends...');
     for (var name in config.backends) {
         var url = config.backends[name];
+        url = url + (url.endsWith('/') ? '' : '/') + '.well-known/openeo';
 
         let individualBackends = {};
 
-        if(typeof url == 'object') {
-            console.log('  - ' + name + ' (group)');
-            individualBackends = url;
-        } else if(url.substr(-19) == '/.well-known/openeo') {
-            console.log('  - ' + name + ' (well-known document: ' + url + ')');
-            try {
-                var response = await axios(url);
-                response.data.versions.forEach(b => individualBackends[name + ' v' + b.api_version] = b.url.replace(/\/$/, ''));
+        console.log('  - ' + name + ' (well-known document: ' + url + ')');
+        try {
+            var response = await axios(url);
+            response.data.versions.forEach(b => individualBackends[name + ' v' + b.api_version] = b.url.replace(/\/$/, ''));
+        }
+        catch(error) {
+            console.log('An error occurred while getting or reading ' + url + ' (' + error.name + ': ' + error.message + ')');
+            if(verbose) {
+                console.log(error);
             }
-            catch(error) {
-                console.log('An error occurred while getting or reading ' + url + ' (' + error.name + ': ' + error.message + ')');
-                if(verbose) {
-                    console.log(error);
-                }
-            }
-        } else {
-            console.log('  - ' + name + ' (single)');
-            individualBackends[name] = url.replace(/\/$/, '');
         }
         console.log('');
 

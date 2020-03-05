@@ -2,12 +2,12 @@
     "dbUrl": "mongodb://localhost:27017",
     "dbName": "openeohub",
     "backends": {
-        "Google Earth Engine": "https://earthengine.openeo.org/.well-known/openeo",
-        "EURAC WCPS": "https://openeo.eurac.edu/.well-known/openeo",
-        "VITO GeoPySpark": "http://openeo.vgt.vito.be/.well-known/openeo",
-        "EODC OpenShift": "https://openeo.eodc.eu/.well-known/openeo",
-        "mundialis GRASS GIS (Actinia)": "https://openeo.mundialis.de/.well-known/openeo",
-        "Sentinel Hub": "https://openeo.sentinel-hub.com/production/.well-known/openeo"
+        "Google Earth Engine": "https://earthengine.openeo.org/",
+        "EURAC WCPS": "https://openeo.eurac.edu/",
+        "VITO GeoPySpark": "http://openeo.vgt.vito.be/",
+        "EODC OpenShift": "https://openeo.eodc.eu/",
+        "mundialis GRASS GIS (Actinia)": "https://openeo.mundialis.de/",
+        "Sentinel Hub": "https://openeo.sentinel-hub.com/production/"
     },
     "unsuccessfulCrawls": {
         "flagAfter": 2,
