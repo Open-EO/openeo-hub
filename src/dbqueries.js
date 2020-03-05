@@ -77,9 +77,7 @@ module.exports = {
         { $addFields: { 'content.processes.backend': '$backend', 'content.processes.backendTitle': '$backendTitle', 'content.processes.retrieved': '$retrieved', 'content.processes.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'process': '$content.processes' } },
         { $unwind: '$process' },
-        { $replaceRoot: {newRoot: '$process'} },
-        // convert `parameters` object to array because otherwise we can't search for parameter descriptions (MongoDB doesn't support wildcards for object keys)
-        { $addFields: { 'parametersAsArray' : { $cond: { if: {$eq: ["array", {$type: '$parameters'}]}, then: '$parameters', else: { $objectToArray: '$parameters' } } } } }
+        { $replaceRoot: {newRoot: '$process'} }
     ],
     GET_DISTINCT_COLLECTIONS_PIPELINE: [
         { $project: {id: {$ifNull: ["$id", "$name"]}, title: 1} },   // allow both id (v0.4) and name (v0.3)

@@ -35,7 +35,7 @@ mongo.connect(async (error, client) => {
         await db.collection('raw').createIndex({backend: 1, path: 1}, { name: 'backend-path_unique', unique: true });
         await db.collection('backends').createIndex({backend: 1}, { name: 'backend_unique', unique: true });
         await db.collection('collections').createIndex({name: "text", title: "text", description: "text"}, { name: 'name-title-description_text' });
-        await db.collection('processes').createIndex({name: "text", summary: "text", description: "text", "returns.description": "text", "parametersAsArray.k": "text", "parametersAsArray.v.description": "text"}, {name: 'name-summary-description-paramname-paramdescription_text'});
+        await db.collection('processes').createIndex({name: "text", summary: "text", description: "text", "returns.description": "text"}, {name: 'name-summary-description_text'});
         console.log('Set up database indexes.');
     }
     catch(error) {
