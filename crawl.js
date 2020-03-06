@@ -63,7 +63,9 @@ mongo.connect(async (error, client) => {
         console.log('  - ' + name + ' (well-known document: ' + url + ')');
         try {
             var response = await axios(url);
-            response.data.versions.forEach(b => individualBackends[name + ' v' + b.api_version] = b.url.replace(/\/$/, ''));
+            response.data.versions
+            .filter(b => ! b.api_version.startsWith('0.3.'))   // the Hub doesn't support openEO API v0.3.x anymore
+            .forEach(b => individualBackends[b.api_version] = b.url.replace(/\/$/, ''));   // URL always without trailing slash
         }
         catch(error) {
             console.log('An error occurred while getting or reading ' + url + ' (' + error.name + ': ' + error.message + ')');
