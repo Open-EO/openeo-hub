@@ -6,6 +6,8 @@ module.exports = {
         { $sort: { backend: 1, path: 1 } },
         { $group: {
             _id: '$backend',
+            service: { $first: '$service' },
+            api_version: { $first: '$api_version' },
             backend: { $first: '$backend' },
             backendTitle: { $first: '$backendTitle' },
             group: { $first: '$group' },
@@ -34,6 +36,8 @@ module.exports = {
             } }
         } },
         { $project: {
+            service: 1,
+            api_version: 1,
             backend: 1,
             backendTitle: 1,
             group: 1,
@@ -66,7 +70,13 @@ module.exports = {
     ],
     GET_ALL_COLLECTIONS_PIPELINE: [
         { $match: { path: '/collections', 'content.collections': {$exists: true} } },
-        { $addFields: { 'content.collections.backend': '$backend', 'content.collections.backendTitle': '$backendTitle', 'content.collections.retrieved': '$retrieved', 'content.collections.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
+        { $addFields: {
+            'content.collections.service': '$service',
+            'content.collections.api_version': '$api_version',
+            'content.collections.backend': '$backend',
+            'content.collections.backendTitle': '$backendTitle',
+            'content.collections.retrieved': '$retrieved',
+            'content.collections.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'collection': '$content.collections' } },
         { $unwind: '$collection' },
         { $replaceRoot: { newRoot: '$collection' } }
@@ -74,7 +84,13 @@ module.exports = {
     GET_ALL_PROCESSES_PIPELINE: [
         // basically like for collections
         { $match: { path: '/processes', 'content.processes': {$exists: true} } },
-        { $addFields: { 'content.processes.backend': '$backend', 'content.processes.backendTitle': '$backendTitle', 'content.processes.retrieved': '$retrieved', 'content.processes.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
+        { $addFields: {
+            'content.processes.service': '$service',
+            'content.processes.api_version': '$api_version',
+            'content.processes.backend': '$backend',
+            'content.processes.backendTitle': '$backendTitle',
+            'content.processes.retrieved': '$retrieved',
+            'content.processes.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'process': '$content.processes' } },
         { $unwind: '$process' },
         { $replaceRoot: {newRoot: '$process'} }

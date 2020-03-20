@@ -32,9 +32,12 @@ mongo.connect(async (error, client) => {
 
     console.log('Setting up database indexes...');
     try {
-        await db.collection('raw').createIndex({backend: 1, path: 1}, { name: 'backend-path_unique', unique: true });
+        await db.collection('raw').createIndex({service: 1, api_version: 1, path: 1}, { name: 'service-apiversion-path_unique', unique: true });
         await db.collection('backends').createIndex({backend: 1}, { name: 'backend_unique', unique: true });
+        await db.collection('backends').createIndex({service: 1, api_version: 1}, { name: 'service-apiversion_unique', unique: true });
+        await db.collection('collections').createIndex({service: 1, api_version: 1, id: 1}, { name: 'service-apiversion-id_unique', unique: true });
         await db.collection('collections').createIndex({name: "text", title: "text", description: "text"}, { name: 'name-title-description_text' });
+        await db.collection('processes').createIndex({service: 1, api_version: 1, id: 1}, { name: 'service-apiversion-id_unique', unique: true });
         await db.collection('processes').createIndex({name: "text", summary: "text", description: "text", "returns.description": "text"}, {name: 'name-summary-description_text'});
         console.log('Set up database indexes.');
     }
@@ -55,8 +58,8 @@ mongo.connect(async (error, client) => {
 
     console.log('Crawling all backends...');
     for (var name in config.backends) {
-        var url = config.backends[name];
-        url = url + (url.endsWith('/') ? '' : '/') + '.well-known/openeo';
+        var serviceUrl = config.backends[name].replace(/\/$/, '');   // always without trailing slash
+        var url = serviceUrl + '/.well-known/openeo';
 
         let individualBackends = {};
 
@@ -75,8 +78,8 @@ mongo.connect(async (error, client) => {
         }
         console.log('');
 
-        for (var backendTitle in individualBackends) {
-            let backendUrl = individualBackends[backendTitle];
+        for (var api_version in individualBackends) {
+            let backendUrl = individualBackends[api_version];
             try {
                 console.log('      - ' + backendUrl + ' ...');
                 var paths = [];
@@ -127,8 +130,9 @@ mongo.connect(async (error, client) => {
                     var data = response.data;
                     try {
                         await collection.findOneAndUpdate(
-                            { backend: backendUrl, path: path },
+                            { service: serviceUrl, api_version: api_version, path: path },
                             { $set: {
+                                backend: backendUrl,
                                 backendTitle: backendTitle,
                                 group: name,
                                 content: data,
