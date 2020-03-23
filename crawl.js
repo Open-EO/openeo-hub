@@ -56,6 +56,9 @@ mongo.connect(async (error, client) => {
         '/service_types'
     ];
 
+    let allIndividualBackends = [];
+    let allFailedServices = [];
+
     console.log('Crawling all backends...');
     for (var name in config.backends) {
         var serviceUrl = config.backends[name].replace(/\/$/, '');   // always without trailing slash
@@ -69,12 +72,14 @@ mongo.connect(async (error, client) => {
             response.data.versions
             .filter(b => ! b.api_version.startsWith('0.3.'))   // the Hub doesn't support openEO API v0.3.x anymore
             .forEach(b => individualBackends[b.api_version] = b.url.replace(/\/$/, ''));   // URL always without trailing slash
+            allIndividualBackends = allIndividualBackends.concat(Object.values(individualBackends));
         }
         catch(error) {
             console.log('An error occurred while getting or reading ' + url + ' (' + error.name + ': ' + error.message + ')');
             if(verbose) {
                 console.log(error);
             }
+            allFailedServices.push(serviceUrl);
         }
         console.log('');
 
@@ -169,6 +174,10 @@ mongo.connect(async (error, client) => {
         console.log('');
 
         console.log('Processing data...');
+
+        // Delete all entries that don't belong to one of the backends that are listed in the currently configured services's well-known documents
+        // But exempt those that failed to download. The two conditions are implicitly connected with AND.
+        await collection.deleteMany({ backend: { $not: { $in: allIndividualBackends }}, service: { $not: { $in: allFailedServices }} });
 
         // Increase `unsucessfulCrawls` counter of items that were not updated in this run
         await collection.updateMany({retrieved: {$lt: starttimestamp}}, {$inc: {unsuccessfulCrawls: 1}});
