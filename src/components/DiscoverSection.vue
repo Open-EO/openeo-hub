@@ -80,7 +80,7 @@
 import axios from 'axios';
 import BackendGroup from './BackendGroup.vue';
 import Multiselect from 'vue-multiselect';
-import { FeatureList } from '@openeo/js-commons';
+import { FeatureList } from '@openeo/vue-components';
 import EndpointChooser from './EndpointChooser.vue';
 
 export default {
