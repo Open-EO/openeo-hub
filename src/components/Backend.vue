@@ -57,10 +57,10 @@
             </dd>
 
             <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
-                <h4>{{collapsed.serviceTypes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} service types ({{Object.keys(backend.serviceTypes).length}})</h4>
+                <h4>{{collapsed.serviceTypes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} service types ({{supportedServiceTypesCount}})</h4>
             </dt>
-            <dd v-if="backend.serviceTypes && !collapsed.serviceTypes">
-                <SupportedServiceTypes :services="preparedBackend.serviceTypes" :version="preparedBackend.api_version"></SupportedServiceTypes>
+            <dd v-if="backend.serviceTypes" v-show="!collapsed.serviceTypes">
+                <SupportedServiceTypes :services="preparedBackend.serviceTypes" :version="preparedBackend.api_version" ref="supportedServiceTypesComponent"></SupportedServiceTypes>
             </dd>
 
             <dt v-if="backend.billing" @click="collapsed.billing = !collapsed.billing">
@@ -152,11 +152,12 @@ export default {
             const total = this.$refs.supportedFeaturesComponent.getFeatureCount();
             this.supportedFunctionalitiesCount = '(' + supported + '/' + total + ')';
         }
-        this.$nextTick(() => {  // wrap in next tick because it accesses a computed property
-            if(this.$refs.supportedFileFormatsComponent != undefined) {
-                this.supportedOutputFormatsCount = Object.keys(this.$refs.supportedFileFormatsComponent.outputFormats).length;
-            }
-        });
+        if(this.$refs.supportedFileFormatsComponent != undefined) {
+            this.supportedOutputFormatsCount = this.$refs.supportedFileFormatsComponent.getCount();
+        }
+        if(this.$refs.supportedServiceTypesComponent != undefined) {
+            this.supportedServiceTypesCount = this.$refs.supportedServiceTypesComponent.getCount();
+        }
     },
 
 	data() {
@@ -173,7 +174,8 @@ export default {
                 billing: true
             },
             supportedFunctionalitiesCount: '',
-            supportedOutputFormatsCount: undefined
+            supportedOutputFormatsCount: undefined,
+            supportedServiceTypesCount: undefined
 		};
     },
 
