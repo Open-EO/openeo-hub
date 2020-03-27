@@ -120,8 +120,8 @@ server.get('/api/backends', function(req, res, next) {
         next();
     } else {
         const clip = b => {
-            if(b.collections) { b.collections = b.collections.map(e => ({id: e.name || e.id})); }
-            if(b.processes) { b.processes = b.processes.map(e => ({id: e.name || e.id})); }
+            if(b.collections) { b.collections = b.collections.map(e => ({id: e.id})); }
+            if(b.processes) { b.processes = b.processes.map(e => ({id: e.id})); }
             return b;
         };
 

@@ -48,7 +48,6 @@ module.exports = {
             group: 1,
             retrieved: 1,
             unsuccessfulCrawls: 1,
-            version: '$root.version',
             api_version: '$root.api_version',
             description: '$root.description',
             endpoints: {
@@ -101,7 +100,7 @@ module.exports = {
         { $replaceRoot: {newRoot: '$process'} }
     ],
     GET_DISTINCT_COLLECTIONS_PIPELINE: [
-        { $project: {id: {$ifNull: ["$id", "$name"]}, title: 1} },   // allow both id (v0.4) and name (v0.3)
+        { $project: {id: 1, title: 1} },
         { $group: {     // group by collection id, at the same time calculate the sum, and maintain title
             _id: {$toLower: "$id"},
             id: {$first: "$id"},
@@ -110,7 +109,7 @@ module.exports = {
         { $sort: {id: 1} }  // sort by id ASC
     ],
     GET_DISTINCT_PROCESSES_WITH_COUNT_PIPELINE: [
-        { $project: {id: {$ifNull: ["$id", "$name"]}, summary: 1} },   // allow both id (v0.4) and name (v0.3)
+        { $project: {id: 1, summary: 1} },
         { $group: {     // group by process id, at the same time calculate the sum, and maintain summary/allSummaries
             _id: {$toLower: "$id"},
             id: {$first: "$id"},
@@ -122,7 +121,6 @@ module.exports = {
     ],
     GET_ALL_OUTPUT_FORMATS_WITH_COUNT_PIPELINE: [
         { $match: { outputFormats: {$exists: true} } },  // only consider backends that have output formats
-        { $addFields: { 'outputFormats': { $ifNull: ['$outputFormats.formats', '$outputFormats'] } } },
         { $addFields: { 'outputFormatsNew': { $mergeObjects: ['$outputFormats.input', '$outputFormats.output'] } } },
         { $addFields: { 'outputFormats': { $cond: { if: { $eq: ['$outputFormatsNew', {}] }, then: '$outputFormats', else: '$outputFormatsNew' }} } },
         { $addFields: { 'outputFormatsAsArray' : {$objectToArray: '$outputFormats' } } },  // output formats are saved as object keys -> convert to array

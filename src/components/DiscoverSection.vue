@@ -128,8 +128,8 @@ export default {
 				result.sort((a, b) => {
 					return a.name.toLowerCase().localeCompare(b.name.toLowerCase());  // ascending by name
 				}).map(e => e.backends.sort((a, b) => {
-					var aVersion = (a.api_version || a.version || "0.0.0").split('.');
-					var bVersion = (b.api_version || b.version || "0.0.0").split('.');
+					var aVersion = (a.api_version || "0.0.0").split('.');
+					var bVersion = (b.api_version || "0.0.0").split('.');
 					if (aVersion[0] > bVersion[0]) {  // descending by version, first look at major part
 						return -1;
 					}
@@ -242,16 +242,16 @@ export default {
 
 				// COLLECTIONS (OR)
 				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.some(c1 => b.collections.some(c2 => 
-					c1.isSearchterm ? c1.matches.indexOf(c2.id || c2.name) != -1 : (c1.id || c1.name) == (c2.id || c2.name)
+					c1.isSearchterm ? c1.matches.indexOf(c2.id) != -1 : c1.id == c2.id
 				))),
 				
 				// PROCESSES (AND)
 				this.filters.processes.length == 0 || backends.some(b => b.processes && this.filters.processes.every(p1 => b.processes.some(p2 => 
-					p1.isSearchterm ? p1.matches.indexOf(p2.id || p2.name) != -1 : (p1.id || p1.name) == (p2.id || p2.name)
+					p1.isSearchterm ? p1.matches.indexOf(p2.id) != -1 : p1.id == p2.id
 				))),
 				
 				// OUTPUTFORMATS (OR)
-				this.filters.outputFormats.length == 0 || backends.some(b => b.outputFormats && this.filters.outputFormats.some(of => Object.keys(b.outputFormats.formats || b.outputFormats).indexOf(of.format) != -1)),
+				this.filters.outputFormats.length == 0 || backends.some(b => b.outputFormats && this.filters.outputFormats.some(of => Object.keys(b.outputFormats).indexOf(of.format) != -1)),
 				
 				// SERVICETYPES (OR)
 				this.filters.serviceTypes.length == 0 || backends.some(b => b.serviceTypes && this.filters.serviceTypes.some(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1))

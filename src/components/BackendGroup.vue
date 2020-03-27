@@ -35,10 +35,7 @@ export default {
     },
     methods: {
         tabTitle(backend) {
-            return 'v'+this.version(backend) + (this.needsWarningSign(backend) ? ' ⚠':'');
-        },
-        version(backend) {
-            return typeof backend.api_version === 'string' ? backend.api_version : backend.version;
+            return 'v'+backend.api_version + (this.needsWarningSign(backend) ? ' ⚠':'');
         },
         recentlyUnavailable(backend) {
             return backend.unsuccessfulCrawls >= config.unsuccessfulCrawls.flagAfter;

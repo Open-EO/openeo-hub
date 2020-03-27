@@ -36,9 +36,9 @@ mongo.connect(async (error, client) => {
         await db.collection('backends').createIndex({backend: 1}, { name: 'backend_unique', unique: true });
         await db.collection('backends').createIndex({service: 1, api_version: 1}, { name: 'service-apiversion_unique', unique: true });
         await db.collection('collections').createIndex({service: 1, api_version: 1, id: 1}, { name: 'service-apiversion-id_unique', unique: true });
-        await db.collection('collections').createIndex({name: "text", title: "text", description: "text"}, { name: 'name-title-description_text' });
+        await db.collection('collections').createIndex({id: "text", title: "text", description: "text"}, { name: 'id-title-description_text' });
         await db.collection('processes').createIndex({service: 1, api_version: 1, id: 1}, { name: 'service-apiversion-id_unique', unique: true });
-        await db.collection('processes').createIndex({name: "text", summary: "text", description: "text", "returns.description": "text"}, {name: 'name-summary-description_text'});
+        await db.collection('processes').createIndex({id: "text", summary: "text", description: "text", "returns.description": "text"}, {name: 'id-summary-description_text'});
         console.log('Set up database indexes.');
     }
     catch(error) {
@@ -100,11 +100,11 @@ mongo.connect(async (error, client) => {
                 paths.push('/');
                 paths = paths.concat(endpoints.filter(hasEndpoint));
 
-                // if `/collections/{name}` is supported: add the individual collections too
+                // if `/collections/{id}` is supported: add the individual collections too
                 try {
                     if(hasEndpoint('/collections') && hasEndpoint('/collections/{}')) {
                         const collections = (await axios(backendUrl+'/collections')).data.collections;
-                        paths = paths.concat(collections.map(c => '/collections/' + (c.name || c.id)));
+                        paths = paths.concat(collections.map(c => '/collections/' + c.id));
                     }
                 }
                 catch(error) {
@@ -188,7 +188,7 @@ mongo.connect(async (error, client) => {
         whitelist = await collection.find({path: "/collections"}).toArray();   // get "ground truth" for *all* backends
         todelete = candidates.filter(c =>
             whitelist.find(w => w.backend == c.backend)   // use the correct backend for the check
-            .content.collections.some(c2 => (c2.name||c2.id) == (c.content.name||c.content.id)) == false  // keep candidate for deletion if it's not found in its backend's main `/collections` document
+            .content.collections.some(c2 => c2.id == c.content.id) == false  // keep candidate for deletion if it's not found in its backend's main `/collections` document
         );
         await collection.deleteMany({_id: {$in: todelete.map(e => e._id)}});   // actually delete remaining candidates
         // Similar (not identical!) query (relies solely on `unsuccessfulCrawls` and DOES NOT check the actual ground truth)

@@ -13,7 +13,7 @@
                     {{backend.backendTitle}}
                 </em>
                 <template v-if="showVersion">
-                    | v{{typeof backend.api_version === 'string' ? backend.api_version : backend.version}}
+                    | v{{backend.api_version}}
                 </template>
             </div>
         </h3>
@@ -107,7 +107,7 @@ export default {
         // but when we get a long list for the discovery section having it sorted alphabetically is very handy
         if(!this.isSearchResult) {
             const sortCallback = (e1, e2) => e1.toLowerCase() > e2.toLowerCase();
-            const sortCallbackName = (e1, e2) => (e1.id || e1.name).toLowerCase() > (e2.id || e2.name).toLowerCase();
+            const sortCallbackName = (e1, e2) => e1.id.toLowerCase() > e2.id.toLowerCase();
             // ternary operator check in case the property is `null`
             original.collections = original.collections ? original.collections.sort(sortCallbackName) : null;
             original.processes = original.processes ? original.processes.sort(sortCallbackName) : null;
@@ -129,7 +129,6 @@ export default {
         }
 
         this.preparedBackend = original;
-        this.preparedBackend.api_version = this.preparedBackend.api_version || this.preparedBackend.version;
     },
 
     computed: {
