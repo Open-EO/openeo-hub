@@ -1,6 +1,6 @@
 module.exports = {
     GET_ALL_BACKENDS_PIPELINE: [
-        { $match: { path: { $in: ['/', '/collections', '/processes', '/service_types', '/output_formats'] } } },
+        { $match: { path: { $in: ['/', '/collections', '/processes', '/service_types', '/output_formats', '/file_formats'] } } },
         // This would be more dynamic and is effectively the same: { $match: { path: { $regex: "^\/[a-z_]*$" } } }
         // But since the endpoints are hardcoded anyway there's no benefit, especially not when considering regex slowness.
         { $sort: { backend: 1, path: 1 } },
@@ -27,9 +27,14 @@ module.exports = {
                 in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
             } },
             outputFormats: { $let: {
-                vars: { index: {$indexOfArray: ['$paths', '/output_formats']}},
-                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
-            } },
+                vars: {
+                    index1: {$indexOfArray: ['$paths', '/output_formats']},
+                    index2: {$indexOfArray: ['$paths', '/file_formats']}
+                },
+                in: { $let: {
+                    vars: { index: { $cond: { if: { $eq: ['$$index1', -1] }, then: "$$index2", else: "$$index1" } } },
+                    in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
+            } } } },
             serviceTypes: { $let: {
                 vars: { index: {$indexOfArray: ['$paths', '/service_types']}},
                 in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
@@ -117,7 +122,10 @@ module.exports = {
     ],
     GET_ALL_OUTPUT_FORMATS_WITH_COUNT_PIPELINE: [
         { $match: { outputFormats: {$exists: true} } },  // only consider backends that have output formats
-        { $addFields: { 'outputFormatsAsArray' : {$objectToArray: {$ifNull: ['$outputFormats.formats', '$outputFormats']} } } },  // output formats are saved as object keys -> convert to array
+        { $addFields: { 'outputFormats': { $ifNull: ['$outputFormats.formats', '$outputFormats'] } } },
+        { $addFields: { 'outputFormatsNew': { $mergeObjects: ['$outputFormats.input', '$outputFormats.output'] } } },
+        { $addFields: { 'outputFormats': { $cond: { if: { $eq: ['$outputFormatsNew', {}] }, then: '$outputFormats', else: '$outputFormatsNew' }} } },
+        { $addFields: { 'outputFormatsAsArray' : {$objectToArray: '$outputFormats' } } },  // output formats are saved as object keys -> convert to array
         { $project: {outputFormats: { $map: {input: '$outputFormatsAsArray', as: 'of', in: "$$of.k"} } } },  // map values into top level of object (didn't work without this for some reason)
         { $unwind: "$outputFormats" },  // get one entry for each output format
         { $group: { _id: {$toLower: "$outputFormats"}, format: {$first: "$outputFormats"}, count: {$sum: 1} } },  // group by format name, at the same time calculate the sum

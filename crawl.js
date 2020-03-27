@@ -53,6 +53,7 @@ mongo.connect(async (error, client) => {
         '/collections',
         '/processes',
         '/output_formats',
+        '/file_formats',
         '/service_types'
     ];
 

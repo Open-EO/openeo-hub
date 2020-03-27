@@ -50,10 +50,10 @@
             </dd>
 
             <dt v-if="backend.outputFormats" @click="collapsed.outputFormats = !collapsed.outputFormats">
-                <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{supportedOutputFormatsCount}})</h4>
+                <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} file formats ({{supportedOutputFormatsCount}})</h4>
             </dt>
             <dd v-if="backend.outputFormats" v-show="!collapsed.outputFormats"> <!-- v-if to prevent errors when outputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
-                <SupportedFileFormats :formats="preparedBackend.outputFormats" :version="preparedBackend.api_version" ref="supportedFileFormatsComponent"></SupportedFileFormats>
+                <SupportedFileFormats :formats="preparedBackend.outputFormats" :version="preparedBackend.api_version" :showInput="true" :showOutput="true" ref="supportedFileFormatsComponent"></SupportedFileFormats>
             </dd>
 
             <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
