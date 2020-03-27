@@ -1,20 +1,8 @@
 <template>
-	<Collection :collectionData="collectionData" :version="version" :initiallyCollapsed="initiallyCollapsed">
+	<Collection :collectionData="collectionData" :version="version" :initiallyCollapsed="initiallyCollapsed" :mapOptions="{scrollWheelZoom: false, wrapAroundAntimeridian: false}">
 		<template slot="collection-before-details">
 			<UnsuccessfulCrawlNotice :unsuccessfulCrawls="collectionData.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
 			<DataRetrievedNotice :timestamp="collectionData.retrieved"></DataRetrievedNotice>
-		</template>
-
-		<template slot="collection-spatial-extent" slot-scope="props">
-			Bounding Box: North: {{props.extent[3]}}, South: {{props.extent[1]}}, East: {{props.extent[2]}}, West: {{props.extent[0]}}
-			<l-map style="height:400px" :zoom="1" :options="{scrollWheelZoom:false}">
-				<l-tile-layer
-					url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
-					attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-					:options="{noWrap:true}">
-				</l-tile-layer>
-				<l-rectangle :bounds="[[props.extent[3], props.extent[0]], [props.extent[1], props.extent[2]]]"></l-rectangle>
-			</l-map>
 		</template>
 
 		<template slot="collection-temporal-extent" slot-scope="props">
@@ -39,7 +27,6 @@
 
 <script>
 import { Collection } from '@openeo/vue-components';
-import { LMap, LTileLayer, LRectangle } from 'vue2-leaflet';
 import "leaflet/dist/leaflet.css";
 // The notices can still be of use in CollectionWrapper because `/collections/{id}` is a separate openEO API endpoint that has to be crawled separately (this is not the case for the ProcessWrapper)
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
@@ -52,9 +39,6 @@ export default {
 	components: {
 		Collection,
 		UnsuccessfulCrawlNotice,
-		LMap,
-		LTileLayer,
-		LRectangle,
 		DataRetrievedNotice,
 		FormattedTimestamp
     }
