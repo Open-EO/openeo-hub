@@ -14,8 +14,8 @@
 
 			<h4>openEO API versions</h4>
 			<div>
-				<input type="checkbox" v-model="filters.apiVersions" value="0.3" id="zerodot3"><label for="zerodot3">0.3.x</label>
-				<input type="checkbox" v-model="filters.apiVersions" value="0.4" id="zerodot4"><label for="zerodot4">0.4.x</label>
+				<input type="checkbox" v-model="filters.apiVersions" value="0.4" id="v0dot4"><label for="v0dot4">0.4.x</label>
+				<input type="checkbox" v-model="filters.apiVersions" value="1.0" id="v1dot0"><label for="v1dot0">1.0.x</label>
 			</div>
 
 			<h4>Functionalities</h4>
@@ -227,7 +227,7 @@ export default {
 		checkFilters(backends) {
 			return [
 				// APIVERSIONS (OR)
-				this.filters.apiVersions.length == 0 || backends.some(b => b.api_version && this.filters.apiVersions.some(v => (b.api_version).substr(0,3) == v)),
+				this.filters.apiVersions.length == 0 || backends.some(b => b.api_version && this.filters.apiVersions.some(v => b.api_version.substr(0,3) == v)),
 				
 				// EXCLUDEIFNOFREEPLAN
 				// exclude if *every* plan of *every* backend of the group is set to "paid=true" (more appropriate IMO)
