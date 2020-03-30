@@ -6,11 +6,27 @@ const dbqueries = require('./src/dbqueries.js');
 const mongodb = require('mongodb');
 const mongo = new mongodb.MongoClient(config.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } );
 var db;
+
+var restify = require('restify');
+var server = restify.createServer();
+server.use(restify.plugins.queryParser({ mapParams: false }));
+server.use(restify.plugins.bodyParser({ mapParams: false }));
+
+
+// -------------------------------------------------------------------------------------
+// Start server
+// -------------------------------------------------------------------------------------
+
 console.log('Connecting to the database...');
 mongo.connect()
 .then(client => {
     db = client.db(config.dbName);
     console.log('Connected.');
+    
+    console.log('Starting the server...')
+    server.listen(9000, function() {
+        console.log('Server started at %s.', server.url);
+    });
 })
 .catch(error => {
     console.error('An error occurred while connecting to the database server!');
@@ -19,11 +35,6 @@ mongo.connect()
     console.error('EXITING because a database connection is crucial for the Hub.');
     process.exit(1);
 });
-
-var restify = require('restify');
-var server = restify.createServer();
-server.use(restify.plugins.queryParser({ mapParams: false }));
-server.use(restify.plugins.bodyParser({ mapParams: false }));
 
 
 // -------------------------------------------------------------------------------------
@@ -288,12 +299,3 @@ server.get('/*', restify.plugins.serveStatic({
     directory: './dist',
     default: 'index.html'
 }));
-
-
-// -------------------------------------------------------------------------------------
-// Start server
-// -------------------------------------------------------------------------------------
-
-server.listen(9000, function() {
-    console.log('%s listening at %s', server.name, server.url);
-});
