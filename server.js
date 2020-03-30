@@ -4,26 +4,25 @@ const config = require('./config.json');
 const dbqueries = require('./src/dbqueries.js');
 
 const mongodb = require('mongodb');
-const mongo = new mongodb.MongoClient(config.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } );
 var db;
 
-var restify = require('restify');
-var server = restify.createServer();
-server.use(restify.plugins.queryParser({ mapParams: false }));
-server.use(restify.plugins.bodyParser({ mapParams: false }));
+const restify = require('restify');
+var server;
 
 
 // -------------------------------------------------------------------------------------
 // Start server
 // -------------------------------------------------------------------------------------
 
+console.log('Starting the server...');
+server = restify.createServer();   // This must be in the root scope (not in the `mongo.connect()`'s `then` handler function) so that calls to `server` further down in the script work no matter whether the database is already there or not.
 console.log('Connecting to the database...');
+const mongo = new mongodb.MongoClient(config.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } );
 mongo.connect()
 .then(client => {
     db = client.db(config.dbName);
     console.log('Connected.');
     
-    console.log('Starting the server...')
     server.listen(9000, function() {
         console.log('Server started at %s.', server.url);
     });
@@ -112,6 +111,11 @@ function prepare(data, additionalCallbacks = []) {
     }
 }
 
+
+// -------------------------------------------------------------------------------------
+// Helper function for dealing with CORS preflight stuff
+// -------------------------------------------------------------------------------------
+
 function enableCORS(req, res) {
     res.header('Vary', 'Origin');
     if(req.headers.origin) {
@@ -119,8 +123,17 @@ function enableCORS(req, res) {
     }
 }
 
+
 // -------------------------------------------------------------------------------------
-// Actual handlers for the endpoints
+// Handlers for all endpoints
+// -------------------------------------------------------------------------------------
+
+server.use(restify.plugins.queryParser({ mapParams: false }));
+server.use(restify.plugins.bodyParser({ mapParams: false }));
+
+
+// -------------------------------------------------------------------------------------
+// Actual handlers for the individual endpoints
 // -------------------------------------------------------------------------------------
 
 // list backends
