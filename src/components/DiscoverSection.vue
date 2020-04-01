@@ -48,6 +48,16 @@
 				</template>	
 			</Multiselect>
 
+			<h4>Input formats</h4>
+			<Multiselect
+			    v-model="filters.inputFormats" :options="allInputFormats" trackBy="format" label="format"
+				placeholder="Select from list, or type to search"
+				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
+				<template slot="option" slot-scope="props">
+					{{props.option.format}} <span v-if="props.option.count">({{props.option.count}})</span>
+				</template>
+			</Multiselect>
+			
 			<h4>Output formats</h4>
 			<Multiselect
 			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
@@ -100,6 +110,7 @@ export default {
 			searchedProcesses: [],
 			taggedProcesses: [],
 			allEndpointsCategorized: FeatureList.features,
+			allInputFormats: [],
 			allOutputFormats: [],
 			allServiceTypes: [],
 			filters: {
@@ -107,6 +118,7 @@ export default {
 				collections: [],
 				excludeIfNoFreePlan: false,
 				endpoints: [],
+				inputFormats: [],
 				outputFormats: [],
 				processes: [],
 				serviceTypes: []
@@ -161,6 +173,10 @@ export default {
 
 		axios.get('/api/processes')
 			.then(response => { this.allProcesses = response.data; this.searchProcesses(""); })
+			.catch(error => console.log(error));
+		
+		axios.get('/api/input_formats')
+			.then(response => this.allInputFormats = response.data)
 			.catch(error => console.log(error));
 		
 		axios.get('/api/output_formats')
@@ -249,6 +265,9 @@ export default {
 				this.filters.processes.length == 0 || backends.some(b => b.processes && this.filters.processes.every(p1 => b.processes.some(p2 => 
 					p1.isSearchterm ? p1.matches.indexOf(p2.id) != -1 : p1.id == p2.id
 				))),
+
+				// INPUTFORMATS (OR)
+				this.filters.inputFormats.length == 0 || backends.some(b => b.fileFormats && this.filters.inputFormats.some(ff => Object.keys(b.fileFormats.input).indexOf(ff.format) != -1)),
 				
 				// OUTPUTFORMATS (OR)
 				this.filters.outputFormats.length == 0 || backends.some(b => b.fileFormats && this.filters.outputFormats.some(ff => Object.keys(b.fileFormats.output).indexOf(ff.format) != -1)),

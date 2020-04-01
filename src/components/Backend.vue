@@ -49,6 +49,13 @@
                 <ProcessWrapper v-for="process in backend.processes" :key="process.id" :processData="process" :version="preparedBackend.api_version" :initiallyCollapsed="true" :provideDownload="false"></ProcessWrapper>
             </dd>
 
+            <dt v-if="backend.fileFormats && backend.fileFormats.input" @click="collapsed.inputFormats = !collapsed.inputFormats">
+                <h4>{{collapsed.inputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} input formats ({{supportedInputFormatsCount}})</h4>
+            </dt>
+            <dd v-if="backend.fileFormats && backend.fileFormats.input" v-show="!collapsed.inputFormats"> <!-- v-if to prevent errors when inputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
+                <SupportedFileFormats :formats="preparedBackend.fileFormats" version="1.0.0" :showInput="true" ref="supportedFileFormatsComponentInputs"></SupportedFileFormats>
+            </dd>
+
             <dt v-if="backend.fileFormats && backend.fileFormats.output" @click="collapsed.outputFormats = !collapsed.outputFormats">
                 <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{supportedOutputFormatsCount}})</h4>
             </dt>
@@ -155,6 +162,9 @@ export default {
             const total = this.$refs.supportedFeaturesComponent.getFeatureCount();
             this.supportedFunctionalitiesCount = '(' + supported + '/' + total + ')';
         }
+        if(this.$refs.supportedFileFormatsComponentInputs != undefined) {
+            this.supportedInputFormatsCount = this.$refs.supportedFileFormatsComponentInputs.getCount();
+        }
         if(this.$refs.supportedFileFormatsComponentOutputs != undefined) {
             this.supportedOutputFormatsCount = this.$refs.supportedFileFormatsComponentOutputs.getCount();
         }
@@ -172,11 +182,13 @@ export default {
                 functionalities: false,
                 collections: true,
                 processes: true,
+                inputFormats: true,
                 outputFormats: true,
                 serviceTypes: true,
                 billing: true
             },
             supportedFunctionalitiesCount: '',
+            supportedInputFormatsCount: undefined,
             supportedOutputFormatsCount: undefined,
             supportedServiceTypesCount: undefined
 		};

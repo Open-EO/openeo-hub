@@ -68,6 +68,7 @@ module.exports = {
             collections: '$collections.collections',
             processes: '$processes.processes',
             fileFormats: {
+                input: { $ifNull: ['$fileFormats.input', {}] },   // input formats didn't exist in API v0.4 -> empty object as default
                 output: { $ifNull: ['$fileFormats.output', '$fileFormats'] }   // first item: API v1.0, second item: API v0.4
             },
             serviceTypes: 1,
@@ -120,6 +121,14 @@ module.exports = {
             count: {$sum: 1}
         } },
         { $sort: {count: -1, id: 1} }  // sort by count DESC, id ASC
+    ],
+    GET_ALL_INPUT_FORMATS_WITH_COUNT_PIPELINE: [
+        { $match: { fileFormats: {$exists: true} } },  // only consider backends that have file formats
+        { $addFields: { 'inputFormatsAsArray' : {$objectToArray: '$fileFormats.input' } } },  // input formats are saved as object keys -> convert to array
+        { $project: {inputFormats: { $map: {input: '$inputFormatsAsArray', as: 'if', in: "$$if.k"} } } },  // map values into top level of object (didn't work without this for some reason)
+        { $unwind: "$inputFormats" },  // get one entry for each input format
+        { $group: { _id: {$toLower: "$inputFormats"}, format: {$first: "$inputFormats"}, count: {$sum: 1} } },  // group by format name, at the same time calculate the sum
+        { $sort: {count: -1, format: 1} }  // sort by count DESC, format name ASC
     ],
     GET_ALL_OUTPUT_FORMATS_WITH_COUNT_PIPELINE: [
         { $match: { fileFormats: {$exists: true} } },  // only consider backends that have file formats
