@@ -49,11 +49,11 @@
                 <ProcessWrapper v-for="process in backend.processes" :key="process.id" :processData="process" :version="preparedBackend.api_version" :initiallyCollapsed="true" :provideDownload="false"></ProcessWrapper>
             </dd>
 
-            <dt v-if="backend.outputFormats" @click="collapsed.outputFormats = !collapsed.outputFormats">
-                <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} file formats ({{supportedOutputFormatsCount}})</h4>
+            <dt v-if="backend.fileFormats && backend.fileFormats.output" @click="collapsed.outputFormats = !collapsed.outputFormats">
+                <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{supportedOutputFormatsCount}})</h4>
             </dt>
-            <dd v-if="backend.outputFormats" v-show="!collapsed.outputFormats"> <!-- v-if to prevent errors when outputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
-                <SupportedFileFormats :formats="preparedBackend.outputFormats" :version="preparedBackend.api_version" :showInput="true" :showOutput="true" ref="supportedFileFormatsComponent"></SupportedFileFormats>
+            <dd v-if="backend.fileFormats && backend.fileFormats.output" v-show="!collapsed.outputFormats"> <!-- v-if to prevent errors when outputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
+                <SupportedFileFormats :formats="preparedBackend.fileFormats" version="1.0.0" :showOutput="true" ref="supportedFileFormatsComponentOutputs"></SupportedFileFormats>
             </dd>
 
             <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
@@ -155,8 +155,8 @@ export default {
             const total = this.$refs.supportedFeaturesComponent.getFeatureCount();
             this.supportedFunctionalitiesCount = '(' + supported + '/' + total + ')';
         }
-        if(this.$refs.supportedFileFormatsComponent != undefined) {
-            this.supportedOutputFormatsCount = this.$refs.supportedFileFormatsComponent.getCount();
+        if(this.$refs.supportedFileFormatsComponentOutputs != undefined) {
+            this.supportedOutputFormatsCount = this.$refs.supportedFileFormatsComponentOutputs.getCount();
         }
         if(this.$refs.supportedServiceTypesComponent != undefined) {
             this.supportedServiceTypesCount = this.$refs.supportedServiceTypesComponent.getCount();

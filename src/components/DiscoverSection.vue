@@ -251,7 +251,7 @@ export default {
 				))),
 				
 				// OUTPUTFORMATS (OR)
-				this.filters.outputFormats.length == 0 || backends.some(b => b.outputFormats && this.filters.outputFormats.some(of => Object.keys(b.outputFormats).indexOf(of.format) != -1)),
+				this.filters.outputFormats.length == 0 || backends.some(b => b.fileFormats && this.filters.outputFormats.some(ff => Object.keys(b.fileFormats.output).indexOf(ff.format) != -1)),
 				
 				// SERVICETYPES (OR)
 				this.filters.serviceTypes.length == 0 || backends.some(b => b.serviceTypes && this.filters.serviceTypes.some(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1))

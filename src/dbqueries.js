@@ -26,7 +26,7 @@ module.exports = {
                 vars: { index: {$indexOfArray: ['$paths', '/processes']}},
                 in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
             } },
-            outputFormats: { $let: {
+            fileFormats: { $let: {
                 vars: {
                     index1: {$indexOfArray: ['$paths', '/output_formats']},
                     index2: {$indexOfArray: ['$paths', '/file_formats']}
@@ -67,7 +67,9 @@ module.exports = {
             },
             collections: '$collections.collections',
             processes: '$processes.processes',
-            outputFormats: 1,
+            fileFormats: {
+                output: { $ifNull: ['$fileFormats.output', '$fileFormats'] }   // first item: API v1.0, second item: API v0.4
+            },
             serviceTypes: 1,
             billing: '$root.billing'
         } }
@@ -120,10 +122,8 @@ module.exports = {
         { $sort: {count: -1, id: 1} }  // sort by count DESC, id ASC
     ],
     GET_ALL_OUTPUT_FORMATS_WITH_COUNT_PIPELINE: [
-        { $match: { outputFormats: {$exists: true} } },  // only consider backends that have output formats
-        { $addFields: { 'outputFormatsNew': { $mergeObjects: ['$outputFormats.input', '$outputFormats.output'] } } },
-        { $addFields: { 'outputFormats': { $cond: { if: { $eq: ['$outputFormatsNew', {}] }, then: '$outputFormats', else: '$outputFormatsNew' }} } },
-        { $addFields: { 'outputFormatsAsArray' : {$objectToArray: '$outputFormats' } } },  // output formats are saved as object keys -> convert to array
+        { $match: { fileFormats: {$exists: true} } },  // only consider backends that have file formats
+        { $addFields: { 'outputFormatsAsArray' : {$objectToArray: '$fileFormats.output' } } },  // output formats are saved as object keys -> convert to array
         { $project: {outputFormats: { $map: {input: '$outputFormatsAsArray', as: 'of', in: "$$of.k"} } } },  // map values into top level of object (didn't work without this for some reason)
         { $unwind: "$outputFormats" },  // get one entry for each output format
         { $group: { _id: {$toLower: "$outputFormats"}, format: {$first: "$outputFormats"}, count: {$sum: 1} } },  // group by format name, at the same time calculate the sum
