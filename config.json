@@ -3,7 +3,6 @@
     "dbName": "openeohub",
     "backends": {
         "Google Earth Engine": "https://earthengine.openeo.org/.well-known/openeo",
-        "R Demo Server": "https://r-server.openeo.org",
         "EURAC WCPS": "https://openeo.eurac.edu/.well-known/openeo",
         "VITO GeoPySpark": {
             "current": "http://openeo.vgt.vito.be/openeo/0.4.0",
