@@ -249,8 +249,4 @@ dd > ul {
 </style>
 
 <style>
-ul.file-formats,
-ul.service-types {
-    column-width: 10em;
-}
 </style>
