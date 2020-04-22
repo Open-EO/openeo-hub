@@ -53,21 +53,21 @@
                 <h4>{{collapsed.inputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} input formats ({{supportedInputFormatsCount}})</h4>
             </dt>
             <dd v-if="backend.fileFormats && backend.fileFormats.input" v-show="!collapsed.inputFormats"> <!-- v-if to prevent errors when inputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
-                <SupportedFileFormats :formats="preparedBackend.fileFormats" version="1.0.0" :showInput="true" ref="supportedFileFormatsComponentInputs"></SupportedFileFormats>
+                <FileFormats :formats="preparedBackend.fileFormats" version="1.0.0" :showInput="true" ref="supportedFileFormatsComponentInputs"></FileFormats>
             </dd>
 
             <dt v-if="backend.fileFormats && backend.fileFormats.output" @click="collapsed.outputFormats = !collapsed.outputFormats">
                 <h4>{{collapsed.outputFormats ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{supportedOutputFormatsCount}})</h4>
             </dt>
             <dd v-if="backend.fileFormats && backend.fileFormats.output" v-show="!collapsed.outputFormats"> <!-- v-if to prevent errors when outputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
-                <SupportedFileFormats :formats="preparedBackend.fileFormats" version="1.0.0" :showOutput="true" ref="supportedFileFormatsComponentOutputs"></SupportedFileFormats>
+                <FileFormats :formats="preparedBackend.fileFormats" version="1.0.0" :showOutput="true" ref="supportedFileFormatsComponentOutputs"></FileFormats>
             </dd>
 
             <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
                 <h4>{{collapsed.serviceTypes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} service types ({{supportedServiceTypesCount}})</h4>
             </dt>
             <dd v-if="backend.serviceTypes" v-show="!collapsed.serviceTypes">
-                <SupportedServiceTypes :services="preparedBackend.serviceTypes" :version="preparedBackend.api_version" ref="supportedServiceTypesComponent"></SupportedServiceTypes>
+                <ServiceTypes :services="preparedBackend.serviceTypes" :version="preparedBackend.api_version" ref="supportedServiceTypesComponent"></ServiceTypes>
             </dd>
 
             <dt v-if="backend.billing" @click="collapsed.billing = !collapsed.billing">
@@ -85,7 +85,7 @@
 <script>
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
-import { SupportedFeatures, SupportedFileFormats, SupportedServiceTypes, BillingPlans, Description } from '@openeo/vue-components';
+import { SupportedFeatures, FileFormats, ServiceTypes, BillingPlans, Description } from '@openeo/vue-components';
 import CollectionWrapper from './CollectionWrapper.vue';
 import ProcessWrapper from './ProcessWrapper.vue';
 import axios from 'axios';
@@ -96,8 +96,8 @@ export default {
 	components: {
         Description,
         SupportedFeatures,
-        SupportedFileFormats,
-        SupportedServiceTypes,
+        FileFormats,
+        ServiceTypes,
         BillingPlans,
         DataRetrievedNotice,
         UnsuccessfulCrawlNotice,
