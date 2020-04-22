@@ -22,6 +22,8 @@
 
         <Description v-if="preparedBackend.description" :description="preparedBackend.description" :compact="true" class="scroll-if-too-long"></Description>
 
+        <LinkList :links="preparedBackend.links" :ignoreRel="[ 'version-history', 'conformance', 'data']"></LinkList>
+
         <p><small>URL: <code>{{backend.backendUrl}}</code></small></p>
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
@@ -85,7 +87,7 @@
 <script>
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
-import { SupportedFeatures, FileFormats, ServiceTypes, BillingPlans, Description } from '@openeo/vue-components';
+import { SupportedFeatures, FileFormats, ServiceTypes, BillingPlans, Description, LinkList } from '@openeo/vue-components';
 import CollectionWrapper from './CollectionWrapper.vue';
 import ProcessWrapper from './ProcessWrapper.vue';
 import axios from 'axios';
@@ -95,6 +97,7 @@ export default {
 	props: ['backendData', 'collapsible', 'initiallyCollapsed', 'isSearchResult', 'showVersion'],
 	components: {
         Description,
+        LinkList,
         SupportedFeatures,
         FileFormats,
         ServiceTypes,
@@ -249,4 +252,18 @@ dd > ul {
 </style>
 
 <style>
+.link-list ul {
+    margin-top: 5px;
+    padding-left: 20px;
+}
+.link-list li {
+    float: left;
+    margin-right: 50px;
+}
+.link-list:after {
+    /* classic clearfix -- could be replaced by a `display: flow-root` solution once support for it improves */
+    content: "";
+    display: table;
+    clear: both;
+}
 </style>
