@@ -22,7 +22,7 @@
 
         <Description v-if="preparedBackend.description" :description="preparedBackend.description" :compact="true" class="scroll-if-too-long"></Description>
 
-        <LinkList :links="preparedBackend.links" :ignoreRel="[ 'version-history', 'conformance', 'data']"></LinkList>
+        <LinkList :links="preparedBackend.links" :ignoreRel="['self', 'version-history', 'conformance', 'data']"></LinkList>
 
         <p><small>URL: <code>{{backend.backendUrl}}</code></small></p>
         

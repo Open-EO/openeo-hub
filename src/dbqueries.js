@@ -50,7 +50,7 @@ module.exports = {
             unsuccessfulCrawls: 1,
             api_version: '$root.api_version',
             description: '$root.description',
-            links: '$root.links',
+            links: { $ifNull: ['$root.links', []] },
             endpoints: {
                 $reduce: {
                     input: {
