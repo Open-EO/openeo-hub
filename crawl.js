@@ -2,7 +2,7 @@ const config = require('./config.json');
 const MongoClient = require('mongodb').MongoClient;
 
 const axios = require('axios');
-axios.defaults.timeout = 10*1000;   // 10s = 10000 ms
+axios.defaults.timeout = 60*1000;   // 60s = 60000 ms
 
 const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } );
 
