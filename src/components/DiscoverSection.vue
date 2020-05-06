@@ -91,6 +91,7 @@ import axios from 'axios';
 import BackendGroup from './BackendGroup.vue';
 import Multiselect from 'vue-multiselect';
 import { FeatureList } from '@openeo/vue-components';
+import { MigrateCapabilities } from '@openeo/js-commons';
 import EndpointChooser from './EndpointChooser.vue';
 
 export default {
@@ -252,10 +253,17 @@ export default {
 				// !this.filters.excludeIfNoFreePlan || backends.some(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.some(p => p.paid == false || p.name == 'free')),
 				
 				// ENDPOINTS (AND)
-				this.filters.endpoints.length == 0 || backends.some(b => b.endpoints && this.filters.endpoints.every(e1 => b.endpoints.some(e2 =>
-					e2.methods.map(m => m.toLowerCase()).indexOf(e1.split(' ')[0]) != -1 &&
-					e2.path.toLowerCase().replace(/{[^}]*}/g, '{}') == e1.split(' ')[1].toLowerCase().replace(/{[^}]*}/g, '{}')
-				))),
+				this.filters.endpoints.length == 0 || backends.some(b => {
+					if(!b.endpoints) {
+						return false;
+					} else {
+						var convertedEndpoints = MigrateCapabilities.convertEndpointsToLatestSpec(b.endpoints, b.api_version, true);
+						return this.filters.endpoints.every(e1 => convertedEndpoints.some(e2 =>
+							e2.methods.map(m => m.toLowerCase()).indexOf(e1.split(' ')[0]) != -1 &&
+							e2.path.toLowerCase().replace(/{[^}]*}/g, '{}') == e1.split(' ')[1].toLowerCase().replace(/{[^}]*}/g, '{}')
+						))
+					}
+				}),
 
 				// COLLECTIONS (OR)
 				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.some(c1 => b.collections.some(c2 => 
