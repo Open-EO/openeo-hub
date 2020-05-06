@@ -48,6 +48,7 @@ module.exports = {
             group: 1,
             retrieved: 1,
             unsuccessfulCrawls: 1,
+            production: { $ifNull: ['$root.production', true] },
             api_version: '$root.api_version',
             description: '$root.description',
             links: { $ifNull: ['$root.links', []] },

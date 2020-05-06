@@ -28,6 +28,8 @@
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
         <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
+        <div v-if="!preparedBackend.production" class="warning">⚠ This backend is flagged as NOT production-ready.</div>
+        <div v-if="preparedBackend.production && preparedBackend.api_version > '1'" class="info">✔️ This backend is flagged as production-ready.</div>
 
         <dl>
             <dt v-if="backend.endpoints" @click="collapsed.functionalities = !collapsed.functionalities">
@@ -248,6 +250,15 @@ dd {
 }
 dd > ul {
 	padding-left: 15px;
+}
+
+div.warning {
+    color: #d59800;  /* dark yellow */
+    margin-top: 10px;
+}
+div.info {
+    color: green;
+    margin-top: 10px;
 }
 </style>
 
