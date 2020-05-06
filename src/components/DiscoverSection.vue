@@ -253,7 +253,8 @@ export default {
 				
 				// ENDPOINTS (AND)
 				this.filters.endpoints.length == 0 || backends.some(b => b.endpoints && this.filters.endpoints.every(e1 => b.endpoints.some(e2 =>
-				    e2.methods.map(m => m.toLowerCase()).indexOf(e1.split(' ')[0]) != -1 && e2.path.toLowerCase().replace(/{[^}]*}/g, '{}') == e1.split(' ')[1]
+					e2.methods.map(m => m.toLowerCase()).indexOf(e1.split(' ')[0]) != -1 &&
+					e2.path.toLowerCase().replace(/{[^}]*}/g, '{}') == e1.split(' ')[1].toLowerCase().replace(/{[^}]*}/g, '{}')
 				))),
 
 				// COLLECTIONS (OR)
