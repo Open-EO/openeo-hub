@@ -5,7 +5,9 @@
 			<nav>
 				<ul>
 					<li @click="view = 'discover'" :class="{active: view == 'discover'}" title="Discover">Discover</li>
+					<!--
 					<li @click="view = 'exchange'" :class="{active: view == 'exchange'}" title="Exchange">Exchange</li>
+					-->
 					<li @click="view = 'about'" :class="{active: view == 'about'}" title="About">About</li>
 				</ul>
 			</nav>
@@ -14,7 +16,9 @@
 		<main>
 			<!-- Don't use `v-show` for `div`s that may contain Leaflet maps - it would cause the map to be initiated incorrectly. Setting `height:0` etc. (instead of v-show's `display:none`) solves the problem. -->
 			<DiscoverSection :class="{hidden: view != 'discover', wrapper: 1}"></DiscoverSection>
+			<!-- disabled for now
 			<ExchangeSection :class="{hidden: view != 'exchange'}" :active="view == 'exchange'"></ExchangeSection>
+			-->
 			<AboutSection :class="{hidden: view != 'about'}"></AboutSection>
 		</main>
 
