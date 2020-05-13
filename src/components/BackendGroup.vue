@@ -36,7 +36,9 @@ export default {
     methods: {
         toggleCollapsed() {
             this.collapsed = !this.collapsed;
-            this.$refs.tabsComponent.adjustSizes();
+            if (typeof this.$refs.tabsComponent.adjustSizes === 'function') {
+                this.$nextTick(this.$refs.tabsComponent.adjustSizes);
+            }
         },
         tabTitle(backend) {
             return 'v'+backend.api_version + (this.needsWarningSign(backend) ? ' ⚠':'');
