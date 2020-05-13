@@ -1,6 +1,6 @@
 {
   "name": "@openeo/hub",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": "openEO Consortium",
   "contributors": [
     {
@@ -20,7 +20,7 @@
     "url": "https://github.com/Open-EO/openeo-hub.git"
   },
   "engines": {
-    "node" : ">=10.0.0"
+    "node": ">=10.0.0"
   },
   "scripts": {
     "crawl": "node crawl.js",
@@ -33,8 +33,8 @@
     "start:dev": "vue-cli-service build --mode development && node server.js"
   },
   "dependencies": {
-    "@openeo/js-commons": "1.0.0-rc.2",
-    "@openeo/vue-components": "1.0.0-beta.3",
+    "@openeo/js-commons": "1.0.0-rc.3",
+    "@openeo/vue-components": "1.0.0-beta.4",
     "axios": "^0.19.0",
     "moment": "^2.22.2",
     "mongodb": "^3.5.2",
