@@ -60,7 +60,9 @@ mongo.connect(async (error, client) => {
     let allIndividualBackends = [];
     let allFailedServices = [];
 
-    console.log('Crawling all backends...');
+    console.log('Crawling all backends... (timeout per request is ' + (axios.defaults.timeout/1000) + ' seconds)');
+    console.log('');
+
     for (var name in config.backends) {
         var serviceUrl = config.backends[name].replace(/\/$/, '');   // always without trailing slash
         var url = serviceUrl + '/.well-known/openeo';
@@ -121,10 +123,16 @@ mongo.connect(async (error, client) => {
                 }
             }
 
+            var bulkNotice = false;
             for(var index in paths) {
                 var path = paths[index];
-                if(path.indexOf('/collections/') == -1 || verbose) {
+                var isCollectionDetail = path.indexOf('/collections/') != -1;
+                if(!isCollectionDetail || verbose) {
                     console.log('          - Downloading ' + backendUrl+path + ' ...');
+                }
+                if(!bulkNotice && !verbose && isCollectionDetail) {
+                    console.log('          - Downloading details for all ' + (paths.length - index) + ' collections... (only outputting errors)')
+                    bulkNotice = true;
                 }
                 try {
                     var response = await axios(backendUrl+path);
