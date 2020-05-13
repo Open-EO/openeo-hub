@@ -1,12 +1,12 @@
 <template>
 	<div class="backendGroup">
-        <h3 @click="collapsed = !collapsed">
+        <h3 @click="toggleCollapsed">
             {{collapsed ? '▶' : '▼'}}
             {{groupName}}
         </h3>
 
         <div v-show="!collapsed">
-            <Tabs :id="groupName" :pills="true">
+            <Tabs :id="groupName" :pills="true" ref="tabsComponent">
                 <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="tabTitle(backend)" :selected="index == 0">
                     <Backend :backendData="backend" :collapsible="false" :showVersion="false"></Backend>
                 </Tab>
@@ -34,6 +34,10 @@ export default {
 		};
     },
     methods: {
+        toggleCollapsed() {
+            this.collapsed = !this.collapsed;
+            this.$refs.tabsComponent.adjustSizes();
+        },
         tabTitle(backend) {
             return 'v'+backend.api_version + (this.needsWarningSign(backend) ? ' ⚠':'');
         },
