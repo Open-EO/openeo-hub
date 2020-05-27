@@ -6,6 +6,7 @@
         </h3>
 
         <div v-show="!collapsed">
+            <p><small>URL: <code>{{backends[0].service}}</code></small></p>
             <Tabs :id="groupName" :pills="true" ref="tabsComponent">
                 <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="tabTitle(backend)" :selected="index == 0">
                     <Backend :backendData="backend" :collapsible="false" :showVersion="false"></Backend>
