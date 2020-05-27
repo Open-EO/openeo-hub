@@ -203,16 +203,15 @@ main > section p:first-child {
 	flex: 1 1 40%;
 	border-left: 1px dotted #cecbc8;
 }
-#discover-list > p:last-of-type {
-	margin-bottom: 30px;
-}
 #discover-list > ul > li {
 	list-style: none;
+	margin-top: 15px;
+}
+#discover-list > ul > li > div:not(.collapsed) {
+	padding-bottom: 15px;
 }
 #discover-list > ul > li + li {
-	margin-top: 15px;
 	/* border-top: 1px solid black; */
-	padding-top: 15x;
 }
 #discover h3 {
 	margin-bottom: 10px;

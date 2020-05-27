@@ -1,5 +1,5 @@
 <template>
-	<div class="backendGroup">
+	<div class="backendGroup" :class="{collapsed: collapsed}">
         <h3 @click="toggleCollapsed">
             {{collapsed ? '▶' : '▼'}}
             {{groupName}}
