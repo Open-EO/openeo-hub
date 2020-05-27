@@ -80,7 +80,8 @@
 		
 		    <h4>Billing</h4>
 			<div>
-				<input type="checkbox" v-model="filters.excludeIfNoFreePlan" id="excludeIfNoFreePlan"><label for="excludeIfNoFreePlan">Exclude backends without a free plan</label>
+				<input type="checkbox" v-model="filters.excludeIfNoFreePlan" id="excludeIfNoFreePlan">
+				<label for="excludeIfNoFreePlan">Must have a free plan</label>
 			</div>
 		</section>
     </section>
@@ -248,9 +249,9 @@ export default {
 				
 				// EXCLUDEIFNOFREEPLAN
 				// exclude if *every* plan of *every* backend of the group is set to "paid=true" (more appropriate IMO)
-				!this.filters.excludeIfNoFreePlan || !backends.every(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.every(p => p.paid == true)),
+				// !this.filters.excludeIfNoFreePlan || !backends.every(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.every(p => p.paid == true)),
 				// include if at least one plan of the group *has* billing information and in there has a plan with "paid=false"
-				// !this.filters.excludeIfNoFreePlan || backends.some(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.some(p => p.paid == false || p.name == 'free')),
+				!this.filters.excludeIfNoFreePlan || backends.some(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.some(p => p.paid == false)),
 				
 				// ENDPOINTS (AND)
 				this.filters.endpoints.length == 0 || backends.some(b => {
