@@ -4,7 +4,7 @@
     "backends": {
         "Google Earth Engine": "https://earthengine.openeo.org/",
         "EURAC WCPS": "https://openeo.eurac.edu/",
-        "VITO GeoPySpark": "http://openeo.vgt.vito.be/",
+        "VITO GeoPySpark": "https://openeo.vito.be/",
         "EODC OpenShift": "https://openeo.eodc.eu/",
         "mundialis GRASS GIS (Actinia)": "https://openeo.mundialis.de/",
         "Sentinel Hub": "https://openeo.sentinel-hub.com/production/"
