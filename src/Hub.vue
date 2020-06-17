@@ -165,6 +165,9 @@ header img.logo {
 }
 header nav {
 	display: inline-block;
+	position: absolute;
+	right: 0;
+	top: 17px;
 	margin-left: 100px;
 	vertical-align: middle;
 }
@@ -181,9 +184,6 @@ header nav li {
 	margin: 0px 15px;
 	cursor: pointer;
 	text-align: center;
-}
-header nav li:last-child {
-	margin-left: 50px;
 }
 header nav li:hover,
 header nav li.active {
