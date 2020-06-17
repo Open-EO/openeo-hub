@@ -56,7 +56,8 @@ export default {
 /* normalize browser standards */
 body {
 	margin: 0;
-	font-family: sans-serif;
+	/* copied from openeo.org website: mainly keeps system fonts, falls back to sans-serif if nothing else matches (see #40) */
+	font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;
 }
 body.loading {
 	cursor: wait;
@@ -80,8 +81,10 @@ html, body, #app, #container {
 	flex-direction: column;
 }
 header {
-	border-bottom: 1px dotted #cecbc8;
-	padding: 10px;
+	/* copied from openeo.org website */
+	background-color: #fff;
+	border-bottom: 1px solid #eaecef;
+	padding: .7rem 1.5rem
 }
 main {
 	flex: 1;
@@ -148,9 +151,11 @@ input[type='checkbox'] {
 	vertical-align: bottom;
 }
 
-/* pill-style navigation */
-h1 {
+/* navigation */
+header h1 {
 	display: inline-block; /* allow nav to start right next to it */
+	color: #2c3e50; /* copied from openeo.org website */
+	font-size: 20px;
 	vertical-align: middle;
 }
 header img.logo {
@@ -170,25 +175,19 @@ header nav ul {
 header nav li {
 	display: inline-block;
 	list-style: none;
-	font-size: 130%;
-	padding: 5px 10px;
-	margin: 0px 10px;
-	/*border: 1px solid black;*/
-	border: 1px dotted black;
-	border-radius: 10px;
+	color: #2c3e50;   /* copied from openeo.org website */
+	font-weight: 500;   /* copied from openeo.org website */
+	font-size: 17px;
+	margin: 0px 15px;
 	cursor: pointer;
 	text-align: center;
-}
-header nav li:hover {
-	border: 1px solid black;
 }
 header nav li:last-child {
 	margin-left: 50px;
 }
+header nav li:hover,
 header nav li.active {
-	/*background-color: #e8e5e2;*/
-	border: 3px solid black;
-	font-weight: bold;
+	border-bottom: 2px solid #2a89cc;   /* copied from openeo.org website */
 }
 header nav li::after {
 	/* make un-bold text take up as much space as bold text so it doesn't jump when it becomes active */
@@ -198,6 +197,12 @@ header nav li::after {
     height: 0;
     overflow: hidden;
     visibility: hidden;
+}
+header nav li a {
+	color: #2c3e50;   /* copied from openeo.org website */
+}
+header nav li a svg {
+	color: #aaa;   /* copied from openeo.org website */
 }
 
 /* sections */
