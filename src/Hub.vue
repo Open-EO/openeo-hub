@@ -1,7 +1,10 @@
 <template>
 	<div id="container">
 		<header>
-			<h1>openEO Hub</h1>
+			<a href="/">
+				<img src="https://openeo.org/images/openeo_navbar_logo.png" alt="openEO logo" class="logo">
+				<h1>openEO Hub</h1>
+			</a>
 			<nav>
 				<ul>
 					<li @click="view = 'discover'" :class="{active: view == 'discover'}" title="Discover">Discover</li>
@@ -9,6 +12,7 @@
 					<li @click="view = 'exchange'" :class="{active: view == 'exchange'}" title="Exchange">Exchange</li>
 					-->
 					<li @click="view = 'about'" :class="{active: view == 'about'}" title="About">About</li>
+					<li><a href="https://openeo.org/">openeo.org <!-- external link icon: --> <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <!-- end external link icon--> </a></li>
 				</ul>
 			</nav>
 		</header>
@@ -147,11 +151,17 @@ input[type='checkbox'] {
 /* pill-style navigation */
 h1 {
 	display: inline-block; /* allow nav to start right next to it */
+	vertical-align: middle;
+}
+header img.logo {
+	width: 42px;
+	margin-right: 15px;
+	vertical-align: middle;
 }
 header nav {
 	display: inline-block;
 	margin-left: 100px;
-	vertical-align: top;
+	vertical-align: middle;
 }
 header nav ul {
 	margin: 0;
@@ -171,6 +181,9 @@ header nav li {
 }
 header nav li:hover {
 	border: 1px solid black;
+}
+header nav li:last-child {
+	margin-left: 50px;
 }
 header nav li.active {
 	/*background-color: #e8e5e2;*/
