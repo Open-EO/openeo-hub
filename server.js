@@ -234,6 +234,14 @@ server.get('/api/service_types', function(req, res, next) {
         .catch(err => next(err));
 });
 
+// list UDF runtimes
+server.get('/api/udf_runtimes', function(req, res, next) {
+    aggregate(dbqueries.GET_ALL_UDF_RUNTIMES_WITH_COUNT_PIPELINE, 'backends')
+        .then(data => prepare(data))
+        .then(data => { res.send(data); next(); })
+        .catch(err => next(err));
+});
+
 // handle CORS preflight for POSTing
 server.opts('/api/process_graphs', function(req, res, next) {
     enableCORS(req, res);

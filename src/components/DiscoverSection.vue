@@ -77,6 +77,16 @@
 					{{props.option.service}} <span v-if="props.option.count">({{props.option.count}})</span>
 				</template>
 			</Multiselect>
+
+			<h4>UDF runtimes</h4>
+			<Multiselect
+			    v-model="filters.udfRuntimes" :options="allUdfRuntimes" trackBy="runtime" label="runtime"
+				placeholder="Select from list, or type to search"
+				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
+				<template slot="option" slot-scope="props">
+					{{props.option.runtime}} <span v-if="props.option.count">({{props.option.count}})</span>
+				</template>
+			</Multiselect>
 		
 		    <h4>Billing</h4>
 			<div>
@@ -115,6 +125,7 @@ export default {
 			allInputFormats: [],
 			allOutputFormats: [],
 			allServiceTypes: [],
+			allUdfRuntimes: [],
 			filters: {
 				apiVersions: [],
 				collections: [],
@@ -123,7 +134,8 @@ export default {
 				inputFormats: [],
 				outputFormats: [],
 				processes: [],
-				serviceTypes: []
+				serviceTypes: [],
+				udfRuntimes: []
 			}
 		};
 	},
@@ -187,6 +199,10 @@ export default {
 
 		axios.get('/api/service_types')
 			.then(response => this.allServiceTypes = response.data)
+			.catch(error => console.log(error));
+
+		axios.get('/api/udf_runtimes')
+			.then(response => this.allUdfRuntimes = response.data)
 			.catch(error => console.log(error));
 	},
 	methods: {
@@ -283,7 +299,10 @@ export default {
 				this.filters.outputFormats.length == 0 || backends.some(b => b.fileFormats && this.filters.outputFormats.some(ff => Object.keys(b.fileFormats.output).indexOf(ff.format) != -1)),
 				
 				// SERVICETYPES (OR)
-				this.filters.serviceTypes.length == 0 || backends.some(b => b.serviceTypes && this.filters.serviceTypes.some(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1))
+				this.filters.serviceTypes.length == 0 || backends.some(b => b.serviceTypes && this.filters.serviceTypes.some(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1)),
+
+				// UDF RUNTIMES (OR)
+				this.filters.udfRuntimes.length == 0 || backends.some(b => b.udfRuntimes && this.filters.udfRuntimes.some(rt => Object.keys(b.udfRuntimes).indexOf(rt.runtime) != -1))
 			].every(f => f == true);
 		}
 	}

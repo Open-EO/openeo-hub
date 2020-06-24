@@ -1,6 +1,6 @@
 module.exports = {
     GET_ALL_BACKENDS_PIPELINE: [
-        { $match: { path: { $in: ['/', '/collections', '/processes', '/service_types', '/output_formats', '/file_formats'] } } },
+        { $match: { path: { $in: ['/', '/collections', '/processes', '/service_types', '/output_formats', '/file_formats', '/udf_runtimes'] } } },
         // This would be more dynamic and is effectively the same: { $match: { path: { $regex: "^\/[a-z_]*$" } } }
         // But since the endpoints are hardcoded anyway there's no benefit, especially not when considering regex slowness.
         { $sort: { backend: 1, path: 1 } },
@@ -38,6 +38,10 @@ module.exports = {
             serviceTypes: { $let: {
                 vars: { index: {$indexOfArray: ['$paths', '/service_types']}},
                 in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
+            } },
+            udfRuntimes: { $let: {
+                vars: { index: {$indexOfArray: ['$paths', '/udf_runtimes']}},
+                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
             } }
         } },
         { $project: {
@@ -74,6 +78,7 @@ module.exports = {
                 output: { $ifNull: ['$fileFormats.output', '$fileFormats'] }   // first item: API v1.0, second item: API v0.4
             },
             serviceTypes: 1,
+            udfRuntimes: 1,
             billing: '$root.billing'
         } }
     ],
@@ -147,5 +152,13 @@ module.exports = {
         { $unwind: "$serviceTypes" },  // get one entry for each service type
         { $group: { _id: {$toLower: "$serviceTypes"}, service: {$first: "$serviceTypes"}, count: {$sum: 1} } },  // group by service type name, at the same time calculate the sum
         { $sort: {count: -1, service: 1} }  // sort by count DESC, service name ASC
+    ],
+    GET_ALL_UDF_RUNTIMES_WITH_COUNT_PIPELINE: [
+        { $match: { udfRuntimes: {$exists: true} } },  // only consider backends that have UDF runtimes
+        { $addFields: { 'udfRuntimesAsArray' : {$objectToArray: '$udfRuntimes' } } },  // UDF runtimes are saved as object keys -> convert to array
+        { $project: {udfRuntimes: { $map: {input: '$udfRuntimesAsArray', as: 'rt', in: "$$rt.k"} } } },  // map values into top level of object (didn't work without this for some reason)
+        { $unwind: "$udfRuntimes" },  // get one entry for each runtime
+        { $group: { _id: {$toLower: "$udfRuntimes"}, runtime: {$first: "$udfRuntimes"}, count: {$sum: 1} } },  // group by runtime name, at the same time calculate the sum
+        { $sort: {count: -1, runtime: 1} }  // sort by count DESC, runtime name ASC
     ]
 };

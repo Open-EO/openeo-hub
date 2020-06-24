@@ -74,6 +74,13 @@
                 <ServiceTypes :services="preparedBackend.serviceTypes" :version="preparedBackend.api_version" ref="supportedServiceTypesComponent"></ServiceTypes>
             </dd>
 
+            <dt v-if="backend.udfRuntimes" @click="collapsed.udfRuntimes = !collapsed.udfRuntimes">
+                <h4>{{collapsed.udfRuntimes ? '▶' : '▼'}} {{isSearchResult ? 'Matched' : 'All'}} UDF runtimes ({{supportedUdfRuntimesCount}})</h4>
+            </dt>
+            <dd v-if="backend.udfRuntimes" v-show="!collapsed.udfRuntimes">
+                <UdfRuntimes :runtimes="preparedBackend.udfRuntimes" :version="preparedBackend.api_version" ref="supportedUdfRuntimesComponent"></UdfRuntimes>
+            </dd>
+
             <dt v-if="backend.billing" @click="collapsed.billing = !collapsed.billing">
                 <h4>{{collapsed.billing ? '▶' : '▼'}} Billing information</h4>
             </dt>
@@ -89,7 +96,7 @@
 <script>
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
-import { SupportedFeatures, FileFormats, ServiceTypes, BillingPlans, Description, LinkList } from '@openeo/vue-components';
+import { SupportedFeatures, FileFormats, ServiceTypes, UdfRuntimes, BillingPlans, Description, LinkList } from '@openeo/vue-components';
 import CollectionWrapper from './CollectionWrapper.vue';
 import ProcessWrapper from './ProcessWrapper.vue';
 import axios from 'axios';
@@ -103,6 +110,7 @@ export default {
         SupportedFeatures,
         FileFormats,
         ServiceTypes,
+        UdfRuntimes,
         BillingPlans,
         DataRetrievedNotice,
         UnsuccessfulCrawlNotice,
@@ -176,6 +184,9 @@ export default {
         if(this.$refs.supportedServiceTypesComponent != undefined) {
             this.supportedServiceTypesCount = this.$refs.supportedServiceTypesComponent.getCount();
         }
+        if(this.$refs.supportedUdfRuntimesComponent != undefined) {
+            this.supportedUdfRuntimesCount = this.$refs.supportedUdfRuntimesComponent.getCount();
+        }
     },
 
 	data() {
@@ -190,12 +201,14 @@ export default {
                 inputFormats: true,
                 outputFormats: true,
                 serviceTypes: true,
+                udfRuntimes: true,
                 billing: true
             },
             supportedFunctionalitiesCount: '',
             supportedInputFormatsCount: undefined,
             supportedOutputFormatsCount: undefined,
-            supportedServiceTypesCount: undefined
+            supportedServiceTypesCount: undefined,
+            supportedUdfRuntimesCount: undefined
 		};
     },
 

@@ -54,7 +54,8 @@ mongo.connect(async (error, client) => {
         '/processes',
         '/output_formats',
         '/file_formats',
-        '/service_types'
+        '/service_types',
+        '/udf_runtimes'
     ];
 
     let allIndividualBackends = [];
