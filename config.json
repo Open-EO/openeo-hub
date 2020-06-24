@@ -3,10 +3,10 @@
     "dbName": "openeohub",
     "backends": {
         "Google Earth Engine": "https://earthengine.openeo.org/",
-        "EURAC WCPS": "https://openeo.eurac.edu/",
-        "VITO GeoPySpark": "https://openeo.vito.be/",
-        "EODC OpenShift": "https://openeo.eodc.eu/",
-        "mundialis GRASS GIS (Actinia)": "https://openeo.mundialis.de/",
+        "EURAC": "https://openeo.eurac.edu/",
+        "VITO": "https://openeo.vito.be/",
+        "EODC": "https://openeo.eodc.eu/",
+        "mundialis": "https://openeo.mundialis.de/",
         "Sentinel Hub": "https://openeo.sentinel-hub.com/production/"
     },
     "unsuccessfulCrawls": {

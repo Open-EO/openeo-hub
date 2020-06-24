@@ -184,6 +184,9 @@ mongo.connect(async (error, client) => {
 
         console.log('Processing data...');
 
+        // Delete all entries that belong to a group that was meanwhile deleted (or renamed)
+        await collection.deleteMany({ group: { $not: { $in: Object.keys(config.backends) } } });
+        
         // Delete all entries that don't belong to one of the backends that are listed in the currently configured services's well-known documents
         // But exempt those that failed to download. The two conditions are implicitly connected with AND.
         await collection.deleteMany({ backend: { $not: { $in: allIndividualBackends }}, service: { $not: { $in: allFailedServices }} });
