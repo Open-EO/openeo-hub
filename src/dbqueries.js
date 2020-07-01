@@ -93,6 +93,7 @@ module.exports = {
             'content.collections.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'collection': '$content.collections' } },
         { $unwind: '$collection' },
+        { $group: { _id: "$collection.id", collection: { $first: "$collection" } } },   // ensure unique IDs, see issue #76
         { $replaceRoot: { newRoot: '$collection' } }
     ],
     GET_ALL_PROCESSES_PIPELINE: [
@@ -107,6 +108,7 @@ module.exports = {
             'content.processes.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
         { $project: { 'process': '$content.processes' } },
         { $unwind: '$process' },
+        { $group: { _id: "$process.id", process: { $first: "$process" } } },   // ensure unique IDs, see issue #76
         { $replaceRoot: {newRoot: '$process'} }
     ],
     GET_DISTINCT_COLLECTIONS_PIPELINE: [
