@@ -1,8 +1,8 @@
 <template>
 	<div class="endpointchooser">
 		<ul v-if="categorizedEndpoints">
-			<li v-for="(endpoints, category, index) in categorizedEndpoints" :key="category">
-				<input type="checkbox" @change="toggleEndpoints(endpoints)" :id="'category'+index">
+			<li v-for="(endpointObject, category, index) in categorizedEndpoints" :key="category">
+				<input type="checkbox" @change="toggleEndpoints(endpointObject)" :id="'category'+index">
 				<label :for="'category'+index">{{category}}</label>
 			</li>
 		</ul>
@@ -25,8 +25,9 @@ export default {
 		}
 	},
 	methods: {
-		toggleEndpoints(endpoints) {
-			endpoints.forEach(endpoint => {
+		toggleEndpoints(endpointObject) {
+			var endpointArray = Object.keys(endpointObject);
+			endpointArray.forEach(endpoint => {
 				const index = this.selectedEndpoints.indexOf(endpoint);
 				if(index == -1) {
 					this.selectedEndpoints.push(endpoint);
