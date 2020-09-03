@@ -18,7 +18,7 @@
                 <Description v-if="pg.description" :description="pg.description" :compact="true"></Description>
                 <div>
                     <pre :class="{expanded: expanded[i]}">{{pg.process_graph}}</pre>
-                    <button @click="$set(expanded, i, !expanded[i])">{{expanded[i] ? '▼' : '◀'}}</button>
+                    <button @click="$set(expanded, i, !expanded[i])">{{expanded[i] ? '▾' : '◂'}}</button>
                 </div>
             </li>
         </ol>
