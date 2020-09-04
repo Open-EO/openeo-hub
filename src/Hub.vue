@@ -27,7 +27,7 @@
 		</main>
 
 		<footer>
-			This is <strong>openEO Hub</strong>, a discovery and exchange platform for the <a href="http://openeo.org/">openEO</a> community.
+			This is <strong>openEO Hub</strong>, a discovery and exchange platform for the <a href="https://openeo.org/">openEO</a> community.
 		</footer>
 	</div>
 </template>

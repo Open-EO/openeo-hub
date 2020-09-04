@@ -1,5 +1,5 @@
 # openEO Hub
-This repository contains the source code for [openEO Hub](http://hub.openeo.org), a centralized platform to explore openEO back-end providers.
+This repository contains the source code for [openEO Hub](https://hub.openeo.org), a centralized platform to explore openEO back-end providers.
 
 **It is currently in a rather early stage of development.**
 
@@ -14,7 +14,7 @@ openEO Hub tries to implement some ambitious ideas. It is aimed to be a platform
 * explore publicly available containers to run UDFs
 
 ## Public API endpoints
-The Hub provides its data via a RESTful API under http://hub.openeo.org/api. The following endpoints are intended to be used by the public:
+The Hub provides its data via a RESTful API under https://hub.openeo.org/api. The following endpoints are intended to be used by the public:
 
 * Metadata about the API
   * `GET /api` -- capabilities document compliant to openEO API v0.4.2.
@@ -30,7 +30,7 @@ The Hub provides its data via a RESTful API under http://hub.openeo.org/api. The
   * `POST /process_graphs` -- add a new process graph to the Hub's repository (note that there's NO update or delete functionality!)
 
 ## Getting started
-This app is deployed at http://hub.openeo.org/.
+This app is deployed at https://hub.openeo.org/.
 
 If you want to set it up yourself, follow these steps:
 
