@@ -71,6 +71,13 @@ mongo.connect(async (error, client) => {
         let individualBackends = {};
 
         console.log('  - ' + name + ' (well-known document: ' + url + ')');
+        
+        // enforce HTTPS
+        if(! url.startsWith('https')) {
+            console.log("REFUSING to crawl insecure backend that does NOT use HTTPS\n\n");
+            continue;
+        }
+
         try {
             var response = await axios(url);
             response.data.versions
@@ -89,6 +96,13 @@ mongo.connect(async (error, client) => {
 
         for (var api_version in individualBackends) {
             let backendUrl = individualBackends[api_version];
+
+            // enfore HTTPS
+            if(! backendUrl.startsWith('https')) {
+                console.log("REFUSING to crawl insecure backend that does NOT use HTTPS\n\n");
+                continue;
+            }
+
             try {
                 console.log('      - ' + backendUrl + ' ...');
                 var paths = [];
