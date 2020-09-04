@@ -153,15 +153,11 @@ export default {
 
     computed: {
         webEditorUrl() {
-            var protocol = 'https:';
-            if (this.backend.backendUrl.toLowerCase().substr(0,5) === 'http:') {
-                protocol = 'http:';
-            }
             var version = '';   // no need to specify a version for 1.0 (default)
             if(this.backend.api_version.startsWith('0.4')) {
                 version = '0.4/';
             }
-            return protocol + '//editor.openeo.org/' + version + '?server=' + encodeURIComponent(this.backend.backendUrl);
+            return 'https://editor.openeo.org/' + version + '?server=' + encodeURIComponent(this.backend.backendUrl);
         },
         webEditorUnavailable() {
             // unavailable if api_version is known and starts with '0.3' (treat as available if api_version is not known)
