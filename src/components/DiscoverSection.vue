@@ -1,7 +1,7 @@
 <template>
     <section id="discover">
 		<section id="discover-list">
-			<p>This is a list of all available openEO backends:</p>
+			<p>This is a list of all known openEO providers and their services:</p>
 			<ul class="backendlist">
 				<li v-for="group in allBackendGroups" :key="group.name" v-show="checkFilters(group.backends)" >
 					<BackendGroup :groupName="group.name" :backends="group.backends"></BackendGroup>

@@ -28,8 +28,8 @@
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
         <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
-        <div v-if="preparedBackend.api_version > '1' && !preparedBackend.production" class="warning">⚠ This backend is NOT production-ready.</div>
-        <div v-if="preparedBackend.api_version > '1' &&  preparedBackend.production" class="info">✔️ This backend is production-ready.</div>
+        <div v-if="preparedBackend.api_version > '1' && !preparedBackend.production" class="warning">⚠ This service is NOT production-ready.</div>
+        <div v-if="preparedBackend.api_version > '1' &&  preparedBackend.production" class="info">✔️ This service is production-ready.</div>
 
         <dl>
             <dt v-if="backend.endpoints" @click="collapsed.functionalities = !collapsed.functionalities">

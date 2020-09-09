@@ -1,6 +1,6 @@
 <template>
     <div v-if="needsFlag()" class="unsuccessfulCrawlNotice">
-        ⚠ This backend was recently unavailable for crawling.
+        ⚠ This service was recently unavailable for crawling.
     </div>
 </template>
 
