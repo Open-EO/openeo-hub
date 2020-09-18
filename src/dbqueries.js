@@ -5,7 +5,7 @@ module.exports = {
         // But since the endpoints are hardcoded anyway there's no benefit, especially not when considering regex slowness.
         { $sort: { backend: 1, path: 1 } },
         { $group: {
-            _id: '$backend',
+            _id: {$concat: ['$service', '@', '$api_version']},
             service: { $first: '$service' },
             api_version: { $first: '$api_version' },
             backend: { $first: '$backend' },

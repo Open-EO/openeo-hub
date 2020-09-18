@@ -83,7 +83,7 @@ mongo.connect(async (error, client) => {
             response.data.versions
             .filter(b => ! b.api_version.startsWith('0.3.'))   // the Hub doesn't support openEO API v0.3.x anymore
             .forEach(b => individualBackends[b.api_version] = b.url.replace(/\/$/, ''));   // URL always without trailing slash
-            allIndividualBackends = allIndividualBackends.concat(Object.values(individualBackends));
+            allIndividualBackends = allIndividualBackends.concat(Object.keys(individualBackends).map(version => serviceUrl+'@'+version));
         }
         catch(error) {
             console.log('An error occurred while getting or reading ' + url + ' (' + error.name + ': ' + error.message + ')');
@@ -204,7 +204,12 @@ mongo.connect(async (error, client) => {
         
         // Delete all entries that don't belong to one of the backends that are listed in the currently configured services's well-known documents
         // But exempt those that failed to download. The two conditions are implicitly connected with AND.
-        await collection.deleteMany({ backend: { $not: { $in: allIndividualBackends }}, service: { $not: { $in: allFailedServices }} });
+        // See also issue #79, https://stackoverflow.com/q/63937811, and the MongoDB docs for "$expr" and "$in (aggregation)"
+        // Note that the two "$in" are NOT exactly the same operator (one is from the query lanuage, one from the aggregation framework)
+        await collection.deleteMany({
+            $expr: { $not: { $in: [ {$concat:["$service","@","$api_version"]}, allIndividualBackends ] } },
+            service: { $not: { $in: allFailedServices } }
+        });
 
         // Increase `unsucessfulCrawls` counter of items that were not updated in this run
         await collection.updateMany({retrieved: {$lt: starttimestamp}}, {$inc: {unsuccessfulCrawls: 1}});
