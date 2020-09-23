@@ -3,8 +3,8 @@
 		<section id="discover-list">
 			<p>This is a list of all known openEO providers and their services:</p>
 			<ul class="backendlist">
-				<li v-for="group in allBackendGroups" :key="group.name" v-show="checkFilters(group.backends)" >
-					<BackendGroup :groupName="group.name" :backends="group.backends"></BackendGroup>
+				<li v-for="group in allBackendGroups" :key="group.name">
+					<BackendGroup :groupName="group.name" :backends="group.backends" :filters="filters"></BackendGroup>
 				</li>
 			</ul>
 		</section>
@@ -102,7 +102,6 @@ import axios from 'axios';
 import BackendGroup from './BackendGroup.vue';
 import Multiselect from 'vue-multiselect';
 import { FeatureList } from '@openeo/vue-components';
-import { MigrateCapabilities } from '@openeo/js-commons';
 import EndpointChooser from './EndpointChooser.vue';
 
 export default {
@@ -256,54 +255,6 @@ export default {
 				this.taggedProcesses.splice(this.taggedProcesses.findIndex(e => e.id == removedOption.id), 1);
 				// removing from value array (this.filters.processes) works automatically
 			}
-		},
-
-		checkFilters(backends) {
-			return [
-				// APIVERSIONS (OR)
-				this.filters.apiVersions.length == 0 || backends.some(b => b.api_version && this.filters.apiVersions.some(v => b.api_version.substr(0,3) == v)),
-				
-				// EXCLUDEIFNOFREEPLAN
-				// exclude if *every* plan of *every* backend of the group is set to "paid=true" (more appropriate IMO)
-				// !this.filters.excludeIfNoFreePlan || !backends.every(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.every(p => p.paid == true)),
-				// include if at least one plan of the group *has* billing information and in there has a plan with "paid=false"
-				!this.filters.excludeIfNoFreePlan || backends.some(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.some(p => p.paid == false)),
-				
-				// ENDPOINTS (AND)
-				this.filters.endpoints.length == 0 || backends.some(b => {
-					if(!b.endpoints) {
-						return false;
-					} else {
-						var convertedEndpoints = MigrateCapabilities.convertEndpointsToLatestSpec(b.endpoints, b.api_version, true);
-						return this.filters.endpoints.every(e1 => convertedEndpoints.some(e2 =>
-							e2.methods.map(m => m.toLowerCase()).indexOf(e1.split(' ')[0]) != -1 &&
-							e2.path.toLowerCase().replace(/{[^}]*}/g, '{}') == e1.split(' ')[1].toLowerCase().replace(/{[^}]*}/g, '{}')
-						))
-					}
-				}),
-
-				// COLLECTIONS (OR)
-				this.filters.collections.length == 0 || backends.some(b => b.collections && this.filters.collections.some(c1 => b.collections.some(c2 => 
-					c1.isSearchterm ? c1.matches.indexOf(c2.id) != -1 : c1.id == c2.id
-				))),
-				
-				// PROCESSES (AND)
-				this.filters.processes.length == 0 || backends.some(b => b.processes && this.filters.processes.every(p1 => b.processes.some(p2 => 
-					p1.isSearchterm ? p1.matches.indexOf(p2.id) != -1 : p1.id == p2.id
-				))),
-
-				// INPUTFORMATS (OR)
-				this.filters.inputFormats.length == 0 || backends.some(b => b.fileFormats && this.filters.inputFormats.some(ff => Object.keys(b.fileFormats.input).indexOf(ff.format) != -1)),
-				
-				// OUTPUTFORMATS (OR)
-				this.filters.outputFormats.length == 0 || backends.some(b => b.fileFormats && this.filters.outputFormats.some(ff => Object.keys(b.fileFormats.output).indexOf(ff.format) != -1)),
-				
-				// SERVICETYPES (OR)
-				this.filters.serviceTypes.length == 0 || backends.some(b => b.serviceTypes && this.filters.serviceTypes.some(st => Object.keys(b.serviceTypes).indexOf(st.service) != -1)),
-
-				// UDF RUNTIMES (OR)
-				this.filters.udfRuntimes.length == 0 || backends.some(b => b.udfRuntimes && this.filters.udfRuntimes.some(rt => Object.keys(b.udfRuntimes).indexOf(rt.runtime) != -1))
-			].every(f => f == true);
 		}
 	}
 }
