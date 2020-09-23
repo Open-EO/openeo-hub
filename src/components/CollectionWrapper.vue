@@ -5,20 +5,22 @@
 			<DataRetrievedNotice :timestamp="collectionData.retrieved"></DataRetrievedNotice>
 		</template>
 
-		<template slot="collection-temporal-extent" slot-scope="props">
-			<div v-if="props.extent[0] == props.extent[1]">
-				<FormattedTimestamp :timestamp="props.extent[0]"></FormattedTimestamp>
-			</div>
-			<div v-else-if="props.extent[0] == null">
-				Until <FormattedTimestamp :timestamp="props.extent[1]"></FormattedTimestamp>
-			</div>
-			<div v-else-if="props.extent[1] == null">
-				<FormattedTimestamp :timestamp="props.extent[0]"></FormattedTimestamp> until present
-			</div>
-			<div v-else>
-				<FormattedTimestamp :timestamp="props.extent[0]"></FormattedTimestamp>
-				&ndash;
-				<FormattedTimestamp :timestamp="props.extent[1]"></FormattedTimestamp>
+		<template slot="collection-temporal-extents" slot-scope="props">
+			<div v-for="extent in props.extents">
+				<div v-if="extent[0] == extent[1]">
+					<FormattedTimestamp :timestamp="extent[0]"></FormattedTimestamp>
+				</div>
+				<div v-else-if="extent[0] == null">
+					Until <FormattedTimestamp :timestamp="extent[1]"></FormattedTimestamp>
+				</div>
+				<div v-else-if="extent[1] == null">
+					<FormattedTimestamp :timestamp="extent[0]"></FormattedTimestamp> until present
+				</div>
+				<div v-else>
+					<FormattedTimestamp :timestamp="extent[0]"></FormattedTimestamp>
+					&ndash;
+					<FormattedTimestamp :timestamp="extent[1]"></FormattedTimestamp>
+				</div>
 			</div>
 		</template>
 
