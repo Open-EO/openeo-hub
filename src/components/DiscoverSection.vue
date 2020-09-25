@@ -93,6 +93,11 @@
 				<input type="checkbox" v-model="filters.excludeIfNoFreePlan" id="excludeIfNoFreePlan">
 				<label for="excludeIfNoFreePlan">Must have a free plan</label>
 			</div>
+
+			<h4>User-defined process</h4>
+			<div>
+				<textarea v-model="filters.processGraph"></textarea>
+			</div>
 		</section>
     </section>
 </template>
@@ -133,6 +138,7 @@ export default {
 				inputFormats: [],
 				outputFormats: [],
 				processes: [],
+				processGraph: '',
 				serviceTypes: [],
 				udfRuntimes: []
 			}
@@ -265,5 +271,10 @@ export default {
 <style scoped>
 ul.backendlist {
 	padding: 0;
+}
+
+textarea {
+    width: 95%;
+    height: 100px;
 }
 </style>

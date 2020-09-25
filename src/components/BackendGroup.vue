@@ -7,7 +7,7 @@
 
         <div v-show="!collapsed">
             <Tabs :id="groupName" :pills="true" ref="tabsComponent">
-                <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="tabTitle(backend)" :selected="index == 0" :enabled="checkFilters(backend)">
+                <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="tabTitle(backend)" :selected="index == 0" :enabled="checkFilters(backend) && supportedByPG[index]">
                     <Backend :backendData="backend" :collapsible="false" :showVersion="false"></Backend>
                 </Tab>
             </Tabs>
@@ -20,6 +20,7 @@ import Backend from './Backend.vue';
 import { Tab, Tabs } from '@openeo/vue-components';
 import {default as config} from './../../config.json';
 import { MigrateCapabilities } from '@openeo/js-commons';
+import { ProcessGraph, ProcessRegistry } from '@openeo/js-processgraphs';
 
 export default {
     name: 'BackendGroup',
@@ -31,8 +32,18 @@ export default {
 	props: ['groupName', 'backends', 'filters'],
 	data() {
 		return {
-            collapsed: true
+            collapsed: true,
+            supportedByPG: []
 		};
+    },
+    mounted() {
+        this.supportedByPG = new Array(this.backends.length).fill(true);
+        this.updateSupportedByPG(this.filters.processGraph);
+    },
+    watch: {
+        "filters.processGraph": function(newVal, oldVal) {
+            this.updateSupportedByPG(newVal);
+        }
     },
     methods: {
         toggleCollapsed() {
@@ -54,7 +65,35 @@ export default {
             return this.recentlyUnavailable(backend) || this.oldData(backend);
         },
         doesAnyFilterMatch() {
-            return this.backends.some(b => this.checkFilters(b));
+            return this.backends.some((b, i) => this.checkFilters(b) && this.supportedByPG[i]);
+        },
+        updateSupportedByPG(pgstring) {
+            if(pgstring == '') {
+                // Workaround to make array reactive, see https://vuejs.org/v2/guide/reactivity.html#For-Arrays
+                this.supportedByPG.forEach((e,i) => this.$set(this.supportedByPG, i, true));
+            } else {
+                var pgparsed;
+                try {
+                    pgparsed = JSON.parse(pgstring);
+                }
+                catch(e) {
+                    console.log('error during process graph parsing, is it valid JSON?');
+                    console.log(e);
+                }
+                this.backends.forEach((b, i) => {
+                    const pr = new ProcessRegistry(b.processes);
+                    const pg = new ProcessGraph(pgparsed, pr);
+                    pg.validate(false)
+                    .then(errors => {
+                        this.$set(this.supportedByPG, i, errors.count() == 0);
+                    })
+                    .catch(e => {
+                        console.log('internal error with process graph validation');
+                        console.log(e);
+                        this.$set(this.supportedByPG, i, true);
+                    });
+                });
+            }
         },
         checkFilters(b) {
             // Little heads-up in case you're looking for the history of this method: It was previously located in the DiscoverSection component.
