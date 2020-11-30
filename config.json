@@ -7,7 +7,8 @@
         "VITO": "https://openeo.vito.be/",
         "EODC": "https://openeo.eodc.eu/",
         "mundialis": "https://openeo.mundialis.de/",
-        "Sentinel Hub": "https://openeo.sentinel-hub.com/production/"
+        "Sentinel Hub": "https://openeo.sentinel-hub.com/production/",
+        "WEkEO": "https://openeo.wekeo.eu/"
     },
     "unsuccessfulCrawls": {
         "flagAfter": 2,
