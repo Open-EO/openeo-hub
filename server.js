@@ -128,8 +128,15 @@ function enableCORS(req, res) {
 // Handlers for all endpoints
 // -------------------------------------------------------------------------------------
 
+// Easy access to URL parameters and payload content
 server.use(restify.plugins.queryParser({ mapParams: false }));
 server.use(restify.plugins.bodyParser({ mapParams: false }));
+
+// Prevent crashing when URL contains nullbytes (see https://github.com/restify/node-restify/issues/1864)
+server.pre((req, res, next) => {
+    req.url = req.url.replace(/%00|\u0000/g, '');
+    next();
+});
 
 
 // -------------------------------------------------------------------------------------
