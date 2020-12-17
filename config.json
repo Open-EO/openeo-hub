@@ -8,7 +8,8 @@
         "EODC": "https://openeo.eodc.eu/",
         "mundialis": "https://openeo.mundialis.de/",
         "Sentinel Hub": "https://openeo.sentinel-hub.com/production/",
-        "WEkEO": "https://openeo.wekeo.eu/"
+        "WEkEO": "https://openeo.wekeo.eu/",
+        "CREODIAS": "https://openeo.creo.vito.be/"
     },
     "unsuccessfulCrawls": {
         "flagAfter": 2,
