@@ -9,6 +9,7 @@ var db;
 const restify = require('restify');
 var server;
 
+const {ProcessRegistry, ProcessGraph} = require('@openeo/js-processgraphs');
 
 // -------------------------------------------------------------------------------------
 // Start server
@@ -312,6 +313,43 @@ server.get('/api/process_graphs/:id', function(req, res, next) {
                 res.send({message: "Not Found"});
                 next();
             }
+        })
+        .catch(err => next(err));
+});
+
+// validates the given `process_graph` for every URL from the `links` array
+// compliant to openEO API v1.0.1 (as long as only 1 URL is submitted)
+server.post('/api/validation', function(req, res, next) {
+    // treat each item of the `links` array as a backend URL and get their data (if available)
+    find({backend: {$in: req.body.links.map(b => b.href)}}, 'backends')
+        .then(data => {
+            
+            // for each that was found
+            let checks = data.map(b => {
+                // construct the ProcessRegistry from the given `process` data
+                const pr = new ProcessRegistry(b.processes);
+                // and the corresponding ProcessGraph object
+                const pg = new ProcessGraph(req.body.process_graph, pr);
+                // do the validation (is returned as promise, handle if it fails)
+                return pg.validate(false).catch(err => next(err));
+            });
+            
+            // when all promises have resolved
+            Promise.all(checks)
+            .then(checks => {
+                // send out result...
+                if(checks.length == 1) {
+                    // ...in openEO API spec-compliant format if it's just 1 backend
+                    res.send({errors: checks[0]});
+                    next();
+                } else {
+                    // ...as an array if there's more than 1 (not really spec-comliant, but as close as it can get for this case)
+                    res.send(checks.map(errlist => ({errors: errlist})));
+                    next();
+                }
+            })
+            .catch(err => next(err));
+
         })
         .catch(err => next(err));
 });

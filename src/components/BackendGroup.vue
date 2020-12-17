@@ -20,7 +20,7 @@ import Backend from './Backend.vue';
 import { Tab, Tabs } from '@openeo/vue-components';
 import {default as config} from './../../config.json';
 import { MigrateCapabilities } from '@openeo/js-commons';
-import { ProcessGraph, ProcessRegistry } from '@openeo/js-processgraphs';
+import axios from 'axios';
 
 export default {
     name: 'BackendGroup',
@@ -80,19 +80,28 @@ export default {
                     console.log('error during process graph parsing, is it valid JSON?');
                     console.log(e);
                 }
-                this.backends.forEach((b, i) => {
-                    const pr = new ProcessRegistry(b.processes);
-                    const pg = new ProcessGraph(pgparsed, pr);
-                    pg.validate(false)
-                    .then(errors => {
-                        this.$set(this.supportedByPG, i, errors.count() == 0);
+                // send process graph to server for validation
+                // use (or abuse?) the `links` field to specify the backend URL(s) for which the validation should take place
+                axios.post('/api/validation', {
+                    process_graph: pgparsed,
+                    links: this.backends.map(b => ({ rel: "related", href: b.backendUrl}))
+                })
+                    .then(response => {
+                        // if it was only 1 backend it will come back as an object, otherwise as an array of such objects
+                        let errorlists = (Array.isArray(response.data) ? response.data : [response.data]).map(e => e.errors);
+                        // set supportedByPG's items according to whether errors were reported or not
+                        errorlists.forEach((errlist, i) => {
+                            this.$set(this.supportedByPG, i, errlist.length == 0);
+                        });
                     })
-                    .catch(e => {
-                        console.log('internal error with process graph validation');
-                        console.log(e);
-                        this.$set(this.supportedByPG, i, true);
+                    .catch(error => {
+                        // default to true
+                        this.supportedByPG.forEach((e,i) => this.$set(this.supportedByPG, i, true));
+                        // output error
+                        console.log(error);
+                        console.log(error.response);
+                        alert(error.response.data.message);
                     });
-                });
             }
         },
         checkFilters(b) {
