@@ -43,14 +43,14 @@
                 <h4>{{collapsed.collections ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} collections ({{backend.collections.length}})</h4>
             </dt>
             <dd v-if="backend.collections && !collapsed.collections">
-                <CollectionWrapper v-for="collection in preparedBackend.collections" :key="collection.id" :collectionData="collection" :version="preparedBackend.api_version" :initiallyCollapsed="true"></CollectionWrapper>
+                <Collections :collections="preparedBackend.collections"></Collections>
             </dd>
             
             <dt v-if="backend.processes" @click="toggleProcesses">
                 <h4>{{collapsed.processes ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
             </dt>
             <dd v-if="preparedBackend.processes && !collapsed.processes">
-                <ProcessWrapper v-for="process in backend.processes" :key="process.id" :processData="process" :version="preparedBackend.api_version" :initiallyCollapsed="true" :provideDownload="false"></ProcessWrapper>
+                <Processes :processes="backend.processes" :provideDownload="false"></Processes>
             </dd>
 
             <dt v-if="backend.fileFormats && backend.fileFormats.input" @click="collapsed.inputFormats = !collapsed.inputFormats">
@@ -103,8 +103,8 @@ import UdfRuntimes from '@openeo/vue-components/components/UdfRuntimes.vue';
 import BillingPlans from '@openeo/vue-components/components/BillingPlans.vue';
 import Description from '@openeo/vue-components/components/Description.vue';
 import LinkList from '@openeo/vue-components/components/LinkList.vue';
-import CollectionWrapper from './CollectionWrapper.vue';
-import ProcessWrapper from './ProcessWrapper.vue';
+import Collections from '@openeo/vue-components/components/Collections.vue';
+import Processes from '@openeo/vue-components/components/Processes.vue';
 import axios from 'axios';
 
 export default {
@@ -120,8 +120,8 @@ export default {
         BillingPlans,
         DataRetrievedNotice,
         UnsuccessfulCrawlNotice,
-        CollectionWrapper,
-        ProcessWrapper
+        Collections,
+        Processes
     },
 
     created() {
