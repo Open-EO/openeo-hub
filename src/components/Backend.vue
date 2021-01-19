@@ -33,10 +33,10 @@
 
         <dl>
             <dt v-if="backend.endpoints" @click="collapsed.functionalities = !collapsed.functionalities">
-                <h4>{{collapsed.functionalities ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'Supported'}} functionalities {{supportedFunctionalitiesCount}}</h4>
+                <h4>{{collapsed.functionalities ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'Supported'}} functionalities</h4>
             </dt>
             <dd v-show="backend.endpoints && !collapsed.functionalities">
-                <SupportedFeatures :endpoints="preparedBackend.endpoints" :version="preparedBackend.api_version" ref="supportedFeaturesComponent"></SupportedFeatures>
+                <SupportedFeatures :endpoints="preparedBackend.endpoints"></SupportedFeatures>
             </dd>
 
             <dt v-if="backend.collections" @click="toggleCollections">
@@ -54,38 +54,38 @@
             </dd>
 
             <dt v-if="backend.fileFormats && backend.fileFormats.input" @click="collapsed.inputFormats = !collapsed.inputFormats">
-                <h4>{{collapsed.inputFormats ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} input formats ({{supportedInputFormatsCount}})</h4>
+                <h4>{{collapsed.inputFormats ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} input formats</h4>
             </dt>
             <dd v-if="backend.fileFormats && backend.fileFormats.input" v-show="!collapsed.inputFormats"> <!-- v-if to prevent errors when inputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
-                <FileFormats :formats="preparedBackend.fileFormats" version="1.0.0" :showInput="true" ref="supportedFileFormatsComponentInputs"></FileFormats>
+                <FileFormats :formats="preparedBackend.fileFormats" :showInput="true"></FileFormats>
             </dd>
 
             <dt v-if="backend.fileFormats && backend.fileFormats.output" @click="collapsed.outputFormats = !collapsed.outputFormats">
-                <h4>{{collapsed.outputFormats ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} output formats ({{supportedOutputFormatsCount}})</h4>
+                <h4>{{collapsed.outputFormats ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} output formats</h4>
             </dt>
             <dd v-if="backend.fileFormats && backend.fileFormats.output" v-show="!collapsed.outputFormats"> <!-- v-if to prevent errors when outputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
-                <FileFormats :formats="preparedBackend.fileFormats" version="1.0.0" :showOutput="true" ref="supportedFileFormatsComponentOutputs"></FileFormats>
+                <FileFormats :formats="preparedBackend.fileFormats" :showOutput="true"></FileFormats>
             </dd>
 
             <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
-                <h4>{{collapsed.serviceTypes ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} service types ({{supportedServiceTypesCount}})</h4>
+                <h4>{{collapsed.serviceTypes ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} service types</h4>
             </dt>
             <dd v-if="backend.serviceTypes" v-show="!collapsed.serviceTypes">
-                <ServiceTypes :services="preparedBackend.serviceTypes" :version="preparedBackend.api_version" ref="supportedServiceTypesComponent"></ServiceTypes>
+                <ServiceTypes :services="preparedBackend.serviceTypes"></ServiceTypes>
             </dd>
 
             <dt v-if="backend.udfRuntimes" @click="collapsed.udfRuntimes = !collapsed.udfRuntimes">
-                <h4>{{collapsed.udfRuntimes ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} UDF runtimes ({{supportedUdfRuntimesCount}})</h4>
+                <h4>{{collapsed.udfRuntimes ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} UDF runtimes</h4>
             </dt>
             <dd v-if="backend.udfRuntimes" v-show="!collapsed.udfRuntimes">
-                <UdfRuntimes :runtimes="preparedBackend.udfRuntimes" :version="preparedBackend.api_version" ref="supportedUdfRuntimesComponent"></UdfRuntimes>
+                <UdfRuntimes :runtimes="preparedBackend.udfRuntimes"></UdfRuntimes>
             </dd>
 
             <dt v-if="backend.billing" @click="collapsed.billing = !collapsed.billing">
                 <h4>{{collapsed.billing ? '▸' : '▾'}} Billing information</h4>
             </dt>
             <dd v-if="backend.billing && !collapsed.billing" class="billing">
-                <BillingPlans :billing="backend.billing" :version="preparedBackend.api_version"></BillingPlans>
+                <BillingPlans :billing="backend.billing"></BillingPlans>
             </dd>
         </dl>
 
@@ -185,12 +185,7 @@ export default {
                 serviceTypes: true,
                 udfRuntimes: true,
                 billing: true
-            },
-            supportedFunctionalitiesCount: '',
-            supportedInputFormatsCount: undefined,
-            supportedOutputFormatsCount: undefined,
-            supportedServiceTypesCount: undefined,
-            supportedUdfRuntimesCount: undefined
+            }
 		};
     },
 
