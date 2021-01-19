@@ -33,42 +33,42 @@
 
         <dl>
             <dt v-if="backend.endpoints" @click="collapsed.functionalities = !collapsed.functionalities">
-                <h4>{{collapsed.functionalities ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'Supported'}} functionalities</h4>
+                <h4>{{collapsed.functionalities ? '▸' : '▾'}} Supported functionalities</h4>
             </dt>
             <dd v-show="backend.endpoints && !collapsed.functionalities">
                 <SupportedFeatures :endpoints="preparedBackend.endpoints"></SupportedFeatures>
             </dd>
 
             <dt v-if="backend.collections" @click="toggleCollections">
-                <h4>{{collapsed.collections ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} collections ({{backend.collections.length}})</h4>
+                <h4>{{collapsed.collections ? '▸' : '▾'}} All collections ({{backend.collections.length}})</h4>
             </dt>
             <dd v-if="backend.collections && !collapsed.collections">
                 <Collections :collections="preparedBackend.collections"></Collections>
             </dd>
             
             <dt v-if="backend.processes" @click="toggleProcesses">
-                <h4>{{collapsed.processes ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} processes ({{backend.processes.length}})</h4>
+                <h4>{{collapsed.processes ? '▸' : '▾'}} All processes ({{backend.processes.length}})</h4>
             </dt>
             <dd v-if="preparedBackend.processes && !collapsed.processes">
                 <Processes :processes="backend.processes" :provideDownload="false"></Processes>
             </dd>
 
             <dt v-if="backend.fileFormats" @click="collapsed.fileFormats = !collapsed.fileFormats">
-                <h4>{{collapsed.fileFormats ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} file formats</h4>
+                <h4>{{collapsed.fileFormats ? '▸' : '▾'}} All file formats</h4>
             </dt>
             <dd v-if="backend.fileFormats" v-show="!collapsed.fileFormats">
                 <FileFormats :formats="preparedBackend.fileFormats" :showInput="true" :showOutput="true"></FileFormats>
             </dd>
 
             <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
-                <h4>{{collapsed.serviceTypes ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} service types</h4>
+                <h4>{{collapsed.serviceTypes ? '▸' : '▾'}} All service types</h4>
             </dt>
             <dd v-if="backend.serviceTypes" v-show="!collapsed.serviceTypes">
                 <ServiceTypes :services="preparedBackend.serviceTypes"></ServiceTypes>
             </dd>
 
             <dt v-if="backend.udfRuntimes" @click="collapsed.udfRuntimes = !collapsed.udfRuntimes">
-                <h4>{{collapsed.udfRuntimes ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} UDF runtimes</h4>
+                <h4>{{collapsed.udfRuntimes ? '▸' : '▾'}} All UDF runtimes</h4>
             </dt>
             <dd v-if="backend.udfRuntimes" v-show="!collapsed.udfRuntimes">
                 <UdfRuntimes :runtimes="preparedBackend.udfRuntimes"></UdfRuntimes>
@@ -102,7 +102,7 @@ import axios from 'axios';
 
 export default {
 	name: 'Backend',
-	props: ['backendData', 'collapsible', 'initiallyCollapsed', 'isSearchResult', 'showVersion'],
+	props: ['backendData', 'collapsible', 'initiallyCollapsed', 'showVersion'],
 	components: {
         Description,
         LinkList,
@@ -121,16 +121,6 @@ export default {
         var original = this.backend;
 
         // normalizing of `processes` array entries (via `convertProcessToLatestSpec`) is done by the Process component
-
-        // don't touch search result because order may be important
-        // but when we get a long list for the discovery section having it sorted alphabetically is very handy
-        if(!this.isSearchResult) {
-            const sortCallback = (e1, e2) => e1.toLowerCase() > e2.toLowerCase();
-            const sortCallbackName = (e1, e2) => e1.id.toLowerCase() > e2.id.toLowerCase();
-            // ternary operator check in case the property is `null`
-            original.collections = original.collections ? original.collections.sort(sortCallbackName) : null;
-            original.processes = original.processes ? original.processes.sort(sortCallbackName) : null;
-        }
 
         if(original.endpoints) {
             // convert `endpoints` array from `['METHOD path', 'METHOD2 path', ...]` format into `[{path:'path', methods:['METHOD','METHOD2']}, ...]` format
