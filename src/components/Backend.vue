@@ -53,18 +53,11 @@
                 <Processes :processes="backend.processes" :provideDownload="false"></Processes>
             </dd>
 
-            <dt v-if="backend.fileFormats && backend.fileFormats.input" @click="collapsed.inputFormats = !collapsed.inputFormats">
-                <h4>{{collapsed.inputFormats ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} input formats</h4>
+            <dt v-if="backend.fileFormats" @click="collapsed.fileFormats = !collapsed.fileFormats">
+                <h4>{{collapsed.fileFormats ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} file formats</h4>
             </dt>
-            <dd v-if="backend.fileFormats && backend.fileFormats.input" v-show="!collapsed.inputFormats"> <!-- v-if to prevent errors when inputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
-                <FileFormats :formats="preparedBackend.fileFormats" :showInput="true"></FileFormats>
-            </dd>
-
-            <dt v-if="backend.fileFormats && backend.fileFormats.output" @click="collapsed.outputFormats = !collapsed.outputFormats">
-                <h4>{{collapsed.outputFormats ? '▸' : '▾'}} {{isSearchResult ? 'Matched' : 'All'}} output formats</h4>
-            </dt>
-            <dd v-if="backend.fileFormats && backend.fileFormats.output" v-show="!collapsed.outputFormats"> <!-- v-if to prevent errors when outputFormats is not present. If it is present: v-show to always render -> allow retrieval of item count (-> heading) from SupportedFileFormats component -->
-                <FileFormats :formats="preparedBackend.fileFormats" :showOutput="true"></FileFormats>
+            <dd v-if="backend.fileFormats" v-show="!collapsed.fileFormats">
+                <FileFormats :formats="preparedBackend.fileFormats" :showInput="true" :showOutput="true"></FileFormats>
             </dd>
 
             <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
@@ -180,8 +173,7 @@ export default {
                 functionalities: false,
                 collections: true,
                 processes: true,
-                inputFormats: true,
-                outputFormats: true,
+                fileFormats: true,
                 serviceTypes: true,
                 udfRuntimes: true,
                 billing: true
