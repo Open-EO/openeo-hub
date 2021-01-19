@@ -1,10 +1,10 @@
 <template>
-	<Process :processData="processData" :version="version" :initiallyCollapsed="initiallyCollapsed" :provideDownload="provideDownload">
+	<Process :process="processData" :version="version" :initiallyCollapsed="initiallyCollapsed" :provideDownload="provideDownload">
 	</Process>
 </template>
 
 <script>
-import { Process } from '@openeo/vue-components';
+import Process from '@openeo/vue-components/components/Process.vue';
 
 export default {
 	name: 'ProcessWrapper',

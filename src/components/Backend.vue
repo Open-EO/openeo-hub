@@ -96,7 +96,13 @@
 <script>
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
-import { SupportedFeatures, FileFormats, ServiceTypes, UdfRuntimes, BillingPlans, Description, LinkList } from '@openeo/vue-components';
+import SupportedFeatures from '@openeo/vue-components/components/SupportedFeatures.vue';
+import FileFormats from '@openeo/vue-components/components/FileFormats.vue';
+import ServiceTypes from '@openeo/vue-components/components/ServiceTypes.vue';
+import UdfRuntimes from '@openeo/vue-components/components/UdfRuntimes.vue';
+import BillingPlans from '@openeo/vue-components/components/BillingPlans.vue';
+import Description from '@openeo/vue-components/components/Description.vue';
+import LinkList from '@openeo/vue-components/components/LinkList.vue';
 import CollectionWrapper from './CollectionWrapper.vue';
 import ProcessWrapper from './ProcessWrapper.vue';
 import axios from 'axios';
@@ -162,26 +168,6 @@ export default {
         webEditorUnavailable() {
             // unavailable if api_version is known and starts with '0.3' (treat as available if api_version is not known)
             return (this.preparedBackend.api_version && this.preparedBackend.api_version.substr(0,3) == '0.3');
-        }
-    },
-
-    mounted: function() {
-        if(this.$refs.supportedFeaturesComponent != undefined) {
-            const supported = this.$refs.supportedFeaturesComponent.getSupportedFeatureCount();
-            const total = this.$refs.supportedFeaturesComponent.getFeatureCount();
-            this.supportedFunctionalitiesCount = '(' + supported + '/' + total + ')';
-        }
-        if(this.$refs.supportedFileFormatsComponentInputs != undefined) {
-            this.supportedInputFormatsCount = this.$refs.supportedFileFormatsComponentInputs.getCount();
-        }
-        if(this.$refs.supportedFileFormatsComponentOutputs != undefined) {
-            this.supportedOutputFormatsCount = this.$refs.supportedFileFormatsComponentOutputs.getCount();
-        }
-        if(this.$refs.supportedServiceTypesComponent != undefined) {
-            this.supportedServiceTypesCount = this.$refs.supportedServiceTypesComponent.getCount();
-        }
-        if(this.$refs.supportedUdfRuntimesComponent != undefined) {
-            this.supportedUdfRuntimesCount = this.$refs.supportedUdfRuntimesComponent.getCount();
         }
     },
 

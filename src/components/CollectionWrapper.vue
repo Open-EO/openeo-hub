@@ -1,5 +1,5 @@
 <template>
-	<Collection :collectionData="collectionData" :version="version" :initiallyCollapsed="initiallyCollapsed" :mapOptions="{scrollWheelZoom: false, wrapAroundAntimeridian: false}">
+	<Collection :collection="collectionData" :version="version" :initiallyCollapsed="initiallyCollapsed" :mapOptions="{scrollWheelZoom: false, wrapAroundAntimeridian: false}">
 		<template slot="collection-before-details">
 			<UnsuccessfulCrawlNotice :unsuccessfulCrawls="collectionData.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
 			<DataRetrievedNotice :timestamp="collectionData.retrieved"></DataRetrievedNotice>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { Collection } from '@openeo/vue-components';
+import Collection from '@openeo/vue-components/components/Collection.vue';
 import "leaflet/dist/leaflet.css";
 // The notices can still be of use in CollectionWrapper because `/collections/{id}` is a separate openEO API endpoint that has to be crawled separately (this is not the case for the ProcessWrapper)
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
