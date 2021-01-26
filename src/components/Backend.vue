@@ -18,7 +18,7 @@
             </div>
         </h3>
 
-        <div v-if="!collapsed.root">
+        <div v-if="!collapsed.root" class="backend-body">
 
         <Description v-if="preparedBackend.description" :description="preparedBackend.description" :compact="true" class="scroll-if-too-long"></Description>
 
@@ -31,56 +31,17 @@
         <div v-if="preparedBackend.api_version > '1' && !preparedBackend.production" class="warning">⚠ This service is NOT production-ready.</div>
         <div v-if="preparedBackend.api_version > '1' &&  preparedBackend.production" class="info">✔️ This service is production-ready.</div>
 
-        <dl>
-            <dt v-if="backend.endpoints" @click="collapsed.functionalities = !collapsed.functionalities">
-                <h4>{{collapsed.functionalities ? '▸' : '▾'}} Supported functionalities</h4>
-            </dt>
-            <dd v-show="backend.endpoints && !collapsed.functionalities">
-                <SupportedFeatures :endpoints="preparedBackend.endpoints"></SupportedFeatures>
-            </dd>
+        <SupportedFeatures v-if="backend.endpoints" :endpoints="preparedBackend.endpoints"></SupportedFeatures>
+        <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" :collections="preparedBackend.collections"></Collections>
+        <Processes    v-if="backend.processes"    :collapsed="true" @headingToggled="toggleProcesses" :processes="backend.processes" :provideDownload="false"></Processes>
+        <FileFormats  v-if="backend.fileFormats"  :collapsed="true" :searchTerm="''" :formats="preparedBackend.fileFormats" :showInput="true" :showOutput="true"></FileFormats>
+        <ServiceTypes v-if="backend.serviceTypes" :collapsed="true" :searchTerm="''" :services="preparedBackend.serviceTypes"></ServiceTypes>
+        <UdfRuntimes  v-if="backend.udfRuntimes"  :collapsed="true" :searchTerm="''" :runtimes="preparedBackend.udfRuntimes"></UdfRuntimes>
 
-            <dt v-if="backend.collections" @click="toggleCollections">
-                <h4>{{collapsed.collections ? '▸' : '▾'}} All collections ({{backend.collections.length}})</h4>
-            </dt>
-            <dd v-if="backend.collections && !collapsed.collections">
-                <Collections :collections="preparedBackend.collections"></Collections>
-            </dd>
-            
-            <dt v-if="backend.processes" @click="toggleProcesses">
-                <h4>{{collapsed.processes ? '▸' : '▾'}} All processes ({{backend.processes.length}})</h4>
-            </dt>
-            <dd v-if="preparedBackend.processes && !collapsed.processes">
-                <Processes :processes="backend.processes" :provideDownload="false"></Processes>
-            </dd>
-
-            <dt v-if="backend.fileFormats" @click="collapsed.fileFormats = !collapsed.fileFormats">
-                <h4>{{collapsed.fileFormats ? '▸' : '▾'}} All file formats</h4>
-            </dt>
-            <dd v-if="backend.fileFormats" v-show="!collapsed.fileFormats">
-                <FileFormats :formats="preparedBackend.fileFormats" :showInput="true" :showOutput="true"></FileFormats>
-            </dd>
-
-            <dt v-if="backend.serviceTypes" @click="collapsed.serviceTypes = !collapsed.serviceTypes">
-                <h4>{{collapsed.serviceTypes ? '▸' : '▾'}} All service types</h4>
-            </dt>
-            <dd v-if="backend.serviceTypes" v-show="!collapsed.serviceTypes">
-                <ServiceTypes :services="preparedBackend.serviceTypes"></ServiceTypes>
-            </dd>
-
-            <dt v-if="backend.udfRuntimes" @click="collapsed.udfRuntimes = !collapsed.udfRuntimes">
-                <h4>{{collapsed.udfRuntimes ? '▸' : '▾'}} All UDF runtimes</h4>
-            </dt>
-            <dd v-if="backend.udfRuntimes" v-show="!collapsed.udfRuntimes">
-                <UdfRuntimes :runtimes="preparedBackend.udfRuntimes"></UdfRuntimes>
-            </dd>
-
-            <dt v-if="backend.billing" @click="collapsed.billing = !collapsed.billing">
-                <h4>{{collapsed.billing ? '▸' : '▾'}} Billing information</h4>
-            </dt>
-            <dd v-if="backend.billing && !collapsed.billing" class="billing">
-                <BillingPlans :billing="backend.billing"></BillingPlans>
-            </dd>
-        </dl>
+        <div v-if="backend.billing" :class="{billing: 1, expanded: !collapsed.billing}">
+            <h4 @click="collapsed.billing = !collapsed.billing">Billing Information</h4>
+            <BillingPlans v-if="backend.billing && !collapsed.billing" :billing="backend.billing" :heading="null"></BillingPlans>
+        </div>
 
         </div>
     </div>
@@ -160,12 +121,6 @@ export default {
             preparedBackend: null,
             collapsed: {
                 root: (this.collapsible || false) && (this.initiallyCollapsed || false),
-                functionalities: false,
-                collections: true,
-                processes: true,
-                fileFormats: true,
-                serviceTypes: true,
-                udfRuntimes: true,
                 billing: true
             }
 		};
@@ -173,23 +128,21 @@ export default {
 
     methods: {
         async toggleCollections() {
-            if(this.collapsed.collections && Array.isArray(this.preparedBackend.collections) && this.preparedBackend.collections.length > 0 && Object.keys(this.preparedBackend.collections[0]).length == 1) {
+            if(Array.isArray(this.preparedBackend.collections) && this.preparedBackend.collections.length > 0 && Object.keys(this.preparedBackend.collections[0]).length == 1) {
                 document.body.classList.add('loading');
                 let request = await axios.get('/api/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections');
                 this.preparedBackend.collections = request.data;
                 document.body.classList.remove('loading');
             }
-            this.collapsed.collections = !this.collapsed.collections;
         },
 
         async toggleProcesses() {
-            if(this.collapsed.processes && Array.isArray(this.preparedBackend.processes) && this.preparedBackend.processes.length > 0 && Object.keys(this.preparedBackend.processes[0]).length == 1) {
+            if(Array.isArray(this.preparedBackend.processes) && this.preparedBackend.processes.length > 0 && Object.keys(this.preparedBackend.processes[0]).length == 1) {
                 document.body.classList.add('loading');
                 let request = await axios.get('/api/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/processes');
                 this.preparedBackend.processes = request.data;
                 document.body.classList.remove('loading');
             }
-            this.collapsed.processes = !this.collapsed.processes;
         }
     }
 }
@@ -217,11 +170,8 @@ body.loading h3, body.loading h4 {
     overflow-y: auto;
 }
 
-dd {
+.vue-component {
 	margin-bottom: 10px;
-}
-dd > ul {
-	padding-left: 15px;
 }
 
 div.warning {
@@ -232,9 +182,31 @@ div.info {
     color: green;
     margin-top: 10px;
 }
+
+.billing {
+    padding-left: 40px;  /* to indent content */
+}
+.billing h4 {
+    margin-left: -40px;  /* to reverse indentation for heading */
+    padding-left: 1em;   /* to make room for the collapsing arrow */
+}
+.billing h4:before {     /* taken from openeo-vue-components/components/SearchableList.vue */
+	content: "▸";
+	margin-left: -1em;
+	float: left;
+	font-size: 1em;
+}
+.billing.expanded h4:before {    /* also taken from there */
+	content: "▾";
+}
 </style>
 
 <style>
+.backend-body > .vue-component > .searchable-list > .body,
+.backend-body > .vue-component.features > ul {
+    margin-left: 40px;   /* to indent content */
+}
+
 .link-list ul {
     margin-top: 5px;
     padding-left: 20px;

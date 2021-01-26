@@ -240,6 +240,7 @@ main > section p:first-child {
 #discover-filters h4:not(:first-of-type) {
 	margin-top: 20px;
 }
+#discover-list .vue-component > h2,
 #discover-list h4,
 #discover-list h5 {
 	font-size: 100%;
