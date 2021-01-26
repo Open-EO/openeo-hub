@@ -155,9 +155,6 @@ export default {
 h4 {
     cursor: pointer;
 }
-body.loading h3, body.loading h4 {
-    cursor: wait;
-}
 .open-in-web-editor {
     float: right;
 }
@@ -205,6 +202,10 @@ div.info {
 .backend-body > .vue-component > .searchable-list > .body,
 .backend-body > .vue-component.features > ul {
     margin-left: 40px;   /* to indent content */
+}
+
+body.loading h2, body.loading h3, body.loading h4, body.loading .summary {
+    cursor: wait !important;
 }
 
 .link-list ul {
