@@ -32,7 +32,30 @@
         <div v-if="preparedBackend.api_version > '1' &&  preparedBackend.production" class="info">✔️ This service is production-ready.</div>
 
         <SupportedFeatures v-if="backend.endpoints" :endpoints="preparedBackend.endpoints"></SupportedFeatures>
-        <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" :collections="preparedBackend.collections"></Collections>
+        <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" :collections="preparedBackend.collections">
+            <template #collection-before-description="props">
+                <UnsuccessfulCrawlNotice :unsuccessfulCrawls="props.collection.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
+                <DataRetrievedNotice :timestamp="props.collection.retrieved"></DataRetrievedNotice>
+            </template>
+            <template #collection-temporal-extents="props">
+                <div v-for="extent in props.extents">
+                    <div v-if="extent[0] == extent[1]">
+                        <FormattedTimestamp :timestamp="extent[0]"></FormattedTimestamp>
+                    </div>
+                    <div v-else-if="extent[0] == null">
+                        Until <FormattedTimestamp :timestamp="extent[1]"></FormattedTimestamp>
+                    </div>
+                    <div v-else-if="extent[1] == null">
+                        <FormattedTimestamp :timestamp="extent[0]"></FormattedTimestamp> until present
+                    </div>
+                    <div v-else>
+                        <FormattedTimestamp :timestamp="extent[0]"></FormattedTimestamp>
+                        &ndash;
+                        <FormattedTimestamp :timestamp="extent[1]"></FormattedTimestamp>
+                    </div>
+                </div>
+            </template>
+        </Collections>
         <Processes    v-if="backend.processes"    :collapsed="true" @headingToggled="toggleProcesses" :processes="backend.processes" :provideDownload="false"></Processes>
         <FileFormats  v-if="backend.fileFormats"  :collapsed="true" :searchTerm="''" :formats="preparedBackend.fileFormats" :showInput="true" :showOutput="true"></FileFormats>
         <ServiceTypes v-if="backend.serviceTypes" :collapsed="true" :searchTerm="''" :services="preparedBackend.serviceTypes"></ServiceTypes>
@@ -50,6 +73,7 @@
 <script>
 import DataRetrievedNotice from './DataRetrievedNotice.vue';
 import UnsuccessfulCrawlNotice from './UnsuccessfulCrawlNotice.vue';
+import FormattedTimestamp from './FormattedTimestamp.vue';
 import SupportedFeatures from '@openeo/vue-components/components/SupportedFeatures.vue';
 import FileFormats from '@openeo/vue-components/components/FileFormats.vue';
 import ServiceTypes from '@openeo/vue-components/components/ServiceTypes.vue';
@@ -74,6 +98,7 @@ export default {
         BillingPlans,
         DataRetrievedNotice,
         UnsuccessfulCrawlNotice,
+        FormattedTimestamp,
         Collections,
         Processes
     },
