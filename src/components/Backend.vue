@@ -34,8 +34,8 @@
         <SupportedFeatures v-if="backend.endpoints" :endpoints="preparedBackend.endpoints"></SupportedFeatures>
         <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" :collections="preparedBackend.collections">
             <template #collection-before-description="props">
-                <UnsuccessfulCrawlNotice :unsuccessfulCrawls="props.collection.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
-                <DataRetrievedNotice :timestamp="props.collection.retrieved"></DataRetrievedNotice>
+                <UnsuccessfulCrawlNotice :unsuccessfulCrawls="props.data.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
+                <DataRetrievedNotice :timestamp="props.data.retrieved"></DataRetrievedNotice>
             </template>
             <template #collection-temporal-extents="props">
                 <div v-for="extent in props.extents">
