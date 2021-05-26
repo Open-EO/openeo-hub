@@ -32,7 +32,7 @@
         <div v-if="preparedBackend.api_version > '1' &&  preparedBackend.production" class="info">✔️ This service is production-ready.</div>
 
         <SupportedFeatures v-if="backend.endpoints" :endpoints="preparedBackend.endpoints"></SupportedFeatures>
-        <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" :collections="preparedBackend.collections">
+        <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" :collections="preparedBackend.collections" :mapOptions="{scrollWheelZoom: false, wrapAroundAntimeridian: false}">
             <template #collection-before-description="props">
                 <UnsuccessfulCrawlNotice :unsuccessfulCrawls="props.data.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
                 <DataRetrievedNotice :timestamp="props.data.retrieved"></DataRetrievedNotice>
