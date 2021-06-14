@@ -33,9 +33,9 @@
     "start:dev": "vue-cli-service build --mode development && node server.js"
   },
   "dependencies": {
-    "@openeo/js-commons": "1.0.0-rc.3",
+    "@openeo/js-commons": "^1.0.0-rc.3",
     "@openeo/js-processgraphs": "1.0.0-beta.5",
-    "@openeo/vue-components": "2.1.0",
+    "@openeo/vue-components": "2.1.1",
     "axios": "^0.21.1",
     "moment": "^2.22.2",
     "mongodb": "^3.5.2",

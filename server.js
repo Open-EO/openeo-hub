@@ -187,6 +187,14 @@ server.get('/api/backends/:backend/collections', function(req, res, next) {
         .catch(err => next(err));
 });
 
+// return collection details of a specific collection of a single backend
+server.get('/api/backends/:backend/collections/:identifier', function(req, res, next) {
+    findOne({backend: decodeURIComponent(req.params.backend), path: '/collections/'+req.params.identifier}, 'raw')  // manual decoding due to double-encoding of `backend` param
+        .then(prepare)
+        .then(data => { res.send(data.content); next(); })
+        .catch(err => next(err));
+});
+
 // return process details of a single backend
 server.get('/api/backends/:backend/processes', function(req, res, next) {
     find({backend: decodeURIComponent(req.params.backend)}, 'processes') // manual decoding due to double-encoding (see Backend.vue#171 as of 2019-07-17)

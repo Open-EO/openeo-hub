@@ -32,7 +32,7 @@
         <div v-if="preparedBackend.api_version > '1' &&  preparedBackend.production" class="info">✔️ This service is production-ready.</div>
 
         <SupportedFeatures v-if="backend.endpoints" :endpoints="preparedBackend.endpoints"></SupportedFeatures>
-        <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" :collections="preparedBackend.collections" :mapOptions="{scrollWheelZoom: false, wrapAroundAntimeridian: false}">
+        <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" @detailsToggled="toggleCollection" :collections="preparedBackend.collections" :mapOptions="{scrollWheelZoom: false, wrapAroundAntimeridian: false}">
             <template #collection-before-description="props">
                 <UnsuccessfulCrawlNotice :unsuccessfulCrawls="props.data.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
                 <DataRetrievedNotice :timestamp="props.data.retrieved"></DataRetrievedNotice>
@@ -152,6 +152,15 @@ export default {
     },
 
     methods: {
+        async toggleCollection(expanded, key, identifier, data) {
+            // get the detailed information about the collection
+            let request = await axios.get('/api/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections/'+encodeURIComponent(identifier));
+            // find the corresponding entry in the supplied data
+            let datapoint = this.preparedBackend.collections.find(c => c.id == identifier);
+            // loop through keys because `this.$set(data, key, request.data)` doesn't work properly
+            Object.keys(request.data).forEach(k => this.$set(datapoint, k, request.data[k]));
+        },
+
         async toggleCollections() {
             if(Array.isArray(this.preparedBackend.collections) && this.preparedBackend.collections.length > 0 && Object.keys(this.preparedBackend.collections[0]).length == 1) {
                 document.body.classList.add('loading');
