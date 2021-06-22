@@ -189,7 +189,7 @@ server.get('/api/backends/:backend/collections', function(req, res, next) {
 
 // return collection details of a specific collection of a single backend
 server.get('/api/backends/:backend/collections/:identifier', function(req, res, next) {
-    findOne({backend: decodeURIComponent(req.params.backend), path: '/collections/'+req.params.identifier}, 'raw')  // manual decoding due to double-encoding of `backend` param
+    findOne({backend: decodeURIComponent(req.params.backend), path: '/collections/'+decodeURIComponent(req.params.identifier)}, 'raw')  // manual decoding due to double-encoding of params
         .then(prepare)
         .then(data => { res.send(data.content); next(); })
         .catch(err => next(err));

@@ -154,7 +154,7 @@ export default {
     methods: {
         async toggleCollection(expanded, key, identifier, data) {
             // get the detailed information about the collection
-            let request = await axios.get('/api/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections/'+encodeURIComponent(identifier));
+            let request = await axios.get('/api/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections/'+encodeURIComponent(encodeURIComponent(identifier)));
             // find the corresponding entry in the supplied data
             let datapoint = this.preparedBackend.collections.find(c => c.id == identifier);
             // loop through keys because `this.$set(data, key, request.data)` doesn't work properly
