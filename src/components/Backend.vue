@@ -56,7 +56,7 @@
                 </div>
             </template>
         </Collections>
-        <Processes    v-if="backend.processes"    :collapsed="true" @headingToggled="toggleProcesses" :processes="backend.processes" :provideDownload="false"></Processes>
+        <Processes    v-if="backend.processes"    :collapsed="true" @headingToggled="toggleProcesses" :processes="backend.processes" :provideDownload="false" :showGraph="true"></Processes>
         <FileFormats  v-if="backend.fileFormats"  :collapsed="true" :searchTerm="''" :formats="preparedBackend.fileFormats" :showInput="true" :showOutput="true"></FileFormats>
         <ServiceTypes v-if="backend.serviceTypes" :collapsed="true" :searchTerm="''" :services="preparedBackend.serviceTypes"></ServiceTypes>
         <UdfRuntimes  v-if="backend.udfRuntimes"  :collapsed="true" :searchTerm="''" :runtimes="preparedBackend.udfRuntimes"></UdfRuntimes>
