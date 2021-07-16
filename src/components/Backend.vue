@@ -32,7 +32,7 @@
         <div v-if="preparedBackend.api_version > '1' &&  preparedBackend.production" class="info">✔️ This service is production-ready.</div>
 
         <SupportedFeatures v-if="backend.endpoints" :endpoints="preparedBackend.endpoints"></SupportedFeatures>
-        <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" @detailsToggled="toggleCollection" :collections="preparedBackend.collections" :mapOptions="{scrollWheelZoom: false, wrapAroundAntimeridian: false}">
+        <Collections  v-if="backend.collections"  :collapsed="true" @headingToggled="toggleCollections" :loadAdditionalData="loadCollectionDetails" :collections="preparedBackend.collections" :mapOptions="{scrollWheelZoom: false, wrapAroundAntimeridian: false}">
             <template #collection-before-description="props">
                 <UnsuccessfulCrawlNotice :unsuccessfulCrawls="props.data.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
                 <DataRetrievedNotice :timestamp="props.data.retrieved"></DataRetrievedNotice>
@@ -152,13 +152,11 @@ export default {
     },
 
     methods: {
-        async toggleCollection(expanded, key, identifier, data) {
+        async loadCollectionDetails(key, identifier, data) {
             // get the detailed information about the collection
             let request = await axios.get('/api/backends/' + encodeURIComponent(encodeURIComponent(this.backend.backendUrl))+'/collections/'+encodeURIComponent(encodeURIComponent(identifier)));
-            // find the corresponding entry in the supplied data
-            let datapoint = this.preparedBackend.collections.find(c => c.id == identifier);
-            // loop through keys because `this.$set(data, key, request.data)` doesn't work properly
-            Object.keys(request.data).forEach(k => this.$set(datapoint, k, request.data[k]));
+            // return it to the Collections component
+            return request.data;
         },
 
         async toggleCollections() {
