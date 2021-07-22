@@ -2,9 +2,9 @@
     <section id="discover">
 		<section id="discover-list">
 			<p>This is a list of all known openEO providers and their services:</p>
-			<ul class="backendlist" ref="backendlist">
+			<ul class="backendlist">
 				<li v-for="group in allBackendGroups" :key="group.name">
-					<BackendGroup :groupName="group.name" :backends="group.backends" :filters="filters"></BackendGroup>
+					<BackendGroup :groupName="group.name" :backends="group.backends" :filters="filters" ref="backendGroupComponents"></BackendGroup>
 				</li>
 			</ul>
 			<em v-if="noFilterMatches">No service matches your search criteria.</em>
@@ -159,10 +159,10 @@ export default {
 			deep: true,  // to watch all changes within the object
 			handler: function(newVal, oldVal) {
 				this.$nextTick(() => {  // because DOM might not be updated yet
-				    // for every item of the list
-					this.noFilterMatches = Array.from(this.$refs.backendlist.children).every(
-						// test whether its BackendGroup component has been entirely hidden by its v-show
-						li => li.firstChild.style.display == 'none'
+				    // for every BackendGroup component
+					this.noFilterMatches = this.$refs.backendGroupComponents.every(
+						// test whether its HTML element has been entirely hidden due to the v-show
+						bg => bg.$el.style.display == 'none'
 					)
 				})
 			}
