@@ -2,11 +2,12 @@
     <section id="discover">
 		<section id="discover-list">
 			<p>This is a list of all known openEO providers and their services:</p>
-			<ul class="backendlist">
+			<ul class="backendlist" ref="backendlist">
 				<li v-for="group in allBackendGroups" :key="group.name">
 					<BackendGroup :groupName="group.name" :backends="group.backends" :filters="filters"></BackendGroup>
 				</li>
 			</ul>
+			<em v-if="noFilterMatches">No service matches your search criteria.</em>
 		</section>
 
 		<section id="discover-filters">
@@ -141,7 +142,8 @@ export default {
 				processGraph: '',
 				serviceTypes: [],
 				udfRuntimes: []
-			}
+			},
+			noFilterMatches: false
 		};
 	},
 	computed: {
@@ -150,6 +152,20 @@ export default {
 		},
 		optionProcesses: function() {
 			return this.searchedProcesses.concat(this.taggedProcesses);
+		}
+	},
+	watch: {
+		filters: {
+			deep: true,  // to watch all changes within the object
+			handler: function(newVal, oldVal) {
+				this.$nextTick(() => {  // because DOM might not be updated yet
+				    // for every item of the list
+					this.noFilterMatches = Array.from(this.$refs.backendlist.children).every(
+						// test whether its BackendGroup component has been entirely hidden by its v-show
+						li => li.firstChild.style.display == 'none'
+					)
+				})
+			}
 		}
 	},
 	mounted() {
