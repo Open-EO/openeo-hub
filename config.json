@@ -2,6 +2,7 @@
     "dbUrl": "mongodb://localhost:27017",
     "dbName": "openeohub",
     "backends": {
+        "openEO Platform": "https://openeo.cloud/",
         "Google Earth Engine": "https://earthengine.openeo.org/",
         "EURAC": "https://openeo.eurac.edu/",
         "VITO": "https://openeo.vito.be/",
