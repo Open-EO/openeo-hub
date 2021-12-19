@@ -34,6 +34,9 @@ This app is deployed at https://hub.openeo.org/.
 
 If you want to set it up yourself, follow these steps:
 
+### Requirements
+Required is Node.js (confirmed to work from version 10 onwards, possibly even earlier) and a MongoDB server (at least version 3.6 to support field names that contain `.` or `$`, [see here](https://docs.mongodb.com/v4.0/reference/limits/#Restrictions-on-Field-Names)).
+
 ### Database
 1. Install MongoDB, especially `mongod` (tested with v4.0.4)
 2. Start it (with write access to the dbpath) - e.g. `sudo mongod --dbpath /var/lib/mongodb`

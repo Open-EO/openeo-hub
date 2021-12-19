@@ -158,6 +158,9 @@ mongo.connect(async (error, client) => {
                     // save to database
                     var data = response.data;
                     try {
+                        // In the $set part, findOneAndUpdate doesn't allow field names that contain '.' or '$', see https://jira.mongodb.org/browse/SERVER-30575
+                        // And that despite the MongoDB server allowing this since version 3.6, see https://docs.mongodb.com/v4.0/reference/limits/#Restrictions-on-Field-Names
+                        /*
                         await collection.findOneAndUpdate(
                             { service: serviceUrl, api_version: api_version, path: path },
                             { $set: {
@@ -170,6 +173,23 @@ mongo.connect(async (error, client) => {
                             }},
                             { upsert: true }
                         )
+                        */
+                        // Therefore do the same behaviour (an upsert) manually:
+                        // (as officially suggested by MongoDB staff at https://jira.mongodb.org/browse/SERVER-30575?focusedCommentId=1821530#comment-1821530)
+                        // (we can't use updateOne because that does the same annoying check as findOneAndUpdate, only insertOne bypasses it, therefore we do a delete+insert instead of an update)
+                        let foundItem = await collection.findOne({ service: serviceUrl, api_version: api_version, path: path });
+                        if(foundItem) await collection.deleteOne({ service: serviceUrl, api_version: api_version, path: path });
+                        await collection.insertOne({
+                            service: serviceUrl,
+                            api_version: api_version,
+                            path: path,
+                            backend: backendUrl,
+                            backendTitle: backendTitle,
+                            group: name,
+                            content: data,
+                            retrieved: new Date().toJSON(),
+                            unsuccessfulCrawls: 0
+                        });
                     }
                     catch(error) {
                         console.log('An error occurred while writing to the database (' + error.name + ': ' + error.message + ')');
