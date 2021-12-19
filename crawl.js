@@ -74,7 +74,7 @@ mongo.connect(async (error, client) => {
         
         // enforce HTTPS
         if(! url.startsWith('https')) {
-            console.log("REFUSING to crawl insecure backend that does NOT use HTTPS\n\n");
+            console.log("REFUSING to crawl insecure service " + serviceUrl + " that does not use HTTPS.\n");
             continue;
         }
 
@@ -99,7 +99,7 @@ mongo.connect(async (error, client) => {
 
             // enfore HTTPS
             if(! backendUrl.startsWith('https')) {
-                console.log("REFUSING to crawl insecure backend that does NOT use HTTPS\n\n");
+                console.log("REFUSING to crawl insecure backend " + backendUrl + " that does not use HTTPS.\n");
                 continue;
             }
 
@@ -192,7 +192,7 @@ mongo.connect(async (error, client) => {
                         });
                     }
                     catch(error) {
-                        console.log('An error occurred while writing to the database (' + error.name + ': ' + error.message + ')');
+                        console.log('An error occurred while writing ' + backendUrl+path + ' to the database (' + error.name + ': ' + error.message + ')');
                         if(verbose) {
                             console.log(error);
                         }
