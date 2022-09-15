@@ -38,7 +38,7 @@
     "@openeo/vue-components": "2.3.3",
     "axios": "^0.21.1",
     "moment": "^2.22.2",
-    "mongodb": "^3.5.2",
+    "mongodb": "^4.9.1",
     "restify": "^8.5.1",
     "vue": "^2.6.0",
     "vue-multiselect": "^2.1.6",
