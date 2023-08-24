@@ -13,11 +13,13 @@
 		<section id="discover-filters">
 			<h3>Filters</h3>
 
+			<!--
 			<h4>openEO API versions</h4>
 			<div>
 				<input type="checkbox" v-model="filters.apiVersions" value="0.4" id="v0dot4"><label for="v0dot4">0.4.x</label>
 				<input type="checkbox" v-model="filters.apiVersions" value="1.0" id="v1dot0"><label for="v1dot0">1.0.x</label>
 			</div>
+			-->
 
 			<h4>Functionalities</h4>
 			<EndpointChooser class="compact" :categorizedEndpoints="allEndpointsCategorized" @input="filters.endpoints = $event"></EndpointChooser>
@@ -29,7 +31,7 @@
 				:internalSearch="false" @search-change="searchCollections" :option-height="66" :clearOnSelect="false"
 				:taggable="true" @tag="addCollectionSearchTerm" @remove="potentiallyRemoveCollectionSearchTerm"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
-				<template slot="option" slot-scope="props" style="width: 100%">
+				<template slot="option" slot-scope="props">
 					<strong>{{props.option.id || '"'+props.search+'"'}}</strong>
 					<p style="margin-bottom:0">{{props.option.title || "&nbsp;"}}</p>
 				</template>	
@@ -42,7 +44,7 @@
 				:internalSearch="false" @search-change="searchProcesses" :option-height="66" :clearOnSelect="false"
 				:taggable="true" @tag="addProcessSearchTerm" @remove="potentiallyRemoveProcessSearchTerm"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
-				<template slot="option" slot-scope="props" style="width: 100%">
+				<template slot="option" slot-scope="props">
 					<strong>{{props.option.id || '"'+props.search+'"'}}</strong>
 					<span v-if="props.option.count">&nbsp;({{props.option.count}})</span>
 					<p style="margin-bottom:0">{{props.option.summary || "&nbsp;"}}</p>
