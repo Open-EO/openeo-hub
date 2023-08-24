@@ -33,10 +33,10 @@
     "start:dev": "vue-cli-service build --mode development && node server.js"
   },
   "dependencies": {
-    "@openeo/js-commons": "^1.0.0-rc.3",
-    "@openeo/js-processgraphs": "1.0.0-beta.5",
-    "@openeo/vue-components": "2.3.3",
-    "axios": "^0.21.1",
+    "@openeo/js-commons": "^1.0.0",
+    "@openeo/js-processgraphs": "^1.0.0",
+    "@openeo/vue-components": "^2.3.3",
+    "axios": "^1.0.0",
     "moment": "^2.22.2",
     "mongodb": "^4.9.1",
     "restify": "^8.5.1",
@@ -45,7 +45,7 @@
     "vue2-leaflet": "^1.2.3"
   },
   "devDependencies": {
-    "@vue/cli-service": "^4.5.13",
+    "@vue/cli-service": "^5.0.0",
     "vue-template-compiler": "^2.5.22"
   }
 }
