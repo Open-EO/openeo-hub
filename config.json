@@ -9,7 +9,6 @@
         "EODC": "https://openeo.eodc.eu/",
         "mundialis": "https://openeo.mundialis.de/",
         "Sentinel Hub": "https://openeo.sentinel-hub.com/production/",
-        "CREODIAS": "https://openeo.creo.vito.be/",
         "Copernicus Data Space Ecosystem": "https://openeo.dataspace.copernicus.eu/"
     },
     "unsuccessfulCrawls": {
