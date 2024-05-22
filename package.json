@@ -39,7 +39,7 @@
     "axios": "^1.0.0",
     "moment": "^2.22.2",
     "mongodb": "^4.9.1",
-    "restify": "^8.5.1",
+    "restify": "^10.0.0",
     "vue": "^2.6.0",
     "vue-multiselect": "^2.1.6",
     "vue2-leaflet": "^1.2.3"
