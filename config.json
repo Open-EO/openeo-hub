@@ -10,6 +10,8 @@
         "mundialis": "https://openeo.mundialis.de/",
         "Sentinel Hub": "https://openeo.sentinel-hub.com/production/",
         "Copernicus Data Space Ecosystem": "https://openeo.dataspace.copernicus.eu/",
+        "Copernicus Data Space Ecosystem Federation": "https://openeofed.dataspace.copernicus.eu",
+        "rasdaman": "https://openeo.rasdaman.com/rasdaman/openeo/"
         "EO4EU Platform": "https://umm-api.apps.eo4eu.eu/EO/"
     },
     "unsuccessfulCrawls": {
