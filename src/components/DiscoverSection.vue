@@ -45,8 +45,9 @@
 
 			<h4>Input formats</h4>
 			<Multiselect
-			    v-model="filters.inputFormats" :options="allInputFormats" trackBy="format" label="format"
+			    v-model="filters.inputFormats" :options="searchedInputFormats" trackBy="format" label="format"
 				placeholder="Select from list, or type to search"
+				:internalSearch="false" @search-change="searchInputFormats"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
 				<template slot="option" slot-scope="props">
 					{{props.option.format}} <span v-if="props.option.count">({{props.option.count}})</span>
@@ -55,8 +56,9 @@
 			
 			<h4>Output formats</h4>
 			<Multiselect
-			    v-model="filters.outputFormats" :options="allOutputFormats" trackBy="format" label="format"
+			    v-model="filters.outputFormats" :options="searchedOutputFormats" trackBy="format" label="format"
 				placeholder="Select from list, or type to search"
+				:internalSearch="false" @search-change="searchOutputFormats"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
 				<template slot="option" slot-scope="props">
 					{{props.option.format}} <span v-if="props.option.count">({{props.option.count}})</span>
@@ -65,8 +67,9 @@
 
 			<h4>Service types</h4>
 			<Multiselect
-			    v-model="filters.serviceTypes" :options="allServiceTypes" trackBy="service" label="service"
+			    v-model="filters.serviceTypes" :options="searchedServiceTypes" trackBy="service" label="service"
 				placeholder="Select from list, or type to search"
+				:internalSearch="false" @search-change="searchServiceTypes"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
 				<template slot="option" slot-scope="props">
 					{{props.option.service}} <span v-if="props.option.count">({{props.option.count}})</span>
@@ -75,8 +78,9 @@
 
 			<h4>UDF runtimes</h4>
 			<Multiselect
-			    v-model="filters.udfRuntimes" :options="allUdfRuntimes" trackBy="runtime" label="runtime"
+			    v-model="filters.udfRuntimes" :options="searchedUdfRuntimes" trackBy="runtime" label="runtime"
 				placeholder="Select from list, or type to search"
+				:internalSearch="false" @search-change="searchUdfRuntimes"
 				:multiple="true" :hideSelected="true" :closeOnSelect="false" :preserveSearch="true" openDirection="below">
 				<template slot="option" slot-scope="props">
 					{{props.option.runtime}} <span v-if="props.option.count">({{props.option.count}})</span>
@@ -122,9 +126,13 @@ export default {
 			taggedProcesses: [],
 			allEndpointsCategorized: FeatureList.features,
 			allInputFormats: [],
+			searchedInputFormats: [],
 			allOutputFormats: [],
+			searchedOutputFormats: [],
 			allServiceTypes: [],
+			searchedServiceTypes: [],
 			allUdfRuntimes: [],
+			searchedUdfRuntimes: [],
 			filters: {
 				collections: [],
 				excludeIfNoFreePlan: false,
@@ -204,19 +212,19 @@ export default {
 			.catch(error => console.log(error));
 		
 		axios.get('/api/input_formats')
-			.then(response => this.allInputFormats = response.data)
+			.then(response => { this.allInputFormats = response.data; this.searchInputFormats(""); })
 			.catch(error => console.log(error));
 		
 		axios.get('/api/output_formats')
-			.then(response => this.allOutputFormats = response.data)
+			.then(response => { this.allOutputFormats = response.data; this.searchOutputFormats(""); })
 			.catch(error => console.log(error));
 
 		axios.get('/api/service_types')
-			.then(response => this.allServiceTypes = response.data)
+			.then(response => { this.allServiceTypes = response.data; this.searchServiceTypes(""); })
 			.catch(error => console.log(error));
 
 		axios.get('/api/udf_runtimes')
-			.then(response => this.allUdfRuntimes = response.data)
+			.then(response => { this.allUdfRuntimes = response.data; this.searchUdfRuntimes(""); })
 			.catch(error => console.log(error));
 	},
 	methods: {
@@ -248,10 +256,14 @@ export default {
 
 		searchProcesses(query) {
 			const queries = query.trim().toLowerCase().split(' ');
-			this.searchedProcesses = this.allProcesses.filter(p => {
+			let results = this.allProcesses.filter(p => {
 				const textToSearch = (p.id + (p.allSummaries ? ' ' + p.allSummaries.join(' / ') : '')).toLowerCase();
 				return queries.every(q => textToSearch.indexOf(q) != -1);
 			});
+			if (query.trim().length > 0) {
+				results.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+			}
+			this.searchedProcesses = results;
 		},
 
 		addProcessSearchTerm(searchterm, id) {
@@ -269,6 +281,38 @@ export default {
 			if(removedOption.isSearchterm) {
 				this.taggedProcesses.splice(this.taggedProcesses.findIndex(e => e.id == removedOption.id), 1);
 				// removing from value array (this.filters.processes) works automatically
+			}
+		},
+
+		searchInputFormats(query) {
+			const q = query.trim().toLowerCase();
+			this.searchedInputFormats = this.allInputFormats.filter(f => f.format.toLowerCase().indexOf(q) !== -1);
+			if (q.length > 0) {
+				this.searchedInputFormats.sort((a, b) => a.format.localeCompare(b.format));
+			}
+		},
+
+		searchOutputFormats(query) {
+			const q = query.trim().toLowerCase();
+			this.searchedOutputFormats = this.allOutputFormats.filter(f => f.format.toLowerCase().indexOf(q) !== -1);
+			if (q.length > 0) {
+				this.searchedOutputFormats.sort((a, b) => a.format.localeCompare(b.format));
+			}
+		},
+
+		searchServiceTypes(query) {
+			const q = query.trim().toLowerCase();
+			this.searchedServiceTypes = this.allServiceTypes.filter(s => s.service.toLowerCase().indexOf(q) !== -1);
+			if (q.length > 0) {
+				this.searchedServiceTypes.sort((a, b) => a.service.localeCompare(b.service));
+			}
+		},
+
+		searchUdfRuntimes(query) {
+			const q = query.trim().toLowerCase();
+			this.searchedUdfRuntimes = this.allUdfRuntimes.filter(r => r.runtime.toLowerCase().indexOf(q) !== -1);
+			if (q.length > 0) {
+				this.searchedUdfRuntimes.sort((a, b) => a.runtime.localeCompare(b.runtime));
 			}
 		}
 	}
