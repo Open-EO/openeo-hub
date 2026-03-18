@@ -1,6 +1,6 @@
 {
   "name": "@openeo/hub",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "author": "openEO Consortium",
   "contributors": [
     {
@@ -20,7 +20,7 @@
     "url": "https://github.com/Open-EO/openeo-hub.git"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "crawl": "node crawl.js",
