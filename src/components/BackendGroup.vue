@@ -7,7 +7,7 @@
 
         <div v-show="!collapsed">
             <Tabs :id="groupName" :pills="true" ref="tabsComponent">
-                <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="tabTitle(backend)" :selected="index == 0" :enabled="checkFilters(backend) && supportedByPG[index]">
+                <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="tabTitle(backend)" :selected="index == defaultTabIndex" :enabled="checkFilters(backend) && supportedByPG[index]">
                     <Backend :backendData="backend" :collapsible="false" :showVersion="false"></Backend>
                 </Tab>
             </Tabs>
@@ -46,6 +46,15 @@ export default {
             this.updateSupportedByPG(newVal);
         }
     },
+    computed: {
+        defaultTabIndex() {
+            // Pick the highest production-ready version (backends are sorted by version desc).
+            // The production field is only meaningful for v1.x+ backends (api_version > '1').
+            const productionIndex = this.backends.findIndex(b => b.api_version > '1' && b.production);
+            // Fall back to index 0 (highest version) when no production-ready version is found.
+            return productionIndex !== -1 ? productionIndex : 0;
+        }
+    },
     methods: {
         toggleCollapsed() {
             this.collapsed = !this.collapsed;
@@ -63,7 +72,7 @@ export default {
             return (new Date() - new Date(backend.retrieved)) >= config.flagWhenOlderThanXHours * 60 * 60 * 1000;
         },
         needsWarningSign(backend) {
-            return this.recentlyUnavailable(backend) || this.oldData(backend);
+            return this.recentlyUnavailable(backend) || this.oldData(backend) || (backend.api_version > '1' && !backend.production);
         },
         doesAnyFilterMatch() {
             return this.backends.some((b, i) => this.checkFilters(b) && this.supportedByPG[i]);
