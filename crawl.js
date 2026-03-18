@@ -65,7 +65,17 @@ async function crawl() {
             response.data.versions
             .filter(b => ! b.api_version.startsWith('0.'))   // the Hub only supports openEO API v1.0.0 and later
             .forEach(b => individualBackends[b.api_version] = b.url.replace(/\/$/, ''));   // URL always without trailing slash
-            allIndividualBackends = allIndividualBackends.concat(Object.keys(individualBackends).map(version => serviceUrl+'@'+version));
+            if (Object.keys(individualBackends).length > 0) {
+                allIndividualBackends = allIndividualBackends.concat(Object.keys(individualBackends).map(version => serviceUrl+'@'+version));
+            }
+            else {
+                // Well-known document was fetched successfully but contained no supported versions.
+                // Treat as a soft failure so that existing data is preserved until the
+                // unsuccessfulCrawls mechanism cleans it up (avoids accidental data loss
+                // when a well-known document temporarily returns an empty version list).
+                console.log('    Well-known document for ' + name + ' contained no supported API versions; treating as soft failure.');
+                allFailedServices.push(serviceUrl);
+            }
         }
         catch(error) {
             console.log('An error occurred while getting or reading ' + url + ' (' + error.name + ': ' + error.message + ')');
@@ -183,16 +193,23 @@ async function crawl() {
         console.log('Processing data...');
 
         // Delete all entries that belong to a group that was meanwhile deleted (or renamed)
-        await db.remove({ group: { $nin: Object.keys(config.backends) } }, 'raw');
+        const removedGroupCount = await db.remove({ group: { $nin: Object.keys(config.backends) } }, 'raw');
+        if (removedGroupCount > 0) {
+            console.log('  Removed ' + removedGroupCount + ' entries from groups no longer in config.');
+        }
         
-        // Delete all entries that don't belong to one of the backends listed in the currently configured services's well-known documents
-        // But exempt those that failed to download.
+        // Delete all entries that don't belong to one of the backends listed in the currently configured services's well-known documents.
+        // But exempt those that failed to download so that temporary outages don't wipe existing data.
         const allRawDocs = await db.find({}, 'raw');
         const toDelete = allRawDocs.filter(doc =>
             !allIndividualBackends.includes(doc.service + '@' + doc.api_version) &&
             !allFailedServices.includes(doc.service)
         );
         if (toDelete.length > 0) {
+            // Log which service@version combinations are being removed
+            const removedKeys = [...new Set(toDelete.map(d => d.service + ' @ ' + d.api_version))];
+            console.log('  Removing entries for backends no longer listed in well-known documents:');
+            removedKeys.forEach(k => console.log('    - ' + k));
             await db.remove({ _id: { $in: toDelete.map(d => d._id) } }, 'raw');
         }
 

@@ -30,7 +30,8 @@
     "start:frontend": "vue-cli-service serve --port 9000",
     "build": "vue-cli-service build",
     "start": "vue-cli-service build && node server.js",
-    "start:dev": "vue-cli-service build --mode development && node server.js"
+    "start:dev": "vue-cli-service build --mode development && node server.js",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "@openeo/js-commons": "^1.5.0",
