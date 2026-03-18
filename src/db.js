@@ -2,6 +2,43 @@ const Datastore = require('@seald-io/nedb');
 const path = require('path');
 const fs = require('fs');
 
+// NeDB forbids field names starting with '$'. openEO API responses can
+// contain JSON-Schema keys like $schema, $ref, etc.  We transparently
+// replace a leading '$' with the fullwidth dollar sign (U+FF04 ＄) on
+// write and restore it on read so callers always see the original data.
+const DOLLAR = '$';
+const DOLLAR_REPLACEMENT = '\uff04';  // ＄
+
+function encodeDoc(obj) {
+    if (obj === null || typeof obj !== 'object' || obj instanceof Date || obj instanceof RegExp) {
+        return obj;
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(encodeDoc);
+    }
+    const out = {};
+    for (const key of Object.keys(obj)) {
+        const newKey = key.startsWith(DOLLAR) ? DOLLAR_REPLACEMENT + key.slice(1) : key;
+        out[newKey] = encodeDoc(obj[key]);
+    }
+    return out;
+}
+
+function decodeDoc(obj) {
+    if (obj === null || typeof obj !== 'object' || obj instanceof Date || obj instanceof RegExp) {
+        return obj;
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(decodeDoc);
+    }
+    const out = {};
+    for (const key of Object.keys(obj)) {
+        const newKey = key.startsWith(DOLLAR_REPLACEMENT) ? DOLLAR + key.slice(1) : key;
+        out[newKey] = decodeDoc(obj[key]);
+    }
+    return out;
+}
+
 class Database {
     constructor(dataDir) {
         this.dataDir = dataDir;
@@ -29,15 +66,18 @@ class Database {
     }
 
     async insert(doc, collectionName) {
-        return this.getCollection(collectionName).insertAsync(doc);
+        const result = await this.getCollection(collectionName).insertAsync(encodeDoc(doc));
+        return decodeDoc(result);
     }
 
     async findOne(query, collectionName) {
-        return this.getCollection(collectionName).findOneAsync(query);
+        const result = await this.getCollection(collectionName).findOneAsync(query);
+        return decodeDoc(result);
     }
 
     async find(query, collectionName) {
-        return this.getCollection(collectionName).findAsync(query);
+        const results = await this.getCollection(collectionName).findAsync(query);
+        return results.map(decodeDoc);
     }
 
     async update(query, update, collectionName, options = {}) {
