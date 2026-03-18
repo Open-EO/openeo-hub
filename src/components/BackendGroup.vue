@@ -116,9 +116,6 @@ export default {
         checkFilters(b) {
             // Little heads-up in case you're looking for the history of this method: It was previously located in the DiscoverSection component.
 			return [
-				// APIVERSIONS (OR)
-				this.filters.apiVersions.length == 0 || (b.api_version && this.filters.apiVersions.some(v => b.api_version.substr(0,3) == v)),
-				
 				// EXCLUDEIFNOFREEPLAN
 				// exclude if *every* plan of *every* backend of the group is set to "paid=true" (more appropriate IMO)
 				// !this.filters.excludeIfNoFreePlan || !backends.every(b => b.billing && Array.isArray(b.billing.plans) && b.billing.plans.every(p => p.paid == true)),

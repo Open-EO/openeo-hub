@@ -1,7 +1,7 @@
 <template>
 	<div :class="{collapsible: collapsible, backend: 1}">
         <a :href="webEditorUrl" target="_blank" class="open-in-web-editor" v-if="!collapsed.root">
-            <button :disabled="webEditorUnavailable" :title="webEditorUnavailable ? 'The openEO Web Editor only supports backends running with openEO API v0.4.0 and later.' : ''">
+            <button>
                 Open in openEO Web Editor
             </button>
         </a>
@@ -128,15 +128,7 @@ export default {
 
     computed: {
         webEditorUrl() {
-            var version = '';   // no need to specify a version for 1.0 (default)
-            if(this.backend.api_version.startsWith('0.4')) {
-                version = '0.4/';
-            }
-            return 'https://editor.openeo.org/' + version + '?server=' + encodeURIComponent(this.backend.backendUrl);
-        },
-        webEditorUnavailable() {
-            // unavailable if api_version is known and starts with '0.3' (treat as available if api_version is not known)
-            return (this.preparedBackend.api_version && this.preparedBackend.api_version.substr(0,3) == '0.3');
+            return 'https://editor.openeo.org/?server=' + encodeURIComponent(this.backend.backendUrl);
         }
     },
 

@@ -202,7 +202,7 @@ app.post('/api/validation', async (req, res) => {
 
 app.get('/api', function(req, res) {
     res.json({
-        api_version: '0.4.2',
+        api_version: '1.0.0',
         backend_version: PACKAGEJSON.version,
         title: 'openEO Hub',
         description: PACKAGEJSON.description,
