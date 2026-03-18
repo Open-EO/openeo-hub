@@ -27,6 +27,9 @@ function prepare(data, additionalCallbacks = []) {
         if(item && typeof item.backend == 'string') {
             item.backendUrl = item.backend;
             item.backendTitle = item.backendTitle;
+            if (typeof item.service === 'string') {
+                item.baseUrl = item.service;
+            }
             delete item.backend;
         }
         return item;
