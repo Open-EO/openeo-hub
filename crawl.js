@@ -207,7 +207,7 @@ async function crawl() {
         );
         if (toDelete.length > 0) {
             // Log which service@version combinations are being removed
-            const removedKeys = [...new Set(toDelete.map(d => d.service + ' @ ' + d.api_version))];
+            const removedKeys = [...new Set(toDelete.map(d => d.service + '@' + d.api_version))];
             console.log('  Removing entries for backends no longer listed in well-known documents:');
             removedKeys.forEach(k => console.log('    - ' + k));
             await db.remove({ _id: { $in: toDelete.map(d => d._id) } }, 'raw');

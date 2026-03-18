@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('../src/db.js');
 
-const TEST_DATA_DIR = path.join(__dirname, '..', 'data-test-' + process.pid);
+const TEST_DATA_DIR = path.join(__dirname, '..', 'data-test-' + process.pid + '-' + Date.now());
 
 /**
  * Simulates the post-crawl cleanup logic from crawl.js lines 195–213.
