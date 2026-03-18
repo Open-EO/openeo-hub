@@ -7,7 +7,7 @@
 
         <div v-show="!collapsed">
             <Tabs :id="groupName" :pills="true" ref="tabsComponent">
-                <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="tabTitle(backend)" :selected="index == 0" :enabled="checkFilters(backend) && supportedByPG[index]">
+                <Tab v-for="(backend, index) in backends" :key="backend.backendUrl" :id="'version-'+backend.backendUrl" :name="tabTitle(backend)" :selected="index == defaultSelectedIndex" :enabled="checkFilters(backend) && supportedByPG[index]">
                     <Backend :backendData="backend" :collapsible="false" :showVersion="false"></Backend>
                 </Tab>
             </Tabs>
@@ -36,6 +36,14 @@ export default {
             collapsed: true,
             supportedByPG: []
 		};
+    },
+    computed: {
+        defaultSelectedIndex() {
+            // Pick the highest production-ready version (backends are already sorted by version descending).
+            // Fall back to index 0 (highest version) if none are production-ready.
+            const idx = this.backends.findIndex(b => b.production === true);
+            return idx !== -1 ? idx : 0;
+        }
     },
     mounted() {
         this.supportedByPG = new Array(this.backends.length).fill(true);
