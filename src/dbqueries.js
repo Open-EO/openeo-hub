@@ -66,10 +66,13 @@ module.exports = {
                     : [],
                 collections: collections ? collections.collections : null,
                 processes: processes ? processes.processes : null,
-                fileFormats: {
-                    input: fileFormats ? (fileFormats.input || {}) : {},
-                    output: fileFormats ? (fileFormats.output || fileFormats) : {}
-                },
+                fileFormats: (() => {
+                    const input = fileFormats ? (fileFormats.input || {}) : {};
+                    const output = fileFormats ? (fileFormats.output || fileFormats) : {};
+                    return (Object.keys(input).length > 0 || Object.keys(output).length > 0)
+                        ? { input, output }
+                        : null;
+                })(),
                 serviceTypes: serviceTypes,
                 udfRuntimes: udfRuntimes,
                 billing: root ? root.billing : undefined
