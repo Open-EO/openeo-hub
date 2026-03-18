@@ -10,7 +10,6 @@ openEO Hub tries to implement some ambitious ideas. It is aimed to be a platform
 * find back-ends supporting required processes, e.g. by submitting a process graph and checking automatically against all back-ends
 * find back-ends that support UDFs
 * get information about back-ends, e.g. regarding costs
-* explore publicly available pre-defined proceses graphs
 * explore publicly available containers to run UDFs
 
 ## Public API endpoints
@@ -23,11 +22,6 @@ The Hub provides its data via a RESTful API under https://hub.openeo.org/api. Th
   * `GET /api/backends?details=full` -- the list of *actual, individual backends* within the Hub's database, including **ALL** their details (i.e. **all** collection descriptions etc.) *This reply can easily be several dozen MBs big.*
   * `GET /api/backends?details=clipped` -- Like `full`, but for collections and processes only the `id`s and `title`s/`summary`s are returned. *This reduces the size **a lot**.*
   * `GET /api/backends?details=grouped` -- Like `clipped`, but the individual backends are grouped by providers.
-* Process graphs within the Hub's *Process Graph Repository* (the "Exchange" panel)
-  * These endpoints work like the endpoints of a normal openEO backend (compliant to openEO API v0.4.2).
-  * `GET /process_graphs` -- lists all process graphs that were submitted to the Hub's repository
-  * `GET /process_graphs/{process_graph_id}` -- return the full information for a single process graph
-  * `POST /process_graphs` -- add a new process graph to the Hub's repository (note that there's NO update or delete functionality!)
 
 ## Getting started
 This app is deployed at https://hub.openeo.org/.
@@ -49,7 +43,7 @@ Required is Node.js (at least version 12). No external database server is needed
 6. Go to http://localhost:9000/
 
 ### Dropping the database
-Should you ever want to hard-reset the database (i.e. drop all collections openeo-hub created), use the `drop` script by calling `node drop.js --yesimsure` or `npm run drop -- --yesimsure`. By default, the script leaves collections with user-generated data (e.g. the submitted process graphs) intact. If you want to drop those too, add the `--everything` option.
+Should you ever want to hard-reset the database (i.e. drop all collections openeo-hub created), use the `drop` script by calling `node drop.js --yesimsure` or `npm run drop -- --yesimsure`.
 
 ## Troubleshooting
 If errors occur during crawling, this is probably caused by one of the crawled backends (a) returning JSON that is not compliant to the openEO API specification, or (b) malfunctioning under the load of many requests in quick succession. In the first case (a), the `--verbose` option may be helpful to locate the error (be sure to pass the option to the *script* and not to NPM, i.e. call `node crawl.js --verbose` or `npm run crawl -- --verbose`).

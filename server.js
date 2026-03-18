@@ -181,51 +181,6 @@ app.get('/api/udf_runtimes', asyncHandler(async (req, res) => {
     res.json(prepare(dbqueries.getUdfRuntimesWithCount(data)));
 }));
 
-// handle CORS preflight for POSTing
-app.options('/api/process_graphs', function(req, res) {
-    enableCORS(req, res);
-    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
-    res.send();
-});
-
-// compliant to openEO API 0.4.2
-app.get('/api/process_graphs', asyncHandler(async (req, res) => {
-    enableCORS(req, res);
-    let data = await db.find({}, 'process_graphs');
-    data.forEach(e => e.id = e._id);
-    res.json(prepare(data));
-}));
-
-// compliant to openEO API 0.4.2
-app.post('/api/process_graphs', asyncHandler(async (req, res) => {
-    enableCORS(req, res);
-    if(!req.is('json')) {
-        res.status(415).json({message: "Only JSON allowed"});
-    } else if(typeof req.body.process_graph != 'string' || req.body.process_graph == '') {
-        res.status(422).json({message: "JSON must contain a process_graph property that holds a non-empty string"});
-    } else {
-        const inserted = await db.insert(req.body, 'process_graphs');
-        res.status(201);
-        res.set('OpenEO-Identifier', inserted._id);
-        res.set('Location', '/process_graphs/' + inserted._id);
-        res.send();
-    }
-}));
-
-// compliant to openEO API 0.4.2
-app.get('/api/process_graphs/:id', asyncHandler(async (req, res) => {
-    enableCORS(req, res);
-    const pg = await db.findOne({_id: req.params.id}, 'process_graphs');
-    if(pg) {
-        pg.id = pg._id;
-        delete pg._id;
-        res.json(pg);
-    } else {
-        res.status(404).json({message: "Not Found"});
-    }
-}));
-
 // validates the given `process_graph` for every URL from the `links` array
 // compliant to openEO API v1.0.1 (as long as only 1 URL is submitted)
 app.post('/api/validation', asyncHandler(async (req, res) => {
@@ -254,9 +209,7 @@ app.get('/api', function(req, res) {
         title: 'openEO Hub',
         description: PACKAGEJSON.description,
         endpoints: [
-            { path: '/backends', methods: ['GET'] },
-            { path: '/process_graphs', methods: ['GET', 'POST'] },
-            { path: '/process_graphs/{process_graph_id}', methods: ['GET'] }
+            { path: '/backends', methods: ['GET'] }
         ]
     });
 });

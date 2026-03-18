@@ -3,7 +3,6 @@ const path = require('path');
 const config = require('./config.js');
 
 const userIsSure = process.argv[2] == '--yesimsure'  || process.argv[3] == '--yesimsure';
-const dropEverything = process.argv[2] == '--everything' || process.argv[3] == '--everything';
 
 if(!userIsSure) {
     console.log('You must start the script with --yesimsure parameter to take effect');
@@ -11,9 +10,6 @@ if(!userIsSure) {
     console.log('Exiting without doing anything.');
 } else {
     var collectionsToDrop = ['raw', 'backends', 'collections', 'processes'];
-    if(dropEverything) {
-        collectionsToDrop.push('process_graphs');
-    }
 
     let dropped = 0;
     for (const name of collectionsToDrop) {
@@ -29,6 +25,6 @@ if(!userIsSure) {
         console.log('No collections exist that could be dropped.');
         console.log('Exiting without doing anything.');
     } else {
-        console.log('Successfully dropped all collections' + (dropEverything ? '' : ' (except user-generated content)') + '.');
+        console.log('Successfully dropped all collections.');
     }
 }
