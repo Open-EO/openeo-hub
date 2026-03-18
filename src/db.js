@@ -24,7 +24,7 @@ function encodeKey(key) {
     }
     // Replace all '.' with fullwidth equivalent
     if (key.indexOf('.') !== -1) {
-        key = key.split('.').join(ENCODE_MAP['.']);
+        key = key.replaceAll('.', ENCODE_MAP['.']);
     }
     return key;
 }
@@ -36,7 +36,7 @@ function decodeKey(key) {
     }
     // Restore all fullwidth full stops to '.'
     if (key.indexOf(ENCODE_MAP['.']) !== -1) {
-        key = key.split(ENCODE_MAP['.']).join('.');
+        key = key.replaceAll(ENCODE_MAP['.'], '.');
     }
     return key;
 }
