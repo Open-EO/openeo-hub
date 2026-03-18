@@ -25,6 +25,7 @@
         <LinkList :links="preparedBackend.links" :ignoreRel="['self', 'version-history', 'conformance', 'data']"></LinkList>
 
         <p><small>URL: <code>{{backend.baseUrl || backend.backendUrl}}</code></small></p>
+        <p v-if="backend.baseUrl && backend.baseUrl !== backend.backendUrl" class="versioned-url"><small>Versioned URL: <code>{{backend.backendUrl}}</code></small></p>
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
         <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
@@ -202,6 +203,12 @@ div.warning {
 div.info {
     color: green;
     margin-top: 10px;
+}
+
+.versioned-url {
+    margin-top: -0.5em;
+    opacity: 0.6;
+    font-size: 0.9em;
 }
 
 .billing {
