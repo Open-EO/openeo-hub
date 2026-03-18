@@ -204,12 +204,12 @@ async function crawl() {
         const candidates = await db.find({ unsuccessfulCrawls: { $gte: 1 }, path: { $regex: /^\/collections\/.+$/ } }, 'raw');
         const whitelist = await db.find({ path: '/collections' }, 'raw');
         const accidental = whitelist.filter(b => !(typeof b == 'object' && typeof b.content == 'object' && Array.isArray(b.content.collections))).map(b => b.backend);
-        const todelete = candidates.filter(c =>
-            accidental.indexOf(c.backend) == -1 &&   // don't delete if main `/collections` document seems invalid
-            whitelist.find(w => w.backend == c.backend) &&
-            whitelist.find(w => w.backend == c.backend)
-            .content.collections.some(c2 => c2.id == c.content.id) == false  // keep candidate for deletion if it's not found in its backend's main `/collections` document
-        );
+        const todelete = candidates.filter(c => {
+            if (accidental.indexOf(c.backend) !== -1) return false;  // don't delete if main `/collections` document seems invalid
+            const match = whitelist.find(w => w.backend == c.backend);
+            if (!match) return false;
+            return match.content.collections.some(c2 => c2.id == c.content.id) == false;  // keep candidate for deletion if it's not found in its backend's main `/collections` document
+        });
         if (todelete.length > 0) {
             await db.remove({ _id: { $in: todelete.map(e => e._id) } }, 'raw');
         }

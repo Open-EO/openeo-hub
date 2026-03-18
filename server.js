@@ -126,7 +126,11 @@ app.get('/api/backends/:backend/collections/:identifier', asyncHandler(async (re
         backend: decodeURIComponent(req.params.backend),
         path: '/collections/' + decodeURIComponent(req.params.identifier)
     }, 'raw');
-    res.json(prepare(data).content);
+    if (data) {
+        res.json(prepare(data).content);
+    } else {
+        res.status(404).json({ message: "Not Found" });
+    }
 }));
 
 // return process details of a single backend
