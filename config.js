@@ -1,7 +1,6 @@
-{
-    "dbUrl": "mongodb://localhost:27017",
-    "dbName": "openeohub",
-    "backends": {
+module.exports = {
+    dataDir: './data',
+    backends: {
         "openEO Platform": "https://openeo.cloud/",
         "Google Earth Engine": "https://earthengine.openeo.org/",
         "EURAC": "https://openeo.eurac.edu/",
@@ -14,9 +13,9 @@
         "rasdaman": "https://openeo.rasdaman.com/rasdaman/openeo/",
         "EO4EU Platform": "https://umm-api.apps.eo4eu.eu/EO/"
     },
-    "unsuccessfulCrawls": {
-        "flagAfter": 2,
-        "deleteAfter": 14
+    unsuccessfulCrawls: {
+        flagAfter: 2,
+        deleteAfter: 14
     },
-    "flagWhenOlderThanXHours": 24
-}
+    flagWhenOlderThanXHours: 24
+};
