@@ -71,16 +71,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// Async route handler wrapper
-const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
-
 
 // -------------------------------------------------------------------------------------
 // Actual handlers for the individual endpoints
 // -------------------------------------------------------------------------------------
 
 // list backends
-app.get('/api/backends', asyncHandler(async (req, res) => {
+app.get('/api/backends', async (req, res) => {
     enableCORS(req, res);
     if(!req.query.details) {
         res.json(config.backends);
@@ -106,22 +103,22 @@ app.get('/api/backends', asyncHandler(async (req, res) => {
             res.json(prepare(data, (req.query.details == 'clipped' ? [clip] : [])));
         }
     }
-}));
+});
 
 // return details of a single backend
-app.get('/api/backends/:backend', asyncHandler(async (req, res) => {
+app.get('/api/backends/:backend', async (req, res) => {
     const data = await db.findOne({backend: decodeURIComponent(req.params.backend)}, 'backends');
     res.json(prepare(data));
-}));
+});
 
 // return collection details of a single backend
-app.get('/api/backends/:backend/collections', asyncHandler(async (req, res) => {
+app.get('/api/backends/:backend/collections', async (req, res) => {
     const data = await db.find({backend: decodeURIComponent(req.params.backend)}, 'collections');
     res.json(prepare(data));
-}));
+});
 
 // return collection details of a specific collection of a single backend
-app.get('/api/backends/:backend/collections/:identifier', asyncHandler(async (req, res) => {
+app.get('/api/backends/:backend/collections/:identifier', async (req, res) => {
     const data = await db.findOne({
         backend: decodeURIComponent(req.params.backend),
         path: '/collections/' + decodeURIComponent(req.params.identifier)
@@ -131,59 +128,60 @@ app.get('/api/backends/:backend/collections/:identifier', asyncHandler(async (re
     } else {
         res.status(404).json({ message: "Not Found" });
     }
-}));
+});
 
 // return process details of a single backend
-app.get('/api/backends/:backend/processes', asyncHandler(async (req, res) => {
+app.get('/api/backends/:backend/processes', async (req, res) => {
     const data = await db.find({backend: decodeURIComponent(req.params.backend)}, 'processes');
     res.json(prepare(data));
-}));
+});
 
 // proxy backends
-app.get('/api/backends/:backend/*', asyncHandler(async (req, res) => {
-    const data = await db.findOne({backend: req.params.backend, path: '/' + req.params[0]}, 'raw');
+app.get('/api/backends/:backend/{*rest}', async (req, res) => {
+    const restPath = '/' + req.params.rest.join('/');
+    const data = await db.findOne({backend: req.params.backend, path: restPath}, 'raw');
     res.json(data);
-}));
+});
 
 // list collections
-app.get('/api/collections', asyncHandler(async (req, res) => {
+app.get('/api/collections', async (req, res) => {
     const data = await db.find({}, 'collections');
     res.json(prepare(dbqueries.getDistinctCollections(data)));
-}));
+});
 
 // list processes
-app.get('/api/processes', asyncHandler(async (req, res) => {
+app.get('/api/processes', async (req, res) => {
     const data = await db.find({}, 'processes');
     res.json(prepare(dbqueries.getDistinctProcessesWithCount(data)));
-}));
+});
 
 // list input formats
-app.get('/api/input_formats', asyncHandler(async (req, res) => {
+app.get('/api/input_formats', async (req, res) => {
     const data = await db.find({}, 'backends');
     res.json(prepare(dbqueries.getInputFormatsWithCount(data)));
-}));
+});
 
 // list output formats
-app.get('/api/output_formats', asyncHandler(async (req, res) => {
+app.get('/api/output_formats', async (req, res) => {
     const data = await db.find({}, 'backends');
     res.json(prepare(dbqueries.getOutputFormatsWithCount(data)));
-}));
+});
 
 // list service types
-app.get('/api/service_types', asyncHandler(async (req, res) => {
+app.get('/api/service_types', async (req, res) => {
     const data = await db.find({}, 'backends');
     res.json(prepare(dbqueries.getServiceTypesWithCount(data)));
-}));
+});
 
 // list UDF runtimes
-app.get('/api/udf_runtimes', asyncHandler(async (req, res) => {
+app.get('/api/udf_runtimes', async (req, res) => {
     const data = await db.find({}, 'backends');
     res.json(prepare(dbqueries.getUdfRuntimesWithCount(data)));
-}));
+});
 
 // validates the given `process_graph` for every URL from the `links` array
 // compliant to openEO API v1.0.1 (as long as only 1 URL is submitted)
-app.post('/api/validation', asyncHandler(async (req, res) => {
+app.post('/api/validation', async (req, res) => {
     const links = req.body.links.map(b => b.href);
     const data = await db.find({}, 'backends');
     const matchedBackends = data.filter(b => links.includes(b.backend));
@@ -200,7 +198,7 @@ app.post('/api/validation', asyncHandler(async (req, res) => {
     } else {
         res.json(results.map(errlist => ({errors: errlist})));
     }
-}));
+});
 
 app.get('/api', function(req, res) {
     res.json({
@@ -216,7 +214,7 @@ app.get('/api', function(req, res) {
 
 // serve website (UI)
 app.use(express.static(path.join(__dirname, 'dist')));
-app.get('*', (req, res) => {
+app.get('{*splat}', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
