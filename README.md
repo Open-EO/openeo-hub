@@ -1,16 +1,15 @@
 # openEO Hub
 This repository contains the source code for [openEO Hub](https://hub.openeo.org), a centralized platform to explore openEO service providers.
 
-**It is currently in a rather early stage of development.**
+**It is currently in a maintenance mode.**
 
 ## Goals
 openEO Hub tries to implement some ambitious ideas. It is aimed to be a platform that may allow users to:
 
 * find services by collections
 * find services supporting required processes, e.g. by submitting a process graph and checking automatically against all services
-* find services that support UDFs
+* find services that support UDFs and which runtimes they offer
 * get information about services, e.g. regarding costs
-* explore publicly available containers to run UDFs
 
 ## Public API endpoints
 The Hub provides its data via a RESTful API under https://hub.openeo.org/api. The following endpoints are intended to be used by the public:
@@ -29,11 +28,11 @@ This app is deployed at https://hub.openeo.org/.
 If you want to set it up yourself, follow these steps:
 
 ### Requirements
-Required is Node.js (at least version 12). No external database server is needed — the Hub uses an embedded database ([NeDB](https://github.com/seald/nedb)) that stores data in the `data/` directory.
+Required is Node.js (at least version 20). No external database server is needed — the Hub uses an embedded database ([NeDB](https://github.com/seald/nedb)) that stores data in the `data/` directory.
 
 ### Frontend and API backend
 1. Clone this repo, `cd /path/to/openeo-hub/`
-2. `npm install` -> wait...
+2. `npm install`
 3. Edit `config.js`:
    - Specify the services to crawl (required). This happens via an object with display names as the keys and URLs as the values. The display name is only shown if a service does not supply one itself. The URLs MUST point to an openEO service that supports well-known discovery, but the specified URL itself MUST NOT contain the trailing `/.well-known/openeo`. The URLs may or may not have a trailing slash.
    - Optional: Change the `dataDir` (default: `./data`) to specify where the database files are stored
