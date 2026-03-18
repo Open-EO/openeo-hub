@@ -1,170 +1,232 @@
+// These functions replace the MongoDB aggregation pipelines.
+// Each function takes an array of documents and returns the aggregated result.
+
 module.exports = {
-    GET_ALL_BACKENDS_PIPELINE: [
-        { $match: { path: { $in: ['/', '/collections', '/processes', '/service_types', '/output_formats', '/file_formats', '/udf_runtimes'] } } },
-        // This would be more dynamic and is effectively the same: { $match: { path: { $regex: "^\/[a-z_]*$" } } }
-        // But since the endpoints are hardcoded anyway there's no benefit, especially not when considering regex slowness.
-        { $sort: { backend: 1, path: 1 } },
-        { $group: {
-            _id: {$concat: ['$service', '@', '$api_version']},
-            service: { $first: '$service' },
-            api_version: { $first: '$api_version' },
-            backend: { $first: '$backend' },
-            backendTitle: { $first: '$backendTitle' },
-            group: { $first: '$group' },
-            retrieved: { $min: '$retrieved' },   // use `min` to get the earliest (-> "worst") of the timestamps
-            unsuccessfulCrawls: { $max: '$unsuccessfulCrawls' },   // use `max` to get the largest (-> "worst") number
-            contents: { $push: '$content' },
-            paths: {$push: '$path'}
-        } },
-        { $addFields: {
-            root: { $arrayElemAt: [ '$contents', { $indexOfArray: ['$paths', '/'] } ] },
-            collections: { $let: {
-                vars: { index: {$indexOfArray: ['$paths', '/collections']}},
-                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
-            } },
-            processes: { $let: {
-                vars: { index: {$indexOfArray: ['$paths', '/processes']}},
-                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
-            } },
-            fileFormats: { $let: {
-                vars: {
-                    index1: {$indexOfArray: ['$paths', '/output_formats']},
-                    index2: {$indexOfArray: ['$paths', '/file_formats']}
+
+    // Aggregates raw documents into backend summaries.
+    // Input: array of documents from the 'raw' collection.
+    getAllBackends(rawDocs) {
+        const mainPaths = ['/', '/collections', '/processes', '/service_types', '/output_formats', '/file_formats', '/udf_runtimes'];
+
+        // Filter to main endpoint paths and sort
+        let docs = rawDocs.filter(d => mainPaths.includes(d.path));
+        docs.sort((a, b) => (a.backend + a.path).localeCompare(b.backend + b.path));
+
+        // Group by service@api_version
+        const groups = {};
+        for (const doc of docs) {
+            const key = doc.service + '@' + doc.api_version;
+            if (!groups[key]) {
+                groups[key] = {
+                    service: doc.service,
+                    api_version: doc.api_version,
+                    backend: doc.backend,
+                    backendTitle: doc.backendTitle,
+                    group: doc.group,
+                    retrieved: doc.retrieved,
+                    unsuccessfulCrawls: doc.unsuccessfulCrawls,
+                    contents: [],
+                    paths: []
+                };
+            }
+            const g = groups[key];
+            if (doc.retrieved < g.retrieved) g.retrieved = doc.retrieved;  // min
+            g.unsuccessfulCrawls = Math.max(g.unsuccessfulCrawls, doc.unsuccessfulCrawls);  // max
+            g.contents.push(doc.content);
+            g.paths.push(doc.path);
+        }
+
+        // Transform each group into the final backend document
+        return Object.values(groups).map(g => {
+            const getContent = (path) => {
+                const idx = g.paths.indexOf(path);
+                return idx === -1 ? null : g.contents[idx];
+            };
+
+            const root = getContent('/');
+            const collections = getContent('/collections');
+            const processes = getContent('/processes');
+            const fileFormats = getContent('/output_formats') || getContent('/file_formats');
+            const serviceTypes = getContent('/service_types');
+            const udfRuntimes = getContent('/udf_runtimes');
+
+            return {
+                service: g.service,
+                api_version: root ? root.api_version : g.api_version,
+                backend: g.backend,
+                backendTitle: g.backendTitle,
+                group: g.group,
+                retrieved: g.retrieved,
+                unsuccessfulCrawls: g.unsuccessfulCrawls,
+                production: root ? (root.production || false) : false,
+                description: root ? root.description : undefined,
+                links: root ? (root.links || []) : [],
+                endpoints: root && root.endpoints
+                    ? root.endpoints.reduce((acc, ep) => acc.concat(ep.methods.map(m => m + ' ' + ep.path)), [])
+                    : [],
+                collections: collections ? collections.collections : null,
+                processes: processes ? processes.processes : null,
+                fileFormats: {
+                    input: fileFormats ? (fileFormats.input || {}) : {},
+                    output: fileFormats ? (fileFormats.output || fileFormats) : {}
                 },
-                in: { $let: {
-                    vars: { index: { $cond: { if: { $eq: ['$$index1', -1] }, then: "$$index2", else: "$$index1" } } },
-                    in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
-            } } } },
-            serviceTypes: { $let: {
-                vars: { index: {$indexOfArray: ['$paths', '/service_types']}},
-                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
-            } },
-            udfRuntimes: { $let: {
-                vars: { index: {$indexOfArray: ['$paths', '/udf_runtimes']}},
-                in: { $cond: { if: { $eq: ['$$index', -1] }, then: null, else: { $arrayElemAt: [ '$contents', '$$index' ] } } }
-            } }
-        } },
-        { $project: {
-            service: 1,
-            api_version: 1,
-            backend: 1,
-            backendTitle: 1,
-            group: 1,
-            retrieved: 1,
-            unsuccessfulCrawls: 1,
-            production: { $ifNull: ['$root.production', false] },
-            api_version: '$root.api_version',
-            description: '$root.description',
-            links: { $ifNull: ['$root.links', []] },
-            endpoints: {
-                $reduce: {
-                    input: {
-                        $map: { input: '$root.endpoints', as: 'endpoint', in: { 
-                            $map: { input: '$$endpoint.methods', as: 'method', in:{
-                                $concat: ['$$method',' ','$$endpoint.path']
-                            }}
-                        }}
-                    },
-                    initialValue: [],
-                    in: {
-                        $concatArrays: ['$$value', '$$this']
-                    }
+                serviceTypes: serviceTypes,
+                udfRuntimes: udfRuntimes,
+                billing: root ? root.billing : undefined
+            };
+        });
+    },
+
+    // Extracts and deduplicates collections from raw data.
+    // Input: array of documents from the 'raw' collection.
+    getAllCollections(rawDocs) {
+        const docs = rawDocs.filter(d =>
+            d.path === '/collections' && d.content && Array.isArray(d.content.collections)
+        );
+
+        const seen = {};
+        const results = [];
+        for (const doc of docs) {
+            for (const col of doc.content.collections) {
+                // unique key matching the original pipeline's $group _id
+                const key = (col.id || '') + '@' + doc.service + '@' + doc.api_version;
+                if (!seen[key]) {
+                    seen[key] = true;
+                    results.push({
+                        ...col,
+                        service: doc.service,
+                        api_version: doc.api_version,
+                        backend: doc.backend,
+                        backendTitle: doc.backendTitle,
+                        retrieved: doc.retrieved,
+                        unsuccessfulCrawls: doc.unsuccessfulCrawls
+                    });
                 }
-            },
-            collections: '$collections.collections',
-            processes: '$processes.processes',
-            fileFormats: {
-                input: { $ifNull: ['$fileFormats.input', {}] },   // input formats didn't exist in API v0.4 -> empty object as default
-                output: { $ifNull: ['$fileFormats.output', '$fileFormats'] }   // first item: API v1.0, second item: API v0.4
-            },
-            serviceTypes: 1,
-            udfRuntimes: 1,
-            billing: '$root.billing'
-        } }
-    ],
-    GET_ALL_COLLECTIONS_PIPELINE: [
-        { $match: { path: '/collections', 'content.collections': {$exists: true} } },
-        { $addFields: {
-            'content.collections.service': '$service',
-            'content.collections.api_version': '$api_version',
-            'content.collections.backend': '$backend',
-            'content.collections.backendTitle': '$backendTitle',
-            'content.collections.retrieved': '$retrieved',
-            'content.collections.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
-        { $project: { 'collection': '$content.collections' } },
-        { $unwind: '$collection' },
-        { $group: {   // ensure unique IDs, see issue #76
-            _id: { id: '$collection.id', service: '$collection.service', api_version: '$collection.api_version' },  // unique key of "collections" collection
-            collection: { $first: "$collection" } } },
-        { $replaceRoot: { newRoot: '$collection' } }
-    ],
-    GET_ALL_PROCESSES_PIPELINE: [
-        // basically like for collections
-        { $match: { path: '/processes', 'content.processes': {$exists: true} } },
-        { $addFields: {
-            'content.processes.service': '$service',
-            'content.processes.api_version': '$api_version',
-            'content.processes.backend': '$backend',
-            'content.processes.backendTitle': '$backendTitle',
-            'content.processes.retrieved': '$retrieved',
-            'content.processes.unsuccessfulCrawls': '$unsuccessfulCrawls' } },
-        { $project: { 'process': '$content.processes' } },
-        { $unwind: '$process' },
-        { $group: {   // ensure unique IDs, see issue #76
-            _id: { id: '$process.id', service: '$process.service', api_version: '$process.api_version' },  // unique key of "processes" collection
-            process: { $first: "$process" } } },
-        { $replaceRoot: {newRoot: '$process'} }
-    ],
-    GET_DISTINCT_COLLECTIONS_PIPELINE: [
-        { $project: {id: 1, title: 1} },
-        { $group: {     // group by collection id, at the same time calculate the sum, and maintain title
-            _id: {$toLower: "$id"},
-            id: {$first: "$id"},
-            title: {$first: "$title"},  // if a collection *does* appear twice, the title is usually the same, so just using the first occurrence is enough
-        } },
-        { $sort: {id: 1} }  // sort by id ASC
-    ],
-    GET_DISTINCT_PROCESSES_WITH_COUNT_PIPELINE: [
-        { $project: {id: 1, summary: 1} },
-        { $group: {     // group by process id, at the same time calculate the sum, and maintain summary/allSummaries
-            _id: {$toLower: "$id"},
-            id: {$first: "$id"},
-            summary: {$first: "$summary"},   // simply the first occurrence for easy displaying
-            allSummaries: {$addToSet: "$summary"},  // processes can appear many times with quite different summaries, so it's better to return them all
-            count: {$sum: 1}
-        } },
-        { $sort: {count: -1, id: 1} }  // sort by count DESC, id ASC
-    ],
-    GET_ALL_INPUT_FORMATS_WITH_COUNT_PIPELINE: [
-        { $match: { fileFormats: {$exists: true} } },  // only consider backends that have file formats
-        { $addFields: { 'inputFormatsAsArray' : {$objectToArray: '$fileFormats.input' } } },  // input formats are saved as object keys -> convert to array
-        { $project: {inputFormats: { $map: {input: '$inputFormatsAsArray', as: 'if', in: "$$if.k"} } } },  // map values into top level of object (didn't work without this for some reason)
-        { $unwind: "$inputFormats" },  // get one entry for each input format
-        { $group: { _id: {$toLower: "$inputFormats"}, format: {$first: "$inputFormats"}, count: {$sum: 1} } },  // group by format name, at the same time calculate the sum
-        { $sort: {count: -1, format: 1} }  // sort by count DESC, format name ASC
-    ],
-    GET_ALL_OUTPUT_FORMATS_WITH_COUNT_PIPELINE: [
-        { $match: { fileFormats: {$exists: true} } },  // only consider backends that have file formats
-        { $addFields: { 'outputFormatsAsArray' : {$objectToArray: '$fileFormats.output' } } },  // output formats are saved as object keys -> convert to array
-        { $project: {outputFormats: { $map: {input: '$outputFormatsAsArray', as: 'of', in: "$$of.k"} } } },  // map values into top level of object (didn't work without this for some reason)
-        { $unwind: "$outputFormats" },  // get one entry for each output format
-        { $group: { _id: {$toLower: "$outputFormats"}, format: {$first: "$outputFormats"}, count: {$sum: 1} } },  // group by format name, at the same time calculate the sum
-        { $sort: {count: -1, format: 1} }  // sort by count DESC, format name ASC
-    ],
-    GET_ALL_SERVICE_TYPES_WITH_COUNT_PIPELINE: [
-        { $match: { serviceTypes: {$exists: true} } },  // only consider backends that have service types
-        { $addFields: { 'serviceTypesAsArray' : {$objectToArray: '$serviceTypes' } } },  // service types are saved as object keys -> convert to array
-        { $project: {serviceTypes: { $map: {input: '$serviceTypesAsArray', as: 'st', in: "$$st.k"} } } },  // map values into top level of object (didn't work without this for some reason)
-        { $unwind: "$serviceTypes" },  // get one entry for each service type
-        { $group: { _id: {$toLower: "$serviceTypes"}, service: {$first: "$serviceTypes"}, count: {$sum: 1} } },  // group by service type name, at the same time calculate the sum
-        { $sort: {count: -1, service: 1} }  // sort by count DESC, service name ASC
-    ],
-    GET_ALL_UDF_RUNTIMES_WITH_COUNT_PIPELINE: [
-        { $match: { udfRuntimes: {$exists: true} } },  // only consider backends that have UDF runtimes
-        { $addFields: { 'udfRuntimesAsArray' : {$objectToArray: '$udfRuntimes' } } },  // UDF runtimes are saved as object keys -> convert to array
-        { $project: {udfRuntimes: { $map: {input: '$udfRuntimesAsArray', as: 'rt', in: "$$rt.k"} } } },  // map values into top level of object (didn't work without this for some reason)
-        { $unwind: "$udfRuntimes" },  // get one entry for each runtime
-        { $group: { _id: {$toLower: "$udfRuntimes"}, runtime: {$first: "$udfRuntimes"}, count: {$sum: 1} } },  // group by runtime name, at the same time calculate the sum
-        { $sort: {count: -1, runtime: 1} }  // sort by count DESC, runtime name ASC
-    ]
+            }
+        }
+        return results;
+    },
+
+    // Extracts and deduplicates processes from raw data.
+    // Input: array of documents from the 'raw' collection.
+    getAllProcesses(rawDocs) {
+        const docs = rawDocs.filter(d =>
+            d.path === '/processes' && d.content && Array.isArray(d.content.processes)
+        );
+
+        const seen = {};
+        const results = [];
+        for (const doc of docs) {
+            for (const proc of doc.content.processes) {
+                const key = (proc.id || '') + '@' + doc.service + '@' + doc.api_version;
+                if (!seen[key]) {
+                    seen[key] = true;
+                    results.push({
+                        ...proc,
+                        service: doc.service,
+                        api_version: doc.api_version,
+                        backend: doc.backend,
+                        backendTitle: doc.backendTitle,
+                        retrieved: doc.retrieved,
+                        unsuccessfulCrawls: doc.unsuccessfulCrawls
+                    });
+                }
+            }
+        }
+        return results;
+    },
+
+    // Returns distinct collections (by ID), sorted by id ASC.
+    // Input: array of documents from the 'collections' collection.
+    getDistinctCollections(collections) {
+        const groups = {};
+        for (const col of collections) {
+            const key = (col.id || '').toLowerCase();
+            if (!groups[key]) {
+                groups[key] = { id: col.id, title: col.title };
+            }
+        }
+        return Object.values(groups).sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+    },
+
+    // Returns distinct processes with occurrence count, sorted by count DESC then id ASC.
+    // Input: array of documents from the 'processes' collection.
+    getDistinctProcessesWithCount(processes) {
+        const groups = {};
+        for (const proc of processes) {
+            const key = (proc.id || '').toLowerCase();
+            if (!groups[key]) {
+                groups[key] = { id: proc.id, summary: proc.summary, allSummaries: new Set(), count: 0 };
+            }
+            groups[key].allSummaries.add(proc.summary);
+            groups[key].count++;
+        }
+        return Object.values(groups)
+            .map(g => ({ id: g.id, summary: g.summary, allSummaries: [...g.allSummaries], count: g.count }))
+            .sort((a, b) => b.count - a.count || (a.id || '').localeCompare(b.id || ''));
+    },
+
+    // Returns input file formats with count, sorted by count DESC then format ASC.
+    // Input: array of documents from the 'backends' collection.
+    getInputFormatsWithCount(backends) {
+        const groups = {};
+        for (const b of backends) {
+            if (b.fileFormats && b.fileFormats.input) {
+                for (const format of Object.keys(b.fileFormats.input)) {
+                    const key = format.toLowerCase();
+                    if (!groups[key]) groups[key] = { format, count: 0 };
+                    groups[key].count++;
+                }
+            }
+        }
+        return Object.values(groups).sort((a, b) => b.count - a.count || a.format.localeCompare(b.format));
+    },
+
+    // Returns output file formats with count, sorted by count DESC then format ASC.
+    // Input: array of documents from the 'backends' collection.
+    getOutputFormatsWithCount(backends) {
+        const groups = {};
+        for (const b of backends) {
+            if (b.fileFormats && b.fileFormats.output) {
+                for (const format of Object.keys(b.fileFormats.output)) {
+                    const key = format.toLowerCase();
+                    if (!groups[key]) groups[key] = { format, count: 0 };
+                    groups[key].count++;
+                }
+            }
+        }
+        return Object.values(groups).sort((a, b) => b.count - a.count || a.format.localeCompare(b.format));
+    },
+
+    // Returns service types with count, sorted by count DESC then service ASC.
+    // Input: array of documents from the 'backends' collection.
+    getServiceTypesWithCount(backends) {
+        const groups = {};
+        for (const b of backends) {
+            if (b.serviceTypes) {
+                for (const service of Object.keys(b.serviceTypes)) {
+                    const key = service.toLowerCase();
+                    if (!groups[key]) groups[key] = { service, count: 0 };
+                    groups[key].count++;
+                }
+            }
+        }
+        return Object.values(groups).sort((a, b) => b.count - a.count || a.service.localeCompare(b.service));
+    },
+
+    // Returns UDF runtimes with count, sorted by count DESC then runtime ASC.
+    // Input: array of documents from the 'backends' collection.
+    getUdfRuntimesWithCount(backends) {
+        const groups = {};
+        for (const b of backends) {
+            if (b.udfRuntimes) {
+                for (const runtime of Object.keys(b.udfRuntimes)) {
+                    const key = runtime.toLowerCase();
+                    if (!groups[key]) groups[key] = { runtime, count: 0 };
+                    groups[key].count++;
+                }
+            }
+        }
+        return Object.values(groups).sort((a, b) => b.count - a.count || a.runtime.localeCompare(b.runtime));
+    }
 };

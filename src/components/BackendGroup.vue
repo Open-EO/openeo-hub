@@ -19,7 +19,7 @@
 import Backend from './Backend.vue';
 import Tab from '@openeo/vue-components/components/Tab.vue';
 import Tabs from '@openeo/vue-components/components/Tabs.vue';
-import {default as config} from './../../config.json';
+import config from './../../config.js';
 import { MigrateCapabilities } from '@openeo/js-commons';
 import axios from 'axios';
 

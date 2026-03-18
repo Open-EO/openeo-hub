@@ -8,9 +8,6 @@
 			<nav>
 				<ul>
 					<li @click="view = 'discover'" :class="{active: view == 'discover'}" title="Discover">Discover</li>
-					<!--
-					<li @click="view = 'exchange'" :class="{active: view == 'exchange'}" title="Exchange">Exchange</li>
-					-->
 					<li @click="view = 'about'" :class="{active: view == 'about'}" title="About">About</li>
 					<li><a href="https://openeo.org/">openeo.org <!-- external link icon: --> <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <!-- end external link icon--> </a></li>
 				</ul>
@@ -20,14 +17,11 @@
 		<main>
 			<!-- Don't use `v-show` for `div`s that may contain Leaflet maps - it would cause the map to be initiated incorrectly. Setting `height:0` etc. (instead of v-show's `display:none`) solves the problem. -->
 			<DiscoverSection :class="{hidden: view != 'discover', wrapper: 1}"></DiscoverSection>
-			<!-- disabled for now
-			<ExchangeSection :class="{hidden: view != 'exchange'}" :active="view == 'exchange'"></ExchangeSection>
-			-->
 			<AboutSection :class="{hidden: view != 'about'}"></AboutSection>
 		</main>
 
 		<footer>
-			This is <strong>openEO Hub</strong>, a discovery and exchange platform for the <a href="https://openeo.org/">openEO</a> community.
+			This is <strong>openEO Hub</strong>, a discovery platform for the <a href="https://openeo.org/">openEO</a> community.
 		</footer>
 	</div>
 </template>
@@ -35,14 +29,11 @@
 <script>
 import AboutSection from './components/AboutSection.vue';
 import DiscoverSection from './components/DiscoverSection.vue';
-import ExchangeSection from './components/ExchangeSection.vue';
-
 export default {
 	name: 'openeo-hub',
 	components: {
 		AboutSection,
-		DiscoverSection,
-		ExchangeSection
+		DiscoverSection
 	},
 	data() {
 		return {
@@ -277,42 +268,6 @@ main > section p:first-child {
 .process + .process {
 	/* margin between neighbouring panels */
 	margin-top: 30px;
-}
-
-/* Exchange section */
-#exchange div {
-	display: flex;
-	flex-direction: column;
-}
-#exchange input {
-	max-width: 500px;
-}
-#exchange textarea {
-	max-width: 1000px;
-	min-height: 100px;
-}
-#exchange textarea ~ textarea {
-	min-height: 200px;
-}
-#exchange button {
-	max-width: 100px;
-	flex-shrink: 0;
-}
-#exchange h3 {
-	margin-top: 20px;
-}
-#exchange li div {
-	max-width: 1000px;
-	margin-bottom: 10px;
-}
-#exchange pre {
-	background-color: #ececec;
-	border: 1px solid darkgray;
-	overflow: auto;
-	padding: 5px;
-}
-#exchange pre:not(.expanded) {
-	max-height: 120px;
 }
 
 /* Various */

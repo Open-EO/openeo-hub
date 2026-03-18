@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import {default as config} from './../../config.json';
+import {default as config} from './../../config.js';
 import FormattedTimestamp from './FormattedTimestamp.vue';
 export default {
     name: 'DataRetrievedNotice',

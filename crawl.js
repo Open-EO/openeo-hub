@@ -1,44 +1,27 @@
-const config = require('./config.json');
-const MongoClient = require('mongodb').MongoClient;
+const config = require('./config.js');
 
 const axios = require('axios');
 axios.defaults.timeout = 60*1000;   // 60s = 60000 ms
 
-const mongo = new MongoClient(config.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true } );
-
+const Database = require('./src/db.js');
 const dbqueries = require('./src/dbqueries.js');
+
+const db = new Database(config.dataDir);
+db.init();
 
 const starttimestamp = new Date().toJSON();
 
 const verbose = process.argv[2] == '--verbose';
 
-console.log('Connecting to database server...');
-mongo.connect(async (error, client) => {
-    if(error != null) {
-        console.log();
-        console.log('An error occurred while connecting to the database server (' + error.name + ': ' + error.message + ')');
-        if(verbose) {
-            console.log(error);
-        }
-        console.log();
-        console.log('CRAWLING ABORTED!')
-        return 1;  // abort with non-zero exit code
-    }
-
-    const db = client.db(config.dbName);
-    const collection = db.collection('raw');
-    console.log('Connected to database server.');
-    console.log('');
-
+async function crawl() {
     console.log('Setting up database indexes...');
     try {
-        await db.collection('raw').createIndex({service: 1, api_version: 1, path: 1}, { name: 'service-apiversion-path_unique', unique: true });
-        await db.collection('backends').createIndex({backend: 1}, { name: 'backend_unique', unique: true });
-        await db.collection('backends').createIndex({service: 1, api_version: 1}, { name: 'service-apiversion_unique', unique: true });
-        await db.collection('collections').createIndex({service: 1, api_version: 1, id: 1}, { name: 'service-apiversion-id_unique', unique: true });
-        await db.collection('collections').createIndex({id: "text", title: "text", description: "text"}, { name: 'id-title-description_text' });
-        await db.collection('processes').createIndex({service: 1, api_version: 1, id: 1}, { name: 'service-apiversion-id_unique', unique: true });
-        await db.collection('processes').createIndex({id: "text", summary: "text", description: "text", "returns.description": "text"}, {name: 'id-summary-description_text'});
+        await db.ensureIndex('raw', { fieldName: 'service' });
+        await db.ensureIndex('raw', { fieldName: 'api_version' });
+        await db.ensureIndex('raw', { fieldName: 'path' });
+        await db.ensureIndex('backends', { fieldName: 'backend', unique: true });
+        await db.ensureIndex('collections', { fieldName: 'id' });
+        await db.ensureIndex('processes', { fieldName: 'id' });
         console.log('Set up database indexes.');
     }
     catch(error) {
@@ -96,16 +79,17 @@ mongo.connect(async (error, client) => {
 
         for (var api_version in individualBackends) {
             let backendUrl = individualBackends[api_version];
+            var backendTitle = name;
 
-            // enfore HTTPS
+            // enforce HTTPS
             if(! backendUrl.startsWith('https')) {
                 console.log("REFUSING to crawl insecure backend " + backendUrl + " that does not use HTTPS.\n");
                 continue;
             }
 
+            var paths = [];
             try {
                 console.log('      - ' + backendUrl + ' ...');
-                var paths = [];
                 const req = await axios(backendUrl+'/');
                 const caps = req.data.endpoints
                     .filter(e => e.methods.map(m => m.toLowerCase()).indexOf('get') != -1)  // only keep those that have a GET method
@@ -130,7 +114,7 @@ mongo.connect(async (error, client) => {
                         console.log(error);
                     }
                 }
-            }  
+            }
             catch(error) {
                 console.log('An error occurred while gathering endpoint URLs for ' + backendUrl + ' (' + error.name + ': ' + error.message + ')');
                 if(verbose) {
@@ -155,31 +139,11 @@ mongo.connect(async (error, client) => {
                     if(path == '/' && response.data.title) {
                         backendTitle = response.data.title;
                     }
-                    // save to database
+                    // save to database (upsert: delete existing + insert new)
                     var data = response.data;
                     try {
-                        // In the $set part, findOneAndUpdate doesn't allow field names that contain '.' or '$', see https://jira.mongodb.org/browse/SERVER-30575
-                        // And that despite the MongoDB server allowing this since version 3.6, see https://docs.mongodb.com/v4.0/reference/limits/#Restrictions-on-Field-Names
-                        /*
-                        await collection.findOneAndUpdate(
-                            { service: serviceUrl, api_version: api_version, path: path },
-                            { $set: {
-                                backend: backendUrl,
-                                backendTitle: backendTitle,
-                                group: name,
-                                content: data,
-                                retrieved: new Date().toJSON(),
-                                unsuccessfulCrawls: 0
-                            }},
-                            { upsert: true }
-                        )
-                        */
-                        // Therefore do the same behaviour (an upsert) manually:
-                        // (as officially suggested by MongoDB staff at https://jira.mongodb.org/browse/SERVER-30575?focusedCommentId=1821530#comment-1821530)
-                        // (we can't use updateOne because that does the same annoying check as findOneAndUpdate, only insertOne bypasses it, therefore we do a delete+insert instead of an update)
-                        let foundItem = await collection.findOne({ service: serviceUrl, api_version: api_version, path: path });
-                        if(foundItem) await collection.deleteOne({ service: serviceUrl, api_version: api_version, path: path });
-                        await collection.insertOne({
+                        await db.remove({ service: serviceUrl, api_version: api_version, path: path }, 'raw', { multi: false });
+                        await db.insert({
                             service: serviceUrl,
                             api_version: api_version,
                             path: path,
@@ -189,7 +153,7 @@ mongo.connect(async (error, client) => {
                             content: data,
                             retrieved: new Date().toJSON(),
                             unsuccessfulCrawls: 0
-                        });
+                        }, 'raw');
                     }
                     catch(error) {
                         console.log('An error occurred while writing ' + backendUrl+path + ' to the database (' + error.name + ': ' + error.message + ')');
@@ -204,7 +168,7 @@ mongo.connect(async (error, client) => {
                         console.log(error);
                     }
                 }
-            };
+            }
 
             console.log('');
         }
@@ -220,41 +184,62 @@ mongo.connect(async (error, client) => {
         console.log('Processing data...');
 
         // Delete all entries that belong to a group that was meanwhile deleted (or renamed)
-        await collection.deleteMany({ group: { $not: { $in: Object.keys(config.backends) } } });
+        await db.remove({ group: { $nin: Object.keys(config.backends) } }, 'raw');
         
-        // Delete all entries that don't belong to one of the backends that are listed in the currently configured services's well-known documents
-        // But exempt those that failed to download. The two conditions are implicitly connected with AND.
-        // See also issue #79, https://stackoverflow.com/q/63937811, and the MongoDB docs for "$expr" and "$in (aggregation)"
-        // Note that the two "$in" are NOT exactly the same operator (one is from the query lanuage, one from the aggregation framework)
-        await collection.deleteMany({
-            $expr: { $not: { $in: [ {$concat:["$service","@","$api_version"]}, allIndividualBackends ] } },
-            service: { $not: { $in: allFailedServices } }
-        });
+        // Delete all entries that don't belong to one of the backends listed in the currently configured services's well-known documents
+        // But exempt those that failed to download.
+        const allRawDocs = await db.find({}, 'raw');
+        const toDelete = allRawDocs.filter(doc =>
+            !allIndividualBackends.includes(doc.service + '@' + doc.api_version) &&
+            !allFailedServices.includes(doc.service)
+        );
+        if (toDelete.length > 0) {
+            await db.remove({ _id: { $in: toDelete.map(d => d._id) } }, 'raw');
+        }
 
-        // Increase `unsucessfulCrawls` counter of items that were not updated in this run
-        await collection.updateMany({retrieved: {$lt: starttimestamp}}, {$inc: {unsuccessfulCrawls: 1}});
+        // Increase `unsuccessfulCrawls` counter of items that were not updated in this run
+        await db.update({ retrieved: { $lt: starttimestamp } }, { $inc: { unsuccessfulCrawls: 1 } }, 'raw', { multi: true });
         
         // Delete `/collection/{id}` documents that are no longer referenced from their main `/collections` document
-        candidates = await collection.find({unsuccessfulCrawls: {$gte: 1}, path: {$regex: /^\/collections\/.+$/}}).toArray();  // `unsuccessfulCrawls` of legit candidates *should* always be ==1 (not ==0 because then they would still be in the main collection document, not >1 because then they would already have been removed during the previous crawl, but use >=1 anyway)
-        whitelist = await collection.find({path: "/collections"}).toArray();   // get "ground truth" for *all* backends
-        accidental = whitelist.filter(b => !(typeof b == 'object' && typeof b.content == 'object' && Array.isArray(b.content.collections))).map(b => b.backend);
-        todelete = candidates.filter(c =>
-            accidental.indexOf(c.backend) == -1 &&   // don't delete if main `/collections` document seems invalid
-            whitelist.find(w => w.backend == c.backend)   // use the correct backend for the check
-            .content.collections.some(c2 => c2.id == c.content.id) == false  // keep candidate for deletion if it's not found in its backend's main `/collections` document
-        );
-        await collection.deleteMany({_id: {$in: todelete.map(e => e._id)}});   // actually delete remaining candidates
-        // Similar (not identical!) query (relies solely on `unsuccessfulCrawls` and DOES NOT check the actual ground truth)
-        // collection.deleteMany({unsuccessfulCrawls: {$gte: 1}, path: {$regex: /^\/collections\/.+$/}});
+        const candidates = await db.find({ unsuccessfulCrawls: { $gte: 1 }, path: { $regex: /^\/collections\/.+$/ } }, 'raw');
+        const whitelist = await db.find({ path: '/collections' }, 'raw');
+        const accidental = whitelist.filter(b => !(typeof b == 'object' && typeof b.content == 'object' && Array.isArray(b.content.collections))).map(b => b.backend);
+        const todelete = candidates.filter(c => {
+            if (accidental.indexOf(c.backend) !== -1) return false;  // don't delete if main `/collections` document seems invalid
+            const match = whitelist.find(w => w.backend == c.backend);
+            if (!match) return false;
+            return match.content.collections.some(c2 => c2.id == c.content.id) == false;  // keep candidate for deletion if it's not found in its backend's main `/collections` document
+        });
+        if (todelete.length > 0) {
+            await db.remove({ _id: { $in: todelete.map(e => e._id) } }, 'raw');
+        }
         
         // Delete documents that have reached the configured threshold of maximum unsuccessful crawls
-        await collection.deleteMany({unsuccessfulCrawls: {$gte: config.unsuccessfulCrawls.deleteAfter}});
+        await db.remove({ unsuccessfulCrawls: { $gte: config.unsuccessfulCrawls.deleteAfter } }, 'raw');
 
-        // Get all collections as usual, but in the end remove `id` from result to avoid "duplicate key" errors and output.
-        // Call `hasNext` because as long as there's no I/O request the Mongo Node driver doesn't actually execute the pipeline.
-        await collection.aggregate(dbqueries.GET_ALL_BACKENDS_PIPELINE   .concat([{$project: {_id: 0}}, {$out: 'backends'}]))   .hasNext();
-        await collection.aggregate(dbqueries.GET_ALL_COLLECTIONS_PIPELINE.concat([{$project: {_id: 0}}, {$out: 'collections'}])).hasNext();
-        await collection.aggregate(dbqueries.GET_ALL_PROCESSES_PIPELINE  .concat([{$project: {_id: 0}}, {$out: 'processes'}]))  .hasNext();
+        // Aggregate data from raw collection into backends, collections, and processes collections
+        const rawDocs = await db.find({}, 'raw');
+
+        // Replace backends collection
+        await db.remove({}, 'backends');
+        const backends = dbqueries.getAllBackends(rawDocs);
+        for (const backend of backends) {
+            await db.insert(backend, 'backends');
+        }
+
+        // Replace collections collection
+        await db.remove({}, 'collections');
+        const collections = dbqueries.getAllCollections(rawDocs);
+        for (const col of collections) {
+            await db.insert(col, 'collections');
+        }
+
+        // Replace processes collection
+        await db.remove({}, 'processes');
+        const processes = dbqueries.getAllProcesses(rawDocs);
+        for (const proc of processes) {
+            await db.insert(proc, 'processes');
+        }
         
         console.log('Finished processing data.');
         console.log('');
@@ -267,18 +252,9 @@ mongo.connect(async (error, client) => {
         console.log('');
     }
     finally {
-        console.log('Closing database connection...');
-        try {
-            await mongo.close();
-            console.log('Closed database connection.')
-        }
-        catch(error) {
-            console.log('An error occurred while closing the database connection (' + error.name + ': ' + error.message + ')');
-            if(verbose) {
-                console.log(error);
-            }
-        }
         console.log('');
         console.log('DONE!');
     }
-});
+}
+
+crawl();
