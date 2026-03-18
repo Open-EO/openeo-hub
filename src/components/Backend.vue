@@ -24,7 +24,7 @@
 
         <LinkList :links="preparedBackend.links" :ignoreRel="['self', 'version-history', 'conformance', 'data']"></LinkList>
 
-        <p><small>URL: <code>{{backend.backendUrl}}</code></small></p>
+        <p><small>URL: <code>{{backend.baseUrl || backend.backendUrl}}</code></small></p>
         
         <UnsuccessfulCrawlNotice :unsuccessfulCrawls="backend.unsuccessfulCrawls"></UnsuccessfulCrawlNotice>
         <DataRetrievedNotice :timestamp="backend.retrieved"></DataRetrievedNotice>
@@ -128,7 +128,7 @@ export default {
 
     computed: {
         webEditorUrl() {
-            return 'https://editor.openeo.org/?server=' + encodeURIComponent(this.backend.backendUrl);
+            return 'https://editor.openeo.org/?server=' + encodeURIComponent(this.backend.baseUrl || this.backend.backendUrl);
         }
     },
 
