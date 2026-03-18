@@ -10,7 +10,7 @@
       "name": "Matthias Mohr"
     }
   ],
-  "description": "Platform for discovering openEO back-ends and exchanging process graphs with the openEO community.",
+  "description": "Platform for discovering openEO services and exchanging process graphs with the openEO community.",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Open-EO/openeo-hub/issues"

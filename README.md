@@ -1,15 +1,15 @@
 # openEO Hub
-This repository contains the source code for [openEO Hub](https://hub.openeo.org), a centralized platform to explore openEO back-end providers.
+This repository contains the source code for [openEO Hub](https://hub.openeo.org), a centralized platform to explore openEO service providers.
 
 **It is currently in a rather early stage of development.**
 
 ## Goals
 openEO Hub tries to implement some ambitious ideas. It is aimed to be a platform that may allow users to:
 
-* find back-ends by collections
-* find back-ends supporting required processes, e.g. by submitting a process graph and checking automatically against all back-ends
-* find back-ends that support UDFs
-* get information about back-ends, e.g. regarding costs
+* find services by collections
+* find services supporting required processes, e.g. by submitting a process graph and checking automatically against all services
+* find services that support UDFs
+* get information about services, e.g. regarding costs
 * explore publicly available containers to run UDFs
 
 ## Public API endpoints
@@ -17,11 +17,11 @@ The Hub provides its data via a RESTful API under https://hub.openeo.org/api. Th
 
 * Metadata about the API
   * `GET /api` -- capabilities document compliant to openEO API v1.0.0.
-* Available openEO backends
-  * `GET /api/backends` -- the list of *backend provider URLs* that the Hub is configured to crawl (i.e. links to `.well-known` documents where available, otherwise a link directly to the backend OR an object with several links to backends of the same provider).
-  * `GET /api/backends?details=full` -- the list of *actual, individual backends* within the Hub's database, including **ALL** their details (i.e. **all** collection descriptions etc.) *This reply can easily be several dozen MBs big.*
+* Available openEO services
+  * `GET /api/backends` -- the list of *service provider URLs* that the Hub is configured to crawl (i.e. links to `.well-known` documents where available, otherwise a link directly to the service OR an object with several links to services of the same provider).
+  * `GET /api/backends?details=full` -- the list of *actual, individual services* within the Hub's database, including **ALL** their details (i.e. **all** collection descriptions etc.) *This reply can easily be several dozen MBs big.*
   * `GET /api/backends?details=clipped` -- Like `full`, but for collections and processes only the `id`s and `title`s/`summary`s are returned. *This reduces the size **a lot**.*
-  * `GET /api/backends?details=grouped` -- Like `clipped`, but the individual backends are grouped by providers.
+  * `GET /api/backends?details=grouped` -- Like `clipped`, but the individual services are grouped by providers.
 
 ## Getting started
 This app is deployed at https://hub.openeo.org/.
@@ -35,7 +35,7 @@ Required is Node.js (at least version 12). No external database server is needed
 1. Clone this repo, `cd /path/to/openeo-hub/`
 2. `npm install` -> wait...
 3. Edit `config.js`:
-   - Specify the backends to crawl (required). This happens via an object with display names as the keys and URLs as the values. The display name is only shown if a backend does not supply one itself. The URLs MUST point to an openEO service that supports well-known discovery, but the specified URL itself MUST NOT contain the trailing `/.well-known/openeo`. The URLs may or may not have a trailing slash.
+   - Specify the services to crawl (required). This happens via an object with display names as the keys and URLs as the values. The display name is only shown if a service does not supply one itself. The URLs MUST point to an openEO service that supports well-known discovery, but the specified URL itself MUST NOT contain the trailing `/.well-known/openeo`. The URLs may or may not have a trailing slash.
    - Optional: Change the `dataDir` (default: `./data`) to specify where the database files are stored
    - Optional: Change presets for thresholds that control how the crawler handles existing data that is not reachable on re-crawl
 4. `npm run crawl` -> wait until finished with output "DONE!" (see below if something doesn't look right or any line starts with "An error...")
@@ -46,7 +46,7 @@ Required is Node.js (at least version 12). No external database server is needed
 Should you ever want to hard-reset the database (i.e. drop all collections openeo-hub created), use the `drop` script by calling `node drop.js --yesimsure` or `npm run drop -- --yesimsure`.
 
 ## Troubleshooting
-If errors occur during crawling, this is probably caused by one of the crawled backends (a) returning JSON that is not compliant to the openEO API specification, or (b) malfunctioning under the load of many requests in quick succession. In the first case (a), the `--verbose` option may be helpful to locate the error (be sure to pass the option to the *script* and not to NPM, i.e. call `node crawl.js --verbose` or `npm run crawl -- --verbose`).
+If errors occur during crawling, this is probably caused by one of the crawled services (a) returning JSON that is not compliant to the openEO API specification, or (b) malfunctioning under the load of many requests in quick succession. In the first case (a), the `--verbose` option may be helpful to locate the error (be sure to pass the option to the *script* and not to NPM, i.e. call `node crawl.js --verbose` or `npm run crawl -- --verbose`).
 
 ## Scheduling re-crawling
 On Linux systems, you can use the cron daemon to schedule recurring crawling. For example, adding the following line to `/etc/crontab` executes the crawl script every night at 3:00 am, as the user johndoe: `0 3 * * * johndoe node /path/to/openeo-hub/crawl.js`
