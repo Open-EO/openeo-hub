@@ -46,7 +46,7 @@ module.exports = {
             const root = getContent('/');
             const collections = getContent('/collections');
             const processes = getContent('/processes');
-            const fileFormats = getContent('/output_formats') || getContent('/file_formats');
+            const fileFormats = getContent('/file_formats');
             const serviceTypes = getContent('/service_types');
             const udfRuntimes = getContent('/udf_runtimes');
 

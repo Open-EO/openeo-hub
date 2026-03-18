@@ -35,7 +35,6 @@ async function crawl() {
     const endpoints = [
         '/collections',
         '/processes',
-        '/output_formats',
         '/file_formats',
         '/service_types',
         '/udf_runtimes'
@@ -64,7 +63,7 @@ async function crawl() {
         try {
             var response = await axios(url);
             response.data.versions
-            .filter(b => ! b.api_version.startsWith('0.3.'))   // the Hub doesn't support openEO API v0.3.x anymore
+            .filter(b => ! b.api_version.startsWith('0.'))   // the Hub only supports openEO API v1.0.0 and later
             .forEach(b => individualBackends[b.api_version] = b.url.replace(/\/$/, ''));   // URL always without trailing slash
             allIndividualBackends = allIndividualBackends.concat(Object.keys(individualBackends).map(version => serviceUrl+'@'+version));
         }

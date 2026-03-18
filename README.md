@@ -16,7 +16,7 @@ openEO Hub tries to implement some ambitious ideas. It is aimed to be a platform
 The Hub provides its data via a RESTful API under https://hub.openeo.org/api. The following endpoints are intended to be used by the public:
 
 * Metadata about the API
-  * `GET /api` -- capabilities document compliant to openEO API v0.4.2.
+  * `GET /api` -- capabilities document compliant to openEO API v1.0.0.
 * Available openEO backends
   * `GET /api/backends` -- the list of *backend provider URLs* that the Hub is configured to crawl (i.e. links to `.well-known` documents where available, otherwise a link directly to the backend OR an object with several links to backends of the same provider).
   * `GET /api/backends?details=full` -- the list of *actual, individual backends* within the Hub's database, including **ALL** their details (i.e. **all** collection descriptions etc.) *This reply can easily be several dozen MBs big.*

@@ -13,14 +13,6 @@
 		<section id="discover-filters">
 			<h3>Filters</h3>
 
-			<!--
-			<h4>openEO API versions</h4>
-			<div>
-				<input type="checkbox" v-model="filters.apiVersions" value="0.4" id="v0dot4"><label for="v0dot4">0.4.x</label>
-				<input type="checkbox" v-model="filters.apiVersions" value="1.0" id="v1dot0"><label for="v1dot0">1.0.x</label>
-			</div>
-			-->
-
 			<h4>Functionalities</h4>
 			<EndpointChooser class="compact" :categorizedEndpoints="allEndpointsCategorized" @input="filters.endpoints = $event"></EndpointChooser>
 
@@ -134,7 +126,6 @@ export default {
 			allServiceTypes: [],
 			allUdfRuntimes: [],
 			filters: {
-				apiVersions: [],
 				collections: [],
 				excludeIfNoFreePlan: false,
 				endpoints: [],
