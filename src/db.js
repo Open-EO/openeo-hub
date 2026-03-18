@@ -2,12 +2,44 @@ const Datastore = require('@seald-io/nedb');
 const path = require('path');
 const fs = require('fs');
 
-// NeDB forbids field names starting with '$'. openEO API responses can
-// contain JSON-Schema keys like $schema, $ref, etc.  We transparently
-// replace a leading '$' with the fullwidth dollar sign (U+FF04 ＄) on
-// write and restore it on read so callers always see the original data.
-const DOLLAR = '$';
-const DOLLAR_REPLACEMENT = '\uff04';  // ＄
+// NeDB forbids:
+//   - field names starting with '$'  (e.g. $schema, $ref from JSON-Schema)
+//   - field names containing '.'     (e.g. version keys like "Python 3.8")
+// We transparently replace these characters with fullwidth equivalents on
+// write and restore them on read so callers always see the original data.
+const ENCODE_MAP = {
+    '$': '\uff04',  // $ → ＄ (U+FF04, fullwidth dollar sign) — only at start of key
+    '.': '\uff0e',  // . → ．(U+FF0E, fullwidth full stop)
+};
+
+const DECODE_MAP = {};
+for (const [orig, replacement] of Object.entries(ENCODE_MAP)) {
+    DECODE_MAP[replacement] = orig;
+}
+
+function encodeKey(key) {
+    // Replace leading '$' with fullwidth equivalent
+    if (key.length > 0 && key[0] === '$') {
+        key = ENCODE_MAP['$'] + key.slice(1);
+    }
+    // Replace all '.' with fullwidth equivalent
+    if (key.indexOf('.') !== -1) {
+        key = key.split('.').join(ENCODE_MAP['.']);
+    }
+    return key;
+}
+
+function decodeKey(key) {
+    // Restore leading fullwidth dollar to '$'
+    if (key.length > 0 && key[0] === ENCODE_MAP['$']) {
+        key = '$' + key.slice(1);
+    }
+    // Restore all fullwidth full stops to '.'
+    if (key.indexOf(ENCODE_MAP['.']) !== -1) {
+        key = key.split(ENCODE_MAP['.']).join('.');
+    }
+    return key;
+}
 
 function encodeDoc(obj) {
     if (obj === null || typeof obj !== 'object' || obj instanceof Date || obj instanceof RegExp) {
@@ -18,8 +50,7 @@ function encodeDoc(obj) {
     }
     const out = {};
     for (const key of Object.keys(obj)) {
-        const newKey = key.startsWith(DOLLAR) ? DOLLAR_REPLACEMENT + key.slice(1) : key;
-        out[newKey] = encodeDoc(obj[key]);
+        out[encodeKey(key)] = encodeDoc(obj[key]);
     }
     return out;
 }
@@ -33,8 +64,7 @@ function decodeDoc(obj) {
     }
     const out = {};
     for (const key of Object.keys(obj)) {
-        const newKey = key.startsWith(DOLLAR_REPLACEMENT) ? DOLLAR + key.slice(1) : key;
-        out[newKey] = decodeDoc(obj[key]);
+        out[decodeKey(key)] = decodeDoc(obj[key]);
     }
     return out;
 }
