@@ -33,14 +33,14 @@
     "start:dev": "vue-cli-service build --mode development && node server.js"
   },
   "dependencies": {
-    "@openeo/js-commons": "^1.0.0",
-    "@openeo/js-processgraphs": "^1.0.0",
-    "@openeo/vue-components": "^2.3.3",
+    "@openeo/js-commons": "^1.5.0",
+    "@openeo/js-processgraphs": "^1.4.2",
+    "@openeo/vue-components": "^2.23.3",
     "@seald-io/nedb": "^4.1.2",
     "axios": "^1.0.0",
     "express": "^4.22.1",
     "moment": "^2.22.2",
-    "vue": "^2.6.0",
+    "vue": "^2.7.0",
     "vue-multiselect": "^2.1.6",
     "vue2-leaflet": "^1.2.3"
   },
@@ -48,6 +48,6 @@
     "@vue/cli-service": "^5.0.0",
     "sass": "^1.77.4",
     "sass-loader": "^14.2.1",
-    "vue-template-compiler": "^2.5.22"
+    "vue-template-compiler": "^2.7.0"
   }
 }
