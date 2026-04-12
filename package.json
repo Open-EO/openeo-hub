@@ -38,7 +38,7 @@
     "@openeo/js-processgraphs": "^1.4.2",
     "@openeo/vue-components": "^2.23.3",
     "@seald-io/nedb": "^4.1.2",
-    "axios": "^1.8.0",
+    "axios": "^1.15.0",
     "express": "^5.2.1",
     "moment": "^2.30.0",
     "vue": "^2.7.0",
