@@ -39,7 +39,16 @@ Required is Node.js (at least version 20). No external database server is needed
    - Optional: Change presets for thresholds that control how the crawler handles existing data that is not reachable on re-crawl
 4. `npm run crawl` -> wait until finished with output "DONE!" (see below if something doesn't look right or any line starts with "An error...")
 5. `npm start`
-6. Go to http://localhost:9000/
+6. Go to <http://localhost:9000/>
+
+### Setting up cron jobs
+
+Add to your cron job:
+
+```crontab
+# Recrawl openEO services every day at 01:00
+0 1 * * * cd ~/openeo-hub && npm run crawl
+```
 
 ### Dropping the database
 Should you ever want to hard-reset the database (i.e. drop all collections openeo-hub created), use the `drop` script by calling `node drop.js --yesimsure` or `npm run drop -- --yesimsure`.
