@@ -47,7 +47,7 @@ Add to your cron job:
 
 ```crontab
 # Recrawl openEO services every day at 01:00
-0 1 * * * cd ~/openeo-hub && npm run crawl
+0 1 * * * cd ~/openeo-hub && npm run crawl && npm run up
 ```
 
 ### Dropping the database
