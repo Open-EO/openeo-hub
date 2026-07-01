@@ -254,21 +254,10 @@ async function crawl() {
         // Update backends collection, preserving metadata
         const backends = dbqueries.getAllBackends(rawDocs);
         const existingBackends = await db.find({}, 'backends');
-        const backendMap = {};
-        for (const existing of existingBackends) {
-            backendMap[existing.service + '@' + existing.api_version] = existing;
-        }
         for (const backend of backends) {
-            const key = backend.service + '@' + backend.api_version;
-            const existing = backendMap[key];
-            if (existing) {
-                // Preserve metadata from existing entry
-                backend.retrieved = existing.retrieved;
-                backend.unsuccessfulCrawls = existing.unsuccessfulCrawls;
-                await db.update({ service: backend.service, api_version: backend.api_version }, backend, 'backends');
-            } else {
-                await db.insert(backend, 'backends');
-            }
+            // Replace entry for this service/api_version so document keys are encoded via insert().
+            await db.remove({ service: backend.service, api_version: backend.api_version }, 'backends', { multi: true });
+            await db.insert(backend, 'backends');
         }
         
         // Remove backends that are no longer in the raw data
