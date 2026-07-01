@@ -1,7 +1,8 @@
 const config = require('./config.js');
 
 const axios = require('axios');
-axios.defaults.timeout = 60*1000;   // 60s = 60000 ms
+const INITIAL_TIMEOUT = 5*1000;      // 5 seconds
+const RETRY_TIMEOUT = 20*1000;       // 20 seconds
 
 const Database = require('./src/db.js');
 const dbqueries = require('./src/dbqueries.js');
@@ -13,13 +14,27 @@ const starttimestamp = new Date().toJSON();
 
 const verbose = process.argv[2] == '--verbose';
 
+// Helper function to make requests with retry logic
+async function fetchWithRetry(url) {
+    try {
+        return await axios(url, { timeout: INITIAL_TIMEOUT });
+    } catch (error) {
+        // Don't retry on 404 errors - the resource doesn't exist
+        if (error.response && error.response.status === 404) {
+            throw error;
+        }
+        // Retry with longer timeout on other failures
+        return await axios(url, { timeout: RETRY_TIMEOUT });
+    }
+}
+
 async function crawl() {
     console.log('Setting up database indexes...');
     try {
         await db.ensureIndex('raw', { fieldName: 'service' });
         await db.ensureIndex('raw', { fieldName: 'api_version' });
         await db.ensureIndex('raw', { fieldName: 'path' });
-        await db.ensureIndex('backends', { fieldName: 'backend', unique: true });
+        await db.ensureIndex('backends', { fieldName: ['service', 'api_version'], unique: true });
         await db.ensureIndex('collections', { fieldName: 'id' });
         await db.ensureIndex('processes', { fieldName: 'id' });
         console.log('Set up database indexes.');
@@ -61,7 +76,7 @@ async function crawl() {
         }
 
         try {
-            var response = await axios(url);
+            var response = await fetchWithRetry(url);
             response.data.versions
             .filter(b => ! b.api_version.startsWith('0.'))   // the Hub only supports openEO API v1.0.0 and later
             .forEach(b => individualBackends[b.api_version] = b.url.replace(/\/$/, ''));   // URL always without trailing slash
@@ -99,7 +114,7 @@ async function crawl() {
             var paths = [];
             try {
                 console.log('      - ' + backendUrl + ' ...');
-                const req = await axios(backendUrl+'/');
+                const req = await fetchWithRetry(backendUrl+'/');
                 const caps = req.data.endpoints
                     .filter(e => e.methods.map(m => m.toLowerCase()).indexOf('get') != -1)  // only keep those that have a GET method
                     .map(e => e.path.replace(/{.*}/g,'{}'));    // replace parameter names with nothing to ease querying
@@ -113,7 +128,7 @@ async function crawl() {
                 // if `/collections/{id}` is supported: add the individual collections too
                 try {
                     if(hasEndpoint('/collections') && hasEndpoint('/collections/{}')) {
-                        const collections = (await axios(backendUrl+'/collections')).data.collections;
+                        const collections = (await fetchWithRetry(backendUrl+'/collections')).data.collections;
                         paths = paths.concat(collections.map(c => '/collections/' + c.id));
                     }
                 }
@@ -143,7 +158,7 @@ async function crawl() {
                     bulkNotice = true;
                 }
                 try {
-                    var response = await axios(backendUrl+path);
+                    var response = await fetchWithRetry(backendUrl+path);
                     // extract backend title (if applicable)
                     if(path == '/' && response.data.title) {
                         backendTitle = response.data.title;
@@ -236,12 +251,29 @@ async function crawl() {
         // Aggregate data from raw collection into backends, collections, and processes collections
         const rawDocs = await db.find({}, 'raw');
 
-        // Replace backends collection
-        await db.remove({}, 'backends');
+        // Update backends collection, preserving metadata
         const backends = dbqueries.getAllBackends(rawDocs);
-        for (const backend of backends) {
-            await db.insert(backend, 'backends');
+        const existingBackends = await db.find({}, 'backends');
+        const backendMap = {};
+        for (const existing of existingBackends) {
+            backendMap[existing.service + '@' + existing.api_version] = existing;
         }
+        for (const backend of backends) {
+            const key = backend.service + '@' + backend.api_version;
+            const existing = backendMap[key];
+            if (existing) {
+                // Preserve metadata from existing entry
+                backend.retrieved = existing.retrieved;
+                backend.unsuccessfulCrawls = existing.unsuccessfulCrawls;
+                await db.update({ service: backend.service, api_version: backend.api_version }, backend, 'backends');
+            } else {
+                await db.insert(backend, 'backends');
+            }
+        }
+        
+        // Remove backends that are no longer in the raw data
+        const backendKeysInRaw = new Set(backends.map(b => b.service + '@' + b.api_version));
+        await db.remove({ _id: { $in: existingBackends.filter(b => !backendKeysInRaw.has(b.service + '@' + b.api_version)).map(b => b._id) } }, 'backends');
 
         // Replace collections collection
         await db.remove({}, 'collections');
