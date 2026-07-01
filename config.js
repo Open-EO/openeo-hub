@@ -4,7 +4,7 @@ module.exports = {
         "openEO Platform": "https://openeo.cloud/",
         "Google Earth Engine": "https://earthengine.openeo.org/",
         "EURAC": "https://openeo.eurac.edu/",
-        "VITO": "https://openeo.vito.be/",
+        "TerraScope": "https://openeo.terrascope.be/",
         "EODC": "https://openeo.eodc.eu/",
         // mundials was offline last time we checked, might have been discontinued
         // "mundialis": "https://openeo.mundialis.de/",
