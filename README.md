@@ -28,7 +28,7 @@ This app is deployed at https://hub.openeo.org/.
 If you want to set it up yourself, follow these steps:
 
 ### Requirements
-Required is Node.js (at least version 20). No external database server is needed — the Hub uses an embedded database ([NeDB](https://github.com/seald/nedb)) that stores data in the `data/` directory.
+Required is Node.js (at least version 22.12, the current LTS version 24 is recommended). No external database server is needed — the Hub uses an embedded database ([NeDB](https://github.com/seald/nedb)) that stores data in the `data/` directory.
 
 ### Frontend and API backend
 1. Clone this repo, `cd /path/to/openeo-hub/`
