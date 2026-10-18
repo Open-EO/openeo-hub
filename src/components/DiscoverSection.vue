@@ -101,7 +101,7 @@
 import axios from 'axios';
 import BackendGroup from './BackendGroup.vue';
 import Multiselect from 'vue-multiselect';
-var FeatureList = require('@openeo/vue-components/featurelist.js');
+import FeatureList from '@openeo/vue-components/featurelist.js';
 import EndpointChooser from './EndpointChooser.vue';
 
 export default {
