@@ -1,9 +1,14 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue2';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+import { realpathSync } from 'node:fs';
+import { dirname } from 'node:path';
 
-const configFile = fileURLToPath(new URL('./config.js', import.meta.url)).replace(/\\/g, '/');
-const vueComponents = '/node_modules/@openeo/vue-components/';
+const toPosix = path => path.replace(/\\/g, '/');
+const configFile = toPosix(fileURLToPath(new URL('./config.js', import.meta.url)));
+// Use the real path, as Vite resolves symlinks, e.g. after `npm link @openeo/vue-components`
+const vueComponents = toPosix(realpathSync(dirname(createRequire(import.meta.url).resolve('@openeo/vue-components/package.json')))) + '/';
 // Modules that need to be evaluated before a required module, as require() was called lazily
 // e.g. leaflet.antimeridian expects the global L that Leaflet sets
 const requirePrerequisites = {
@@ -23,10 +28,10 @@ function commonjsCompat() {
 			if (query && query.includes('type=')) {
 				return null;
 			}
-			if (file === configFile || file.endsWith(vueComponents + 'featurelist.js')) {
+			if (file === configFile || file === vueComponents + 'featurelist.js') {
 				return { code: code.replace(/module\.exports\s*=/, 'export default'), map: null };
 			}
-			if (file.includes(vueComponents) && code.includes('require(')) {
+			if (file.startsWith(vueComponents) && code.includes('require(')) {
 				const imports = [];
 				code = code.replace(/\brequire\((['"])([^'"]+)\1\)/g, (match, quote, path) => {
 					const name = `__cjs_require_${imports.length}`;

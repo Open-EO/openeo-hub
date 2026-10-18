@@ -20,7 +20,7 @@
     "url": "https://github.com/Open-EO/openeo-hub.git"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
     "crawl": "node crawl.js",
