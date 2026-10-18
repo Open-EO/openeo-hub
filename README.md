@@ -61,7 +61,7 @@ On Linux systems, you can use the cron daemon to schedule recurring crawling. Fo
 
 ## Development
 There are several start scripts for different dev scenarios:
-- `npm run start:frontend` runs a *vue-cli-service* dev server with Hot-Module-Replacement (HMR) - handy when working on the frontend only. Major downside: The backend is not available in this mode (i.e. you can't test API calls).
+- `npm run start:frontend` runs a *Vite* dev server with Hot-Module-Replacement (HMR) - handy when working on the frontend only. Major downside: The backend is not available in this mode (i.e. you can't test API calls).
 - `npm run start:backend` starts the *Express* server, so you can test API calls (e.g. with *Postman*). Frontend-wise it serves whatever is found in the `/dist` directory (i.e. the most recent frontend build).
 - `npm run start` builds the frontend to the `dist` directory and *then* starts the *Express* server, i.e. you can use the latest frontend and make API calls too. But Vue is in production mode, so the *Devtools* are not available.
 - `npm run start:dev` therefore builds the frontend to the `dist` directory *in development mode* and then starts the *Express* server, i.e. you can use the latest frontend, test API calls and use *Devtools* as well. But there's no HMR, so you need to manually restart everytime you want to see your changes.

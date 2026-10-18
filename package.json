@@ -20,7 +20,7 @@
     "url": "https://github.com/Open-EO/openeo-hub.git"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
     "crawl": "node crawl.js",
@@ -30,10 +30,10 @@
     "down": "pm2 stop openeo-hub-server",
     "undeploy": "pm2 delete openeo-hub-server",
     "start:backend": "node server.js",
-    "start:frontend": "vue-cli-service serve --port 9000",
-    "build": "vue-cli-service build",
-    "start": "vue-cli-service build && node server.js",
-    "start:dev": "vue-cli-service build --mode development && node server.js",
+    "start:frontend": "vite",
+    "build": "vite build",
+    "start": "vite build && node server.js",
+    "start:dev": "vite build --mode development && node server.js",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
@@ -49,10 +49,16 @@
     "vue2-leaflet": "^1.2.3"
   },
   "devDependencies": {
-    "pm2": "^6.0.14",
-    "@vue/cli-service": "^5.0.9",
-    "sass": "^1.98.0",
-    "sass-loader": "^16.0.7",
-    "vue-template-compiler": "^2.7.0"
+    "@vitejs/plugin-vue2": "^2.3.4",
+    "pm2": "^7.0.4",
+    "sass": "^1.105.2",
+    "vite": "^7.3.7"
+  },
+  "overrides": {
+    "pm2": {
+      "chokidar": "^4.0.3"
+    },
+    "basic-ftp": "^6.2.3",
+    "js-yaml": "^4.3.2"
   }
 }
